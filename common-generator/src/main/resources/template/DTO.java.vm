@@ -1,0 +1,36 @@
+package ${package}.${moduleName}.dto;
+
+#if(${hasBigDecimal})
+import java.math.BigDecimal;
+#end
+#if(${hasDate})
+import java.sql.Date;
+#end
+import java.time.Instant;
+import com.supermap.common.pojo.PageParam;
+import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+
+/**
+ * ${comments}
+ *
+ * @author ${author}
+ */
+@EqualsAndHashCode(callSuper = true)
+@Schema(title = "${comments}")
+@Data
+public class ${className}DTO extends PageParam {
+
+	@Schema(title = "开始时间")
+	private Timestamp startTime;
+
+	@Schema(title = "结束时间")
+	private Timestamp endTime;
+#foreach ($column in $columns)
+
+	@Schema(title = "$column.comments")
+	private $column.attrType $column.attrname;
+#end
+
+}

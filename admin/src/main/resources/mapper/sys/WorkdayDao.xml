@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.supermap.modules.sys.dao.WorkdayDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.supermap.modules.sys.entity.WorkdayEntity" id="workdayMap">
+        <result property="id" column="id"/>
+        <result property="date" column="date"/>
+        <result property="year" column="year"/>
+        <result property="month" column="month"/>
+        <result property="day" column="day"/>
+        <result property="status" column="status"/>
+    </resultMap>
+
+
+</mapper>

@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.supermap.modules.platform.dao.FeatureDao">
+    <resultMap type="com.supermap.modules.platform.entity.FeatureEntity" id="featureMap">
+        <result property="id" column="id"/>
+        <result property="name" column="name"/>
+        <result property="properties" column="properties"/>
+        <result property="createdAt" column="created_at"/>
+    </resultMap>
+
+    <insert id="saveWithGeoJson">
+        WITH input AS (SELECT #{geoJson}::jsonb AS data)
+
+        INSERT
+        INTO geo_feature (id, name, geom, properties, created_at)
+
+        -- FeatureCollection
+        SELECT generate_snowflake_id(),
+               #{featureEntity.name},
+               ST_Transform(
+                       ST_SetSRID(
+                               ST_GeomFromGeoJSON(
+                                       f.value ->> 'geometry'
+                               ),
+                               4326
+                       ),
+                       4326
+               ),
+               f.value -> 'properties',
+               now()
+
+        FROM input,
+             LATERAL jsonb_array_elements(data -> 'features') AS f(value)
+
+        WHERE data ->> 'type' = 'FeatureCollection'
+
+        UNION ALL
+
+        -- 单 Feature
+        SELECT #{featureEntity.id},
+               #{featureEntity.name},
+               ST_Transform(
+                       ST_SetSRID(
+                               ST_GeomFromGeoJSON(data ->> 'geometry'),
+                               4326
+                       ),
+                       4326
+               ),
+               data -> 'properties',
+               now()
+
+        FROM input
+
+        WHERE data ->> 'type' = 'Feature'
+    </insert>
+
+    <insert id="saveWithWkt">
+        INSERT INTO geo_feature (id, name, geom, properties, created_at)
+        VALUES (#{featureEntity.id},
+                #{featureEntity.name},
+                CASE
+                    WHEN #{srid} = 4326 THEN
+                        ST_SetSRID(ST_GeomFromText(#{wkt}), 4326)
+                    ELSE
+                        ST_Transform(
+                                ST_SetSRID(ST_GeomFromText(#{wkt}), #{srid}),
+                                4326
+                        )
+                    END,
+                #{featureEntity.properties}::jsonb,
+                now())
+    </insert>
+
+    <select id="queryNormalBbox" resultType="string">
+        SELECT jsonb_build_object(
+                       'type', 'FeatureCollection',
+                       'features', COALESCE(
+                               jsonb_agg(
+                                       jsonb_build_object(
+                                               'type', 'Feature',
+                                               'id', id::text,
+                                               'geometry', ST_AsGeoJSON(geom)::jsonb,
+                                               'properties', properties
+                                       )
+                               ),
+                               '[]'::jsonb
+                                   )
+               )
+        FROM geo_feature
+        <!--  使用 GIST 索引         生成一个矩形 Polygon（bbox）-->
+        WHERE geom &amp;&amp; ST_MakeEnvelope(#{dto.minX}, #{dto.minY}, #{dto.maxX}, #{dto.maxY}, 4326)
+          AND ST_Intersects(
+                geom,
+                ST_MakeEnvelope(#{dto.minX}, #{dto.minY}, #{dto.maxX}, #{dto.maxY}, 4326)
+              )
+    </select>
+
+    <select id="queryCrossDatelineBbox" resultType="string">
+        SELECT jsonb_build_object(
+                       'type', 'FeatureCollection',
+                       'features', COALESCE(
+                               jsonb_agg(
+                                       jsonb_build_object(
+                                               'type', 'Feature',
+                                               'id', id::text,
+                                               'geometry', ST_AsGeoJSON(geom)::jsonb,
+                                               'properties', properties
+                                       )
+                               ),
+                               '[]'::jsonb
+                                   )
+               )
+        FROM geo_feature
+        WHERE (
+            geom &amp;&amp; ST_MakeEnvelope(170, #{dto.minY}, 180, #{dto.maxY}, 4326)
+                AND ST_Intersects(geom, ST_MakeEnvelope(170, #{dto.minY}, 180, #{dto.maxY}, 4326))
+            )
+           OR (
+            geom &amp;&amp; ST_MakeEnvelope(-180, #{dto.minY}, -170, #{dto.maxY}, 4326)
+                AND ST_Intersects(geom, ST_MakeEnvelope(-180, #{dto.minY}, -170, #{dto.maxY}, 4326))
+            )
+    </select>
+
+    <select id="queryPage" resultType="com.supermap.modules.platform.vo.FeatureVO">
+        SELECT id,
+               name,
+               properties,
+               created_at
+        FROM geo_feature f
+        <where>
+            <if test="dto.keyword != null and dto.keyword != ''">
+                and (f.name like concat('%', #{dto.keyword}, '%')
+                <if test="dto.keyword.matches('^\\d+$')">
+                    or f.id = CAST(#{dto.keyword} AS BIGINT)
+                </if>
+                )
+            </if>
+            <if test="dto.startTime != null">
+                and f.created_at &gt;= #{dto.startTime}
+            </if>
+            <if test="dto.endTime != null">
+                and f.created_at &lt;= #{dto.endTime}
+            </if>
+        </where>
+        order by created_at desc
+    </select>
+
+    <select id="getVOById" resultType="com.supermap.modules.platform.vo.FeatureVO">
+        SELECT id,
+               name,
+               jsonb_build_object(
+                       'type', 'Feature',
+                       'geometry', ST_AsGeoJSON(geom)::jsonb,
+                       'properties', properties
+               ) AS geo_json,
+               properties,
+               created_at
+        FROM geo_feature
+        WHERE id = #{id}
+    </select>
+</mapper>

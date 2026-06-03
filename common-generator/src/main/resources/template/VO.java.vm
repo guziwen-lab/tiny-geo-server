@@ -1,0 +1,24 @@
+package ${package}.${moduleName}.vo;
+
+#if(${hasBigDecimal})
+import java.math.BigDecimal;
+#end
+#if(${hasDate})
+import java.sql.Date;
+#end
+import ${package}.${moduleName}.entity.${className}Entity;
+import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+
+/**
+ * ${comments}
+ *
+ * @author ${author}
+ */
+@EqualsAndHashCode(callSuper = true)
+@Schema(title = "${comments}")
+@Data
+public class ${className}VO extends ${className}Entity {
+
+}

@@ -1,0 +1,33 @@
+package ${package}.${moduleName}.dto;
+
+#if(${hasBigDecimal})
+import java.math.BigDecimal;
+#end
+import com.supermap.common.valid.group.Update;
+import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotNull;
+import lombok.Data;
+
+#if(${hasDate})
+import java.sql.Date;
+#end
+import java.time.Instant;
+
+/**
+ * ${comments}
+ *
+ * @author ${author}
+ */
+@Schema(title = "${comments}")
+@Data
+public class ${className}SaveDTO {
+#foreach ($column in $columns)
+
+#if($column.columnName == $pk.columnName)
+	@NotNull(groups = Update.class)
+#end
+	@Schema(title = "$column.comments")
+	private $column.attrType $column.attrname;
+#end
+
+}

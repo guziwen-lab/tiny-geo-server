@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.supermap.modules.sys.dao.UserDao">
+    <resultMap type="com.supermap.modules.sys.entity.UserEntity" id="userMap">
+        <result property="userId" column="user_id"/>
+        <result property="username" column="username"/>
+        <result property="password" column="password"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+
+    <select id="page" resultType="com.supermap.modules.sys.vo.UserVO">
+        select * from (
+        select u.*, string_agg(r.role_name, ', ' order by r.create_time) AS role_names
+        from sys_user u
+                 left join sys_user_role_relation rel on u.user_id = rel.user_id
+                 left join sys_role r on r.role_id = rel.role_id
+        <where>
+            <if test="dto.keyword != null and dto.keyword != ''">
+                and (u.username like concat('%', #{dto.keyword}, '%')
+                or u.nickname like concat('%', #{dto.keyword}, '%')
+                <if test="dto.keyword.matches('^\\d+$')">
+                    or u.user_id = CAST(#{dto.keyword} AS BIGINT)
+                </if>
+                )
+            </if>
+            <if test="dto.startTime != null">
+                and u.create_time &gt;= #{dto.startTime}
+            </if>
+            <if test="dto.endTime != null">
+                and u.create_time &lt;= #{dto.endTime}
+            </if>
+        </where>
+        group by u.user_id ) t
+        order by create_time desc
+    </select>
+</mapper>

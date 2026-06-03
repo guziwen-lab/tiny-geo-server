@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.supermap.modules.sys.dao.DictDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.supermap.modules.sys.entity.DictEntity" id="dictMap">
+        <result property="dictId" column="dict_id"/>
+        <result property="name" column="name"/>
+        <result property="description" column="description"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+
+    <select id="page" resultMap="dictMap">
+        select distinct d.*
+        from sys_dict d
+                 left join sys_dict_item i on i.dict_id = d.dict_id
+        <where>
+            <if test="dto.keyword != null and dto.keyword != ''">
+                and (d.name like concat('%', #{dto.keyword}, '%')
+                or d.description like concat('%', #{dto.keyword}, '%')
+                or i.name like concat('%', #{dto.keyword}, '%')
+                <if test="dto.keyword.matches('^\\d+$')">
+                    or d.dict_id = CAST(#{dto.keyword} AS BIGINT)
+                        or i.dict_item_id = CAST(#{dto.keyword} AS BIGINT)
+                </if>
+                )
+            </if>
+            <if test="dto.startTime != null">
+                and d.create_time &gt;= #{dto.startTime}
+            </if>
+            <if test="dto.endTime != null">
+                and d.create_time &lt;= #{dto.endTime}
+            </if>
+        </where>
+        order by create_time desc
+    </select>
+</mapper>

@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.supermap.modules.sys.dao.DepartmentDao">
+
+    <resultMap type="com.supermap.modules.sys.entity.DepartmentEntity" id="departmentMap">
+        <result property="id" column="id"/>
+        <result property="parentId" column="parent_id"/>
+        <result property="name" column="name"/>
+        <result property="code" column="code"/>
+        <result property="depth" column="depth"/>
+        <result property="sortOrder" column="sort_order"/>
+        <result property="isActive" column="is_active"/>
+        <result property="metadata" column="metadata"/>
+        <result property="remark" column="remark"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="updatedAt" column="updated_at"/>
+    </resultMap>
+
+    <select id="page" resultType="com.supermap.modules.sys.vo.DepartmentVO">
+        with recursive dep_tree as (
+        select id, parent_id, name, code, depth, id as root_id
+        from sys_department
+        where depth = 0
+        <if test="dto.startTime != null">
+            and created_at &gt;= #{dto.startTime}
+        </if>
+        <if test="dto.endTime != null">
+            and created_at &lt;= #{dto.endTime}
+        </if>
+
+        union all
+
+        select d.id, d.parent_id, d.name, d.code, d.depth, t.root_id
+        from sys_department d
+                 join dep_tree t on d.parent_id = t.id
+        <where>
+            <if test="dto.startTime != null">
+                and d.created_at &gt;= #{dto.startTime}
+            </if>
+            <if test="dto.endTime != null">
+                and d.created_at &lt;= #{dto.endTime}
+            </if>
+        </where>
+        )
+        select distinct r.*,
+                        exists (select 1 from sys_department c where c.parent_id = r.id) as hasChildren
+        from dep_tree t
+                 join sys_department r on r.id = t.root_id
+        <where>
+            <if test="dto.keyword != null and dto.keyword != ''">
+                and (t.name like concat('%', #{dto.keyword}, '%')
+                or t.code like concat('%', #{dto.keyword}, '%')
+                <if test="dto.keyword.matches('^\\d+$')">
+                    or t.id = CAST(#{dto.keyword} AS BIGINT)
+                </if>
+                )
+            </if>
+        </where>
+    </select>
+
+    <select id="subordinate" resultType="com.supermap.modules.sys.vo.DepartmentVO">
+        with recursive dep_tree as (
+        select id,
+               parent_id,
+               name,
+               code,
+               depth,
+               created_at,
+               updated_at,
+               id as root_id
+        from sys_department
+        where parent_id = #{dto.parentId}
+        <if test="dto.startTime != null">
+            and created_at &gt;= #{dto.startTime}
+        </if>
+        <if test="dto.endTime != null">
+            and created_at &lt;= #{dto.endTime}
+        </if>
+        union all
+        select d.id,
+               d.parent_id,
+               d.name,
+               d.code,
+               d.depth,
+               d.created_at,
+               d.updated_at,
+               t.root_id
+        from sys_department d
+                 join dep_tree t on d.parent_id = t.id
+        <where>
+            <if test="dto.startTime != null">
+                and d.created_at &gt;= #{dto.startTime}
+            </if>
+            <if test="dto.endTime != null">
+                and d.created_at &lt;= #{dto.endTime}
+            </if>
+        </where>
+        )
+        select distinct r.*,
+                        exists (select 1 from sys_department c where c.parent_id = r.id) as hasChildren
+        from dep_tree t
+                 join sys_department r on r.id = t.root_id
+        <where>
+            <if test="dto.keyword != null and dto.keyword != ''">
+                and (t.name like concat('%', #{dto.keyword}, '%')
+                or t.code like concat('%', #{dto.keyword}, '%')
+                <if test="dto.keyword.matches('^\\d+$')">
+                    or t.id = CAST(#{dto.keyword} AS BIGINT)
+                </if>
+                )
+            </if>
+        </where>
+    </select>
+
+    <update id="disableChildrenById">
+        WITH RECURSIVE dep_tree AS (SELECT id
+                                    FROM sys_department
+                                    WHERE parent_id = #{id}
+
+                                    UNION ALL
+
+                                    SELECT d.id
+                                    FROM sys_department d
+                                             JOIN dep_tree dt ON d.parent_id = dt.id)
+        UPDATE sys_department
+        SET is_active  = FALSE,
+            updated_at = NOW()
+        WHERE id IN (SELECT id FROM dep_tree)
+    </update>
+
+    <select id="getDepartmentByUserId" resultMap="departmentMap">
+        select distinct d.*
+        from sys_department d
+                 left join sys_user_department_relation r on d.id = r.department_id
+        where r.user_id = #{userId}
+    </select>
+
+    <select id="getWithSubordinatesByCodes" resultMap="departmentMap">
+        WITH RECURSIVE department AS (select *
+                                      from sys_department d
+        where d.code in
+        <foreach item="code" collection="codes" separator="," index="index" open="(" close=")">
+            #{code}
+        </foreach>
+        UNION ALL
+        SELECT child.*
+        FROM sys_department child
+                 JOIN department parent
+                      ON child.parent_id = parent.id)
+        SELECT *
+        FROM department
+    </select>
+</mapper>

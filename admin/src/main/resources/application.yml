@@ -1,0 +1,20 @@
+spring:
+  profiles:
+    active: @profiles.active@
+  application:
+    name: @artifactId@
+  jackson:
+    time-zone: GMT+8
+    date-format: yyyy-MM-dd HH:mm:ss
+    # 设置空如何序列化
+    default-property-inclusion: ALWAYS
+    serialization:
+      # 格式化输出
+      INDENT_OUTPUT: true
+      # 忽略无法转换的对象
+      FAIL_ON_EMPTY_BEANS: false
+  mvc:
+    pathmatch:
+      matching-strategy: ANT_PATH_MATCHER
+  main:
+    allow-circular-references: true

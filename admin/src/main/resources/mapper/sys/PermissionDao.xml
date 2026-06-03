@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.supermap.modules.sys.dao.PermissionDao">
+
+    <resultMap type="com.supermap.modules.sys.entity.PermissionEntity" id="permissionMap">
+        <result property="permissionId" column="permission_id"/>
+        <result property="parentId" column="parent_id"/>
+        <result property="name" column="name"/>
+        <result property="permsKey" column="perms_key"/>
+        <result property="level" column="level"/>
+        <result property="sort" column="sort"/>
+        <result property="url" column="url"/>
+        <result property="type" column="type"/>
+        <result property="icon" column="icon"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+
+    <select id="getByRoleId" resultMap="permissionMap">
+        select p.*
+        from sys_permission p
+                 left join sys_role_permission_relation r on p.permission_id = r.permission_id
+        where r.role_id = #{roleId}
+    </select>
+
+    <select id="getByUserId" resultMap="permissionMap">
+        select distinct p.*
+        from sys_permission p
+                 left join sys_role_permission_relation rp on p.permission_id = rp.permission_id
+                 left join sys_user_role_relation ur on ur.role_id = rp.role_id
+        where ur.user_id = #{userId}
+    </select>
+
+    <update id="updateBatchById">
+        update sys_permission
+        set parent_id   = tmp.parent_id,
+            level       = tmp.level,
+            sort        = tmp.sort,
+            update_time = NOW(),
+            version     = sys_permission.version + 1
+        from (values
+        <foreach collection="permissionEntities" item="item" separator=",">
+            (#{item.permissionId}::bigint,
+             #{item.version}::int,
+             #{item.parentId}::bigint,
+             #{item.level}::int,
+             #{item.sort}::int)
+        </foreach>
+        ) as tmp(id, version, parent_id, level, sort)
+        where sys_permission.permission_id = tmp.id
+          and sys_permission.version = tmp.version
+    </update>
+
+    <select id="getLoginUserRoute" resultMap="permissionMap">
+        select distinct p.*
+        from sys_permission p
+                 join sys_role_permission_relation rp on p.permission_id = rp.permission_id
+                 join sys_user_role_relation ur on rp.role_id = ur.role_id
+        where ur.user_id = #{userId}
+          and type in (0, 1)
+        order by p.sort
+    </select>
+</mapper>

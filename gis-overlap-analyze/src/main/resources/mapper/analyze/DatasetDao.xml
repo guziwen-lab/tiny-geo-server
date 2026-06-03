@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.supermap.modules.analyze.dao.DatasetDao">
+
+    <resultMap type="com.supermap.modules.analyze.entity.DatasetEntity" id="datasetMap">
+        <result property="id" column="id"/>
+        <result property="datasetName" column="dataset_name"/>
+        <result property="datasetType" column="dataset_type"/>
+        <result property="sourceFile" column="source_file"/>
+        <result property="tableName" column="table_name"/>
+        <result property="geomType" column="geom_type"/>
+        <result property="srid" column="srid"/>
+        <result property="featureCount" column="feature_count"/>
+        <result property="createdAt" column="created_at"/>
+    </resultMap>
+
+
+</mapper>

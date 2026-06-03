@@ -1,0 +1,23 @@
+package ${package}.${moduleName}.service;
+
+import com.baomidou.mybatisplus.extension.service.IService;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import ${package}.${moduleName}.entity.${className}Entity;
+import ${package}.${moduleName}.dto.${className}DTO;
+import ${package}.${moduleName}.dto.${className}SaveDTO;
+
+/**
+ * ${comments}
+ *
+ * @author ${author}
+ */
+public interface ${className}Service extends IService<${className}Entity> {
+
+    Page<${className}Entity> queryPage(${className}DTO dto);
+
+    ${pk.attrType} saveDTO(${className}SaveDTO dto);
+
+    void updateDTOById(${className}SaveDTO dto);
+
+}
+

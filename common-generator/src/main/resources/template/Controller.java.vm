@@ -1,0 +1,68 @@
+package ${package}.${moduleName}.controller;
+
+import java.util.Arrays;
+
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.AllArgsConstructor;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
+
+import com.supermap.common.valid.group.Add;
+import com.supermap.common.valid.group.Update;
+import com.supermap.common.pojo.R;
+import ${package}.${moduleName}.dto.${className}DTO;
+import ${package}.${moduleName}.dto.${className}SaveDTO;
+import ${package}.${moduleName}.entity.${className}Entity;
+import ${package}.${moduleName}.service.${className}Service;
+
+/**
+ * ${comments}
+ *
+ * @author ${author}
+ */
+@Tag(name = "${comments}")
+@RestController
+@RequestMapping("/${moduleName}/${pathName}")
+@AllArgsConstructor
+public class ${className}Controller {
+
+    private final ${className}Service ${classname}Service;
+
+    @Operation(summary = "分页查询")
+    @PostMapping("/page")
+    public R<Page<${className}Entity>> page(@RequestBody ${className}DTO dto) {
+        Page<${className}Entity> page = ${classname}Service.queryPage(dto);
+        return R.ok(page);
+    }
+
+    @Operation(summary = "根据主键查询")
+    @GetMapping("/info/{${pk.attrname}}")
+    public R<${className}Entity> info(@PathVariable("${pk.attrname}") ${pk.attrType} ${pk.attrname}) {
+        ${className}Entity ${classname} = ${classname}Service.getById(${pk.attrname});
+        return R.ok(${classname});
+    }
+
+    @Operation(summary = "保存")
+    @PostMapping("/save")
+    public R<${pk.attrType}> save(@RequestBody @Validated(Add.class) ${className}SaveDTO dto) {
+        ${pk.attrType} ${pk.attrname} = ${classname}Service.saveDTO(dto);
+        return R.ok(${pk.attrname});
+    }
+
+    @Operation(summary = "修改")
+    @PutMapping("/update")
+    public R<Void> update(@RequestBody @Validated(Update.class) ${className}SaveDTO dto) {
+        ${classname}Service.updateDTOById(dto);
+        return R.ok();
+    }
+
+    @Operation(summary = "删除")
+    @PostMapping("/delete")
+    public R<Void> delete(@RequestBody ${pk.attrType}[] ${pk.attrname}s) {
+        ${classname}Service.removeByIds(Arrays.asList(${pk.attrname}s));
+        return R.ok();
+    }
+
+}

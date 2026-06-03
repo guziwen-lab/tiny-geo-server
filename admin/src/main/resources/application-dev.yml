@@ -1,0 +1,62 @@
+server:
+  port: 8080
+spring:
+  datasource:
+    url: jdbc:postgresql://service.990304.xyz:5432/common_backend?useUnicode=true&characterEncoding=UTF-8
+    username: postgres
+    password: zYdWyb-rbzniq-8wofdO
+    driver-class-name: org.postgresql.Driver
+  servlet:
+    multipart:
+      max-file-size: 100MB
+      max-request-size: 100MB
+  data:
+    redis:
+      host: service.990304.xyz
+      password: fytzzfvnuesqiaah
+      port: 6379
+      database: 3
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    tags-sorter: alpha
+    operations-sorter: alpha
+  api-docs:
+    path: /v3/api-docs
+  group-configs:
+    - group: 'sys'
+      packages-to-scan:
+        - com.supermap.modules.sys
+    - group: 'log'
+      packages-to-scan:
+        - com.supermap.modules.log
+    - group: 'security'
+      packages-to-scan:
+        - com.supermap.modules.security
+  default-flat-param-object: true
+knife4j:
+  enable: true
+  setting:
+    language: zh_cn
+    swagger-model-name: 实体类列表
+mybatis-plus:
+  mapper-locations: classpath*:/mapper/**/*.xml
+thread:
+  core-pool-size: 8
+  maximum-pool-size: 8
+  keep-alive-time: 10000
+sm3:
+  key: 123
+jwt:
+  secret: 4A895E3B5653580CE7E8DD610FDB39C62136F132
+  expire: 60480000  # 7天
+  header: '{ "alg": "HS256", "typ": "JWT" }'
+login:
+  retry:
+    max-retry-count: 5
+file:
+  base-path: /Users/guziwen/Java/temp/网络查控/file
+  external-url-prefix: http://localhost/file
+logging:
+  level:
+    com.supermap: debug

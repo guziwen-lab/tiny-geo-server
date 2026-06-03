@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.supermap.modules.sys.dao.LoginLogDao">
+
+    <resultMap type="com.supermap.modules.sys.entity.LoginLogEntity" id="loginLogMap">
+        <result property="id" column="id"/>
+        <result property="token" column="token"/>
+        <result property="userId" column="user_id"/>
+        <result property="ip" column="ip"/>
+        <result property="isForceLogout" column="is_force_logout"/>
+        <result property="loginTime" column="login_time"/>
+    </resultMap>
+
+    <select id="getOnlineByRoleId" resultMap="loginLogMap">
+        select *
+        from sys_login_log l
+                 left join sys_user_role_relation r on r.user_id = l.user_id
+        where r.role_id = #{roleId}
+        and l.is_force_logout = false
+        and l.login_time >= #{loginTime}
+    </select>
+</mapper>

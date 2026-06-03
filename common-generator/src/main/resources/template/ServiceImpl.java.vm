@@ -1,0 +1,39 @@
+package ${package}.${moduleName}.service.impl;
+
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.supermap.common.util.BeanUtils;
+import org.springframework.stereotype.Service;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+
+import ${package}.${moduleName}.dao.${className}Dao;
+import ${package}.${moduleName}.entity.${className}Entity;
+import ${package}.${moduleName}.service.${className}Service;
+import ${package}.${moduleName}.dto.${className}DTO;
+import ${package}.${moduleName}.dto.${className}SaveDTO;
+
+@Service("${classname}Service")
+public class ${className}ServiceImpl extends ServiceImpl<${className}Dao, ${className}Entity> implements ${className}Service {
+
+    @Override
+    public Page<${className}Entity> queryPage(${className}DTO dto) {
+        LambdaQueryWrapper<${className}Entity> wrapper = new LambdaQueryWrapper<>();
+        return page(dto.page(), wrapper);
+    }
+
+    @Override
+    public ${pk.attrType} saveDTO(${className}SaveDTO dto) {
+        ${className}Entity ${classname}Entity = new ${className}Entity();
+        BeanUtils.copyProperties(dto, ${classname}Entity);
+        save(${classname}Entity);
+        return ${classname}Entity.get${pk.attrName}();
+    }
+
+    @Override
+    public void updateDTOById(${className}SaveDTO dto) {
+        ${className}Entity ${classname}Entity = new ${className}Entity();
+        BeanUtils.copyProperties(dto, ${classname}Entity);
+        updateById(${classname}Entity);
+    }
+
+}

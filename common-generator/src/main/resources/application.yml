@@ -1,0 +1,58 @@
+server:
+  port: 8088
+  servlet:
+    context-path: /generator
+
+
+spring:
+  datasource:
+    type: com.alibaba.druid.pool.DruidDataSource
+    #MySQL配置
+#    driverClassName: com.mysql.cj.jdbc.Driver
+#    url: jdbc:mysql://localhost:3306/renren_security?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai&nullCatalogMeansCurrent=true
+#    username: renren
+#    password: 123456
+    #达梦8
+#    driver-class-name: dm.jdbc.driver.DmDriver
+#    url: jdbc:dm://127.0.0.1:5236/renren_security?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai&nullCatalogMeansCurrent=true
+#    username: renren_security
+#    password: ren123456
+    #oracle配置
+#    driverClassName: oracle.jdbc.OracleDriver
+#    url: jdbc:oracle:thin:@192.168.10.10:1521:xe
+#    username: renren_security
+#    password: 123456
+    #SQLServer配置
+#    driverClassName: com.microsoft.sqlserver.jdbc.SQLServerDriver
+#    url: jdbc:sqlserver://192.168.10.10:1433;DatabaseName=renren_security
+#    username: sa
+#    password: 123456
+    #PostgreSQL配置
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://service.990304.xyz:5432/tiny_geo_server?useUnicode=true&characterEncoding=UTF-8
+    username: postgres
+    password: zYdWyb-rbzniq-8wofdO
+#    url: jdbc:postgresql://pgm-2ze6ikngxk78h0n4go.pg.rds.aliyuncs.com:5432/ygdz_test?useUnicode=true&characterEncoding=UTF-8
+#    username: postgres
+#    password: 4e2XX0o2gcdmv5jJsqNz
+  jackson:
+    time-zone: GMT+8
+    date-format: yyyy-MM-dd HH:mm:ss
+  web:
+    resources:
+      static-locations: classpath:/static/,classpath:/views/
+
+
+mybatis:
+  mapperLocations: classpath:mapper/**/*.xml
+
+
+pagehelper:
+  reasonable: true
+  supportMethodsArguments: true
+  params: count=countSql
+
+
+#指定数据库，可选值有【mysql、oracle、sqlserver、postgresql、dm】
+renren:
+  database: postgresql
