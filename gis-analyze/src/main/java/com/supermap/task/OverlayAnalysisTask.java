@@ -1,7 +1,7 @@
-package com.supermap.analyze.task;
+package com.supermap.task;
 
-import com.supermap.analyze.*;
-import com.supermap.analyze.service.OverlayService;
+import com.supermap.*;
+import com.supermap.service.OverlayService;
 import com.supermap.dao.GeometryDao;
 import com.supermap.enumeration.AnalysisType;
 import com.supermap.enumeration.OverlayType;
@@ -56,6 +56,13 @@ public class OverlayAnalysisTask extends AbstractAnalysisTask<OverlayParam> {
 
         // 把最后一个临时表改名为结果表
         geometryDao.renameTable(current, resultTableName);
+
+        // 修正最后一步的输出表名为结果表名
+        List<AnalysisStep> steps = context.getSteps();
+        if (!steps.isEmpty()) {
+            AnalysisStep lastStep = steps.get(steps.size() - 1);
+            lastStep.setOutputTable(resultTableName);
+        }
 
         geometryDao.analyzeTable(resultTableName);
         long featureCount = geometryDao.getFeatureCount(resultTableName);

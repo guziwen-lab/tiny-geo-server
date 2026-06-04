@@ -1,6 +1,6 @@
-package com.supermap.analyze.task;
+package com.supermap.task;
 
-import com.supermap.analyze.AnalysisParam;
+import com.supermap.AnalysisParam;
 import com.supermap.enumeration.OverlayType;
 import lombok.AllArgsConstructor;
 import lombok.Data;

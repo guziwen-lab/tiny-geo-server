@@ -1,6 +1,5 @@
-package com.supermap.analyze;
+package com.supermap;
 
-import com.supermap.modules.analyze.entity.DatasetEntity;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

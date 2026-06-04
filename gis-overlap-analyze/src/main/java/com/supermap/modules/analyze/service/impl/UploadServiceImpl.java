@@ -1,6 +1,6 @@
 package com.supermap.modules.analyze.service.impl;
 
-import com.supermap.analyze.security.SqlInjectionCheck;
+import com.supermap.security.SqlInjectionCheck;
 import com.supermap.common.util.StringUtils;
 import com.supermap.dao.GeometryDao;
 import com.supermap.enumeration.DatasetType;
@@ -16,7 +16,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
-import org.springframework.util.Assert;
 
 import java.io.BufferedReader;
 import java.io.IOException;

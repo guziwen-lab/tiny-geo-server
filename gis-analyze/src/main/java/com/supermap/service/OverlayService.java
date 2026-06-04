@@ -1,7 +1,7 @@
-package com.supermap.analyze.service;
+package com.supermap.service;
 
-import com.supermap.analyze.dao.OverlayMapper;
-import com.supermap.analyze.security.SqlInjectionCheck;
+import com.supermap.dao.OverlayMapper;
+import com.supermap.security.SqlInjectionCheck;
 import com.supermap.util.DsTempSnGenerator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

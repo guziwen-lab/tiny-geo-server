@@ -1,4 +1,4 @@
-package com.supermap.analyze;
+package com.supermap;
 
 import com.supermap.enumeration.AnalysisType;
 import org.springframework.stereotype.Service;

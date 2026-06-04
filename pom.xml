@@ -33,6 +33,7 @@
         <module>common-db</module>
         <module>common-office</module>
         <module>gis-overlap-analyze</module>
+        <module>gis-analyze</module>
     </modules>
 
     <dependencies>

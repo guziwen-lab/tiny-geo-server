@@ -1,4 +1,4 @@
-package com.supermap.analyze.security;
+package com.supermap.security;
 
 import org.springframework.util.Assert;
 

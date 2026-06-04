@@ -1,4 +1,4 @@
-package com.supermap.analyze.dao;
+package com.supermap.dao;
 
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;

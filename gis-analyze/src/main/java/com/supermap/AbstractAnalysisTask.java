@@ -1,4 +1,4 @@
-package com.supermap.analyze;
+package com.supermap;
 
 import lombok.extern.slf4j.Slf4j;
 

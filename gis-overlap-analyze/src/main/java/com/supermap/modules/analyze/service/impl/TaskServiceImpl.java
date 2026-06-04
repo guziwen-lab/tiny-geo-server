@@ -2,7 +2,7 @@ package com.supermap.modules.analyze.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.supermap.analyze.*;
+import com.supermap.*;
 import com.supermap.common.util.BeanUtils;
 import com.supermap.enumeration.TaskStatus;
 import com.supermap.modules.analyze.dto.StartTaskDTO;
