@@ -3,6 +3,7 @@ package com.supermap.modules.analyze.entity;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.supermap.enumeration.UploadStatus;
 
 import java.time.Instant;
 
@@ -49,6 +50,12 @@ public class DatasetEntity {
 
     @Schema(title = "无效要素数量")
     private Long invalidFeatureCount;
+
+    @Schema(title = "上传状态")
+    private UploadStatus status;
+
+    @Schema(title = "附加信息")
+    private String message;
 
     @Schema(title = "创建时间")
     private Instant createdAt;

@@ -2,7 +2,8 @@ package com.supermap.modules.analyze.executor;
 
 import com.supermap.AnalysisResult;
 import com.supermap.enumeration.TaskStatus;
-import com.supermap.modules.analyze.service.TaskService;
+import com.supermap.modules.analyze.dao.TaskDao;
+import com.supermap.modules.analyze.entity.TaskEntity;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -13,26 +14,26 @@ import java.time.Instant;
 @RequiredArgsConstructor
 public class TaskStatusUpdater {
 
-    private final TaskService taskService;
+    private final TaskDao taskDao;
 
     @Transactional(rollbackFor = Exception.class)
     public void markSuccess(Long taskId, AnalysisResult result) {
-        var task = taskService.getById(taskId);
+        TaskEntity task = taskDao.selectById(taskId);
         task.setStatus(TaskStatus.SUCCESS);
         task.setResultTableName(result.getResultTableName());
         task.setFeatureCount(result.getFeatureCount());
         task.setCost(result.getCost());
         task.setFinishedAt(Instant.now());
-        taskService.updateById(task);
+        taskDao.updateById(task);
     }
 
     @Transactional(rollbackFor = Exception.class)
     public void markFailed(Long taskId, String message) {
-        var task = taskService.getById(taskId);
+        TaskEntity task = taskDao.selectById(taskId);
         task.setStatus(TaskStatus.FAILED);
         task.setFinishedAt(Instant.now());
         task.setMessage(message);
-        taskService.updateById(task);
+        taskDao.updateById(task);
     }
 
 }

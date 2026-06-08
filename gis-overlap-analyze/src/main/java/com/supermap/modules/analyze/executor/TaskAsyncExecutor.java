@@ -1,6 +1,7 @@
 package com.supermap.modules.analyze.executor;
 
 import com.supermap.*;
+import com.supermap.common.util.CollectionUtils;
 import com.supermap.enumeration.AnalysisType;
 import com.supermap.modules.analyze.entity.TaskStepEntity;
 import com.supermap.modules.analyze.service.TaskStepService;
@@ -34,7 +35,7 @@ public class TaskAsyncExecutor {
     }
 
     private void saveSteps(Long taskId, List<AnalysisStep> steps) {
-        if (steps == null || steps.isEmpty()) {
+        if (CollectionUtils.isEmpty(steps)) {
             return;
         }
         List<TaskStepEntity> entities = steps.stream().map(step -> {
