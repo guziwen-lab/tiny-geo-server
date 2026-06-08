@@ -9,10 +9,10 @@ import com.supermap.modules.analyze.dto.StartTaskDTO;
 import com.supermap.modules.analyze.dto.TaskDatasetSaveDTO;
 import com.supermap.modules.analyze.entity.DatasetEntity;
 import com.supermap.modules.analyze.entity.TaskDatasetEntity;
-import com.supermap.modules.analyze.entity.TaskStepEntity;
+
 import com.supermap.modules.analyze.service.DatasetService;
 import com.supermap.modules.analyze.service.TaskDatasetService;
-import com.supermap.modules.analyze.service.TaskStepService;
+import com.supermap.modules.analyze.executor.TaskAsyncExecutor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -37,7 +37,7 @@ public class TaskServiceImpl extends ServiceImpl<TaskDao, TaskEntity> implements
 
     private final TaskDatasetService taskDatasetService;
 
-    private final TaskStepService taskStepService;
+    private final TaskAsyncExecutor taskAsyncExecutor;
 
     private final DatasetService datasetService;
 
@@ -98,6 +98,11 @@ public class TaskServiceImpl extends ServiceImpl<TaskDao, TaskEntity> implements
             throw new IllegalArgumentException("Overlay analysis requires at least 2 datasets");
         }
 
+        // 标记任务为处理中
+        task.setStatus(TaskStatus.PROCESSING);
+        updateById(task);
+
+        // 构建分析上下文
         AnalysisContext<AnalysisParam> context = new AnalysisContext<>();
         context.setTaskId(taskId);
         context.setInputLayers(datasets.stream().map(item -> {
@@ -112,49 +117,7 @@ public class TaskServiceImpl extends ServiceImpl<TaskDao, TaskEntity> implements
         AnalysisTask<?> analysisTask = analysisEngine.getTask(task.getAnalysisType());
         context.setParam(analysisTask.buildParam(task.getSubType()));
 
-        try {
-            AnalysisResult result = analysisEngine.execute(task.getAnalysisType(), context);
-
-            saveSteps(taskId, context.getSteps());
-            markSuccess(taskId, result);
-        } catch (Exception e) {
-            markFailed(taskId, e.getMessage());
-            throw e;
-        }
+        // 异步执行分析任务
+        taskAsyncExecutor.executeAsync(taskId, task.getAnalysisType(), context);
     }
-
-    private void saveSteps(Long taskId, List<AnalysisStep> steps) {
-        if (steps == null || steps.isEmpty()) {
-            return;
-        }
-        List<TaskStepEntity> entities = steps.stream().map(step -> {
-            TaskStepEntity entity = new TaskStepEntity();
-            entity.setTaskId(taskId);
-            entity.setStepNo(step.getStepNo());
-            entity.setInputTable(step.getInputTable());
-            entity.setOverlayTable(step.getOverlayTable());
-            entity.setOutputTable(step.getOutputTable());
-            return entity;
-        }).toList();
-        taskStepService.saveBatch(entities);
-    }
-
-    private void markSuccess(Long taskId, AnalysisResult result) {
-        TaskEntity task = getById(taskId);
-        task.setStatus(TaskStatus.SUCCESS);
-        task.setResultTableName(result.getResultTableName());
-        task.setFeatureCount(result.getFeatureCount());
-        task.setCost(result.getCost());
-        task.setFinishedAt(Instant.now());
-        updateById(task);
-    }
-
-    private void markFailed(Long taskId, String message) {
-        TaskEntity task = getById(taskId);
-        task.setStatus(TaskStatus.FAILED);
-        task.setFinishedAt(Instant.now());
-        task.setMessage(message);
-        updateById(task);
-    }
-
 }
