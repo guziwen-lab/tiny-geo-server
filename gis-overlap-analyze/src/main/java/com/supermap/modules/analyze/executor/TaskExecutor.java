@@ -33,7 +33,7 @@ public class TaskExecutor {
         return executor;
     }
 
-    @Bean("uploadTaskExecutor")
+    @Bean("importTaskExecutor")
     public ThreadPoolTaskExecutor uploadTaskExecutor() {
         int cpuCores = Runtime.getRuntime().availableProcessors();
 

@@ -30,7 +30,7 @@ public class ImportAsyncExecutor {
     @Value("${gdal.pgConn}")
     private String pgConn;
 
-    @Async("uploadTaskExecutor")
+    @Async("importTaskExecutor")
     public void importLayerAsync(DatasetEntity entity, String sourcePath, String exportLayerName) {
         String tableName = entity.getTableName();
         try {
