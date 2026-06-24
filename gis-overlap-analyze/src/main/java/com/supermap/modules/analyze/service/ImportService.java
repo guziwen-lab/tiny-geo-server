@@ -5,7 +5,7 @@ import java.util.List;
 /**
  * @author gzw
  */
-public interface UploadService {
+public interface ImportService {
 
     Long importShp(String path);
 

@@ -22,10 +22,10 @@ import java.util.stream.Collectors;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class UploadAsyncExecutor {
+public class ImportAsyncExecutor {
 
     private final GeometryDao geometryDao;
-    private final UploadStatusUpdater uploadStatusUpdater;
+    private final ImportStatusUpdater importStatusUpdater;
 
     @Value("${gdal.pgConn}")
     private String pgConn;
@@ -56,7 +56,7 @@ public class UploadAsyncExecutor {
             geometryDao.createGistIndex(tableName);
 
             // 5. 更新状态为成功
-            uploadStatusUpdater.markSuccess(
+            importStatusUpdater.markSuccess(
                     entity.getId(),
                     meta.geomType,
                     meta.srid,
@@ -71,7 +71,7 @@ public class UploadAsyncExecutor {
             } catch (Exception dropEx) {
                 log.error("清理失败表失败: {}", tableName, dropEx);
             }
-            uploadStatusUpdater.markFailed(entity.getId(), e.getMessage());
+            importStatusUpdater.markFailed(entity.getId(), e.getMessage());
         }
     }
 

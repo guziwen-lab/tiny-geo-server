@@ -4,9 +4,9 @@ import com.supermap.common.util.StringUtils;
 import com.supermap.enumeration.DatasetType;
 import com.supermap.enumeration.UploadStatus;
 import com.supermap.modules.analyze.entity.DatasetEntity;
-import com.supermap.modules.analyze.executor.UploadAsyncExecutor;
+import com.supermap.modules.analyze.executor.ImportAsyncExecutor;
 import com.supermap.modules.analyze.service.DatasetService;
-import com.supermap.modules.analyze.service.UploadService;
+import com.supermap.modules.analyze.service.ImportService;
 import com.supermap.util.DsSnGenerator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -30,11 +30,11 @@ import java.util.stream.Collectors;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class UploadServiceImpl implements UploadService {
+public class ImportServiceImpl implements ImportService {
 
     private final DsSnGenerator dsSnGenerator;
     private final DatasetService datasetService;
-    private final UploadAsyncExecutor uploadAsyncExecutor;
+    private final ImportAsyncExecutor importAsyncExecutor;
 
     private static final String LAYER_PATTERN = "^Layer:\\s+(.+?)\\s*(?:\\(|$)";
 
@@ -56,7 +56,7 @@ public class UploadServiceImpl implements UploadService {
         datasetService.save(entity);
 
         // 异步执行导入
-        uploadAsyncExecutor.importLayerAsync(entity, shpPath, null);
+        importAsyncExecutor.importLayerAsync(entity, shpPath, null);
 
         return entity.getId();
     }
@@ -100,7 +100,7 @@ public class UploadServiceImpl implements UploadService {
 
         // 异步执行导入
         for (DatasetEntity entity : entities) {
-            uploadAsyncExecutor.importLayerAsync(entity, gdbPath, entity.getLayerName());
+            importAsyncExecutor.importLayerAsync(entity, gdbPath, entity.getLayerName());
         }
 
         return entities.stream().map(DatasetEntity::getId).collect(Collectors.toList());
