@@ -46,21 +46,12 @@ public class LoginServiceImpl implements LoginService {
     public String login(UserLoginDTO user, HttpServletRequest request) {
         UsernamePasswordToken usernamePasswordToken = new UsernamePasswordToken(user.getUsername(), user.getPassword());
         SecurityUtils.getSubject().login(usernamePasswordToken);
-
-        // 构造 LoginUser
-        LoginUser loginUser = buildLoginUser(user.getUsername());
+        LoginUser loginUser = LoginUserContextHandler.getLoginUser();
 
         String token = redisTokenUtils.createToken(loginUser);
 
         // 保存登录日志
-        LoginLogEntity loginLogEntity = new LoginLogEntity();
-        loginLogEntity.setToken(token);
-        loginLogEntity.setUserId(loginUser.getUserId());
-        loginLogEntity.setLoginTime(new Timestamp(System.currentTimeMillis()));
-        loginLogEntity.setIsForceLogout(false);
-        String ip = IpUtils.getClientIp(request);
-        loginLogEntity.setIp(ip);
-        loginLogService.asyncSave(loginLogEntity);
+        saveLoginLog(request, token, loginUser);
 
         return token;
     }
@@ -127,6 +118,17 @@ public class LoginServiceImpl implements LoginService {
         root.setChildren(children);
 
         children.forEach(item -> buildRoute(item, all));
+    }
+
+    private void saveLoginLog(HttpServletRequest request, String token, LoginUser loginUser) {
+        LoginLogEntity loginLogEntity = new LoginLogEntity();
+        loginLogEntity.setToken(token);
+        loginLogEntity.setUserId(loginUser.getUserId());
+        loginLogEntity.setLoginTime(new Timestamp(System.currentTimeMillis()));
+        loginLogEntity.setIsForceLogout(false);
+        String ip = IpUtils.getClientIp(request);
+        loginLogEntity.setIp(ip);
+        loginLogService.asyncSave(loginLogEntity);
     }
 
 }

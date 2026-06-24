@@ -21,6 +21,8 @@ public class OverlayAnalysisTask extends AbstractAnalysisTask<OverlayParam> {
 
     private final GeometryDao geometryDao;
 
+    private OverlayType overlayType;
+
     private final List<String> tempTableList = new ArrayList<>();
 
     @Override
@@ -36,7 +38,6 @@ public class OverlayAnalysisTask extends AbstractAnalysisTask<OverlayParam> {
     @Override
     protected AnalysisResult doExecute(AnalysisContext<OverlayParam> context) {
         String resultTableName = context.getResultTableName();
-        OverlayType overlayType = context.getParam().getOverlayType();
 
         List<LayerInfo> layers = context.getInputLayers();
         String current = layers.get(0).getTableName();
@@ -47,10 +48,16 @@ public class OverlayAnalysisTask extends AbstractAnalysisTask<OverlayParam> {
             switch (overlayType) {
                 case INTERSECT:
                     output = executeIntersect(current, next);
-                    tempTableList.add(output);
-                    context.addStep(new AnalysisStep(stepNo++, current, next, output));
+                    tempTableList.add(output);  // 添加临时表名到列表，为后续清理
+                    context.addStep(new AnalysisStep(stepNo++, current, next, output)); // 添加分析步骤，为后续保存步骤
                     current = output;
                     break;
+                case UNION:
+                case ERASE:
+                case CLIP:
+                case SYMMETRIC_DIFFERENCE:
+                case IDENTITY:
+                    throw new RuntimeException("暂不支持的OverlayType");
             }
         }
 
@@ -77,6 +84,11 @@ public class OverlayAnalysisTask extends AbstractAnalysisTask<OverlayParam> {
 
     @Override
     protected void validate(AnalysisContext<OverlayParam> context) {
+        OverlayType overlayType = context.getParam().getOverlayType();
+        if (overlayType == null)
+            throw new IllegalArgumentException("叠加分析类型不能为空");
+        this.overlayType = overlayType;
+
         List<LayerInfo> layers = context.getInputLayers();
 
         // 图层数量校验
@@ -97,7 +109,6 @@ public class OverlayAnalysisTask extends AbstractAnalysisTask<OverlayParam> {
         }
 
         // 几何类型兼容性校验
-        OverlayType overlayType = context.getParam().getOverlayType();
         for (LayerInfo layer : layers) {
             GeomType geomType = GeomType.of(layer.getGeomType());
             if (geomType == null) {
@@ -133,7 +144,7 @@ public class OverlayAnalysisTask extends AbstractAnalysisTask<OverlayParam> {
     }
 
     private String executeIntersect(String current, String next) {
-        return overlayService.executeOverlay(current, next);
+        return overlayService.execute(current, next);
     }
 
 }

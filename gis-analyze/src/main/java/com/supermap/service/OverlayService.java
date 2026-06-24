@@ -1,7 +1,6 @@
 package com.supermap.service;
 
 import com.supermap.dao.OverlayMapper;
-import com.supermap.security.SqlInjectionCheck;
 import com.supermap.util.DsTempSnGenerator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -11,18 +10,16 @@ import org.springframework.stereotype.Service;
  */
 @Service
 @RequiredArgsConstructor
-public class OverlayService {
+public class OverlayService extends AbstractExecuteService {
 
     private final OverlayMapper overlayMapper;
 
     private final DsTempSnGenerator dsTempSnGenerator;
 
-    public String executeOverlay(String current, String next) {
-        SqlInjectionCheck.checkTableName(current, next);
-
+    @Override
+    public String executeInternal(String current, String next) {
         String result = "ds_temp_" + dsTempSnGenerator.generate();
         overlayMapper.executeOverlay(current, next, result);
-
         return result;
     }
 
