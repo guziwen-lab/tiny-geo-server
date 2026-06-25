@@ -1,12 +1,12 @@
 gdal:
-  pgConn: PG:host=10.0.0.200 port=5432 dbname=tiny_geo_server user=postgres password=zYdWyb-rbzniq-8wofdO
+  pgConn: PG:host=localhost port=5432 dbname=tiny_geo_server user=postgres password=123456
 server:
   port: 8080
 spring:
   datasource:
-    url: jdbc:postgresql://10.0.0.200:5432/tiny_geo_server?useUnicode=true&characterEncoding=UTF-8
+    url: jdbc:postgresql://localhost:5432/tiny_geo_server?useUnicode=true&characterEncoding=UTF-8
     username: postgres
-    password: zYdWyb-rbzniq-8wofdO
+    password: 123456
     driver-class-name: org.postgresql.Driver
   servlet:
     multipart:
@@ -14,10 +14,10 @@ spring:
       max-request-size: 100MB
   data:
     redis:
-      host: 10.0.0.200
-      password: fytzzfvnuesqiaah
+      host: localhost
+      password: 123456
       port: 6379
-      database: 5
+      database: 1
 springdoc:
   swagger-ui:
     path: /swagger-ui.html

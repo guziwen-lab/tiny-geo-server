@@ -19,6 +19,8 @@ import java.util.List;
  */
 public interface FileService extends IService<FileEntity> {
 
+    String getFilePath(String suffix);
+
     Page<FileEntity> queryPage(FileDTO dto);
 
     FileEntity upload(MultipartFile file);

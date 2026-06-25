@@ -1,13 +1,20 @@
 package com.supermap.enumeration;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+
 /**
  * shp, gdb
  *
  * @author gzw
  */
+@Getter
+@AllArgsConstructor
 public enum DatasetType {
 
-    SHP,
-    GDB;
+    SHP("shp"),
+    GDB("gdb");
+
+    private final String extension;
 
 }

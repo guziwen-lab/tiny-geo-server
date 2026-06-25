@@ -42,12 +42,17 @@ public class FileServiceImpl extends ServiceImpl<FileDao, FileEntity> implements
     }
 
     @Override
+    public String getFilePath(String suffix) {
+        return getDestDir() + UUIDUtils.get() + "." + suffix;
+    }
+
+    @Override
     public Page<FileEntity> queryPage(FileDTO dto) {
         LambdaQueryWrapper<FileEntity> wrapper = new LambdaQueryWrapper<>();
         return page(dto.page(), wrapper);
     }
 
-    private String getFilePath() {
+    private String getDestDir() {
         LocalDate today = LocalDate.now();
         String year = String.valueOf(today.getYear());
         String month = String.format("%02d", today.getMonthValue());  // 格式化为两位数字
@@ -68,7 +73,7 @@ public class FileServiceImpl extends ServiceImpl<FileDao, FileEntity> implements
     @Override
     public FileEntity upload(InputStream inputStream, String fileName) {
         FileEntity fileEntity = new FileEntity();
-        String dest = getFilePath() + UUIDUtils.get() + "." + FileNameUtils.getSuffix(fileName);
+        String dest = getDestDir() + UUIDUtils.get() + "." + FileNameUtils.getSuffix(fileName);
         File destFile = new File(dest);
         try (FileOutputStream outputStream = new FileOutputStream(dest)) {
             long size = IOUtils.copy(inputStream, outputStream);
@@ -99,7 +104,7 @@ public class FileServiceImpl extends ServiceImpl<FileDao, FileEntity> implements
     @Override
     public Long upload(byte[] bytes, String fileName) {
         FileEntity fileEntity = new FileEntity();
-        String dest = getFilePath() + UUIDUtils.get() + "." + FileNameUtils.getSuffix(fileName);
+        String dest = getDestDir() + UUIDUtils.get() + "." + FileNameUtils.getSuffix(fileName);
         File destFile = FileUtils.touch(dest);
         try (BufferedOutputStream outputStream = new BufferedOutputStream(new FileOutputStream(destFile))) {
             outputStream.write(bytes);
