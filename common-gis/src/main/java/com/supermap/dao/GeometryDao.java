@@ -1,6 +1,9 @@
 package com.supermap.dao;
 
+import com.supermap.type.Column;
 import org.apache.ibatis.annotations.*;
+
+import java.util.List;
 
 /**
  * 数据库空间计算代理层（Spatial Gateway）
@@ -84,5 +87,15 @@ public interface GeometryDao {
             ALTER TABLE ${current} RENAME TO ${resultTableName}
             """)
     void renameTable(String current, String resultTableName);
+
+    @Select("""
+            SELECT column_name,
+                   data_type
+            FROM information_schema.columns
+            WHERE table_name = #{table}
+              AND column_name <> 'geom'
+            ORDER BY ordinal_position
+            """)
+    List<Column> listColumns(@Param("table") String table);
 
 }

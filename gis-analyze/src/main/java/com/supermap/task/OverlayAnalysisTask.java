@@ -1,10 +1,10 @@
 package com.supermap.task;
 
 import com.supermap.*;
-import com.supermap.service.OverlayService;
+import com.supermap.service.OverlayIntersectService;
 import com.supermap.dao.GeometryDao;
 import com.supermap.enumeration.AnalysisType;
-import com.supermap.enumeration.OverlayType;
+import com.supermap.enumeration.OverlayAlgorithm;
 import com.supermap.enumeration.GeomType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -17,11 +17,11 @@ import java.util.Objects;
 @Component
 public class OverlayAnalysisTask extends AbstractAnalysisTask<OverlayParam> {
 
-    private final OverlayService overlayService;
+    private final OverlayIntersectService overlayIntersectService;
 
     private final GeometryDao geometryDao;
 
-    private OverlayType overlayType;
+    private OverlayAlgorithm overlayAlgorithm;
 
     private final List<String> tempTableList = new ArrayList<>();
 
@@ -32,7 +32,7 @@ public class OverlayAnalysisTask extends AbstractAnalysisTask<OverlayParam> {
 
     @Override
     public OverlayParam buildParam(String subType) {
-        return new OverlayParam(OverlayType.valueOf(subType));
+        return new OverlayParam(OverlayAlgorithm.valueOf(subType));
     }
 
     @Override
@@ -45,7 +45,7 @@ public class OverlayAnalysisTask extends AbstractAnalysisTask<OverlayParam> {
         for (int i = 1; i < layers.size(); i++) {
             String next = layers.get(i).getTableName();
             String output;
-            switch (overlayType) {
+            switch (overlayAlgorithm) {
                 case INTERSECT:
                     output = executeIntersect(current, next);
                     tempTableList.add(output);  // 添加临时表名到列表，为后续清理
@@ -84,10 +84,10 @@ public class OverlayAnalysisTask extends AbstractAnalysisTask<OverlayParam> {
 
     @Override
     protected void validate(AnalysisContext<OverlayParam> context) {
-        OverlayType overlayType = context.getParam().getOverlayType();
-        if (overlayType == null)
+        OverlayAlgorithm overlayAlgorithm = context.getParam().getOverlayAlgorithm();
+        if (overlayAlgorithm == null)
             throw new IllegalArgumentException("叠加分析类型不能为空");
-        this.overlayType = overlayType;
+        this.overlayAlgorithm = overlayAlgorithm;
 
         List<LayerInfo> layers = context.getInputLayers();
 
@@ -116,16 +116,16 @@ public class OverlayAnalysisTask extends AbstractAnalysisTask<OverlayParam> {
                         "不支持的几何类型: " + layer.getGeomType()
                         + ", 图层: " + layer.getTableName());
             }
-            if (!isCompatible(overlayType, geomType)) {
+            if (!isCompatible(overlayAlgorithm, geomType)) {
                 throw new IllegalArgumentException(
-                        overlayType + "不支持" + geomType.getCode()
+                        overlayAlgorithm + "不支持" + geomType.getCode()
                         + "类型, 图层: " + layer.getTableName());
             }
         }
     }
 
-    private boolean isCompatible(OverlayType overlayType, GeomType geomType) {
-        return switch (overlayType) {
+    private boolean isCompatible(OverlayAlgorithm overlayAlgorithm, GeomType geomType) {
+        return switch (overlayAlgorithm) {
             case INTERSECT, UNION, SYMMETRIC_DIFFERENCE, IDENTITY ->
                     geomType == GeomType.MULTI_POLYGON;
             case CLIP, ERASE ->
@@ -144,7 +144,7 @@ public class OverlayAnalysisTask extends AbstractAnalysisTask<OverlayParam> {
     }
 
     private String executeIntersect(String current, String next) {
-        return overlayService.execute(current, next);
+        return overlayIntersectService.execute(current, next);
     }
 
 }

@@ -29,9 +29,9 @@ spring:
 #    password: 123456
     #PostgreSQL配置
     driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://service.990304.xyz:5432/tiny_geo_server?useUnicode=true&characterEncoding=UTF-8
+    url: jdbc:postgresql://localhost:5432/tiny_geo_server?useUnicode=true&characterEncoding=UTF-8
     username: postgres
-    password: zYdWyb-rbzniq-8wofdO
+    password: 123456
 #    url: jdbc:postgresql://pgm-2ze6ikngxk78h0n4go.pg.rds.aliyuncs.com:5432/ygdz_test?useUnicode=true&characterEncoding=UTF-8
 #    username: postgres
 #    password: 4e2XX0o2gcdmv5jJsqNz

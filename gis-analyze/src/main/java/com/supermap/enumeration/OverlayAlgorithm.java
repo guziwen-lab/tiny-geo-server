@@ -1,6 +1,6 @@
 package com.supermap.enumeration;
 
-public enum OverlayType {
+public enum OverlayAlgorithm {
 
     /**
      * 相交
