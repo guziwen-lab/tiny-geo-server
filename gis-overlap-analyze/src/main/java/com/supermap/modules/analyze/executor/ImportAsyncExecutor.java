@@ -46,12 +46,6 @@ public class ImportAsyncExecutor {
                 throw new RuntimeException("几何类型不支持: " + meta.geomType);
             }
 
-            long invalidFeatureCount = switch (geomType) {
-                case MULTI_POLYGON -> geometryDao.fixGeometryTypeByMultipolygon(tableName);
-                case POINT -> geometryDao.fixGeometryTypeByPoint(tableName);
-                case MULTI_LINE_STRING -> geometryDao.fixGeometryTypeByMultiLineString(tableName);
-            };
-
             // 4. 创建空间索引
             geometryDao.createGistIndex(tableName);
 
@@ -60,8 +54,7 @@ public class ImportAsyncExecutor {
                     entity.getId(),
                     geomType,
                     meta.srid,
-                    meta.featureCount,
-                    invalidFeatureCount
+                    meta.featureCount
             );
         } catch (Exception e) {
             log.error("数据集导入失败, datasetId={}, table={}", entity.getId(), tableName, e);

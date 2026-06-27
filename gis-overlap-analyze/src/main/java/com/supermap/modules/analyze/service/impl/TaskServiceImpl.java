@@ -131,7 +131,7 @@ public class TaskServiceImpl extends ServiceImpl<TaskDao, TaskEntity> implements
         context.setParam(analysisTask.buildParam(task.getSubType()));
 
         // 异步执行分析任务
-        taskAsyncExecutor.executeAsync(taskId, task.getAnalysisType(), context);
+        taskAsyncExecutor.executeAsync(task, task.getAnalysisType(), context);
     }
 
 }

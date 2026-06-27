@@ -89,7 +89,7 @@ public class ExportTaskServiceImpl extends ServiceImpl<ExportTaskDao, ExportTask
         save(entity);
 
         // 异步执行导出，传入配置的格式类型
-        exportAsyncExecutor.exportLayerAsync(entity);
+        exportAsyncExecutor.exportLayerAsync(entity, fileEntity);
 
         return entity.getId();
     }

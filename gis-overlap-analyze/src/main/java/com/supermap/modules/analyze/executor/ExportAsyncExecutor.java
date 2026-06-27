@@ -31,11 +31,8 @@ public class ExportAsyncExecutor {
     private String pgConn;
 
     @Async("exportTaskExecutor")
-    public void exportLayerAsync(ExportTaskEntity entity) {
+    public void exportLayerAsync(ExportTaskEntity entity, FileEntity fileEntity) {
         try {
-            Long fileId = entity.getFileId();
-            FileEntity fileEntity = fileService.getById(fileId);
-
             // 执行 ogr2ogr 导出
             execOgr2ogr(entity.getTableName(), fileEntity.getFilePath(), entity.getExportType());
 

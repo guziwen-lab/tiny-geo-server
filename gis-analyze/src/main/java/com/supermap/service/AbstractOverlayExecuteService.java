@@ -13,18 +13,12 @@ import java.util.Set;
 public abstract class AbstractOverlayExecuteService extends AbstractExecuteService {
 
     @Override
-    protected String executeInternal(String current, String next) {
-        String result = getResultTableName();
-
+    protected String buildExecuteSql(String current, String next, String result) {
         List<Column> currentColumns = geometryDao.listColumns(current);
         List<Column> nextColumns = geometryDao.listColumns(next);
         String selectClause = buildSelectClause(currentColumns, nextColumns, geometryExpression());
 
-        String sql = buildSql(current, next, result, selectClause);
-
-        executeSqlMapper.executeOverlay(sql);
-
-        return result;
+        return buildSql(current, next, result, selectClause);
     }
 
     abstract String geometryExpression();
@@ -39,7 +33,7 @@ public abstract class AbstractOverlayExecuteService extends AbstractExecuteServi
 
         // 当前图层字段
         for (Column column : currentColumns) {
-            String alias = uniqueFieldName(column.name(), usedNames);
+            String alias = getUniqueFieldName(column.name(), usedNames);
             selectItems.add(
                     "a.\"%s\" AS \"%s\""
                             .formatted(column.name(), alias)
@@ -48,7 +42,7 @@ public abstract class AbstractOverlayExecuteService extends AbstractExecuteServi
 
         // 叠加图层字段
         for (Column column : nextColumns) {
-            String alias = uniqueFieldName(column.name(), usedNames);
+            String alias = getUniqueFieldName(column.name(), usedNames);
             selectItems.add(
                     "b.\"%s\" AS \"%s\""
                             .formatted(column.name(), alias)

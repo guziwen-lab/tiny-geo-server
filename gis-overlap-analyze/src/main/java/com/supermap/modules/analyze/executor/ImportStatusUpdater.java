@@ -15,14 +15,12 @@ public class ImportStatusUpdater {
     private final DatasetDao datasetDao;
 
     @Transactional(rollbackFor = Exception.class)
-    public void markSuccess(Long datasetId, GeomType geomType, Integer srid,
-                            Long featureCount, Long invalidFeatureCount) {
+    public void markSuccess(Long datasetId, GeomType geomType, Integer srid, Long featureCount) {
         DatasetEntity entity = datasetDao.selectById(datasetId);
         entity.setStatus(UploadStatus.SUCCESS);
         entity.setGeomType(geomType);
         entity.setSrid(srid);
         entity.setFeatureCount(featureCount);
-        entity.setInvalidFeatureCount(invalidFeatureCount);
         datasetDao.updateById(entity);
     }
 

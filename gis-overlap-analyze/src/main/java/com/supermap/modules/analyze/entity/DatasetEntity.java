@@ -49,9 +49,6 @@ public class DatasetEntity {
     @Schema(title = "要素数量")
     private Long featureCount;
 
-    @Schema(title = "无效要素数量")
-    private Long invalidFeatureCount;
-
     @Schema(title = "上传状态")
     private UploadStatus status;
 

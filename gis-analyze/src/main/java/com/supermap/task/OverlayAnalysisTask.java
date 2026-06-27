@@ -1,20 +1,16 @@
 package com.supermap.task;
 
 import com.supermap.*;
-import com.supermap.service.OverlayClipService;
-import com.supermap.service.OverlayEraseService;
-import com.supermap.service.OverlayIntersectService;
+import com.supermap.service.*;
 import com.supermap.dao.GeometryDao;
 import com.supermap.enumeration.AnalysisType;
 import com.supermap.enumeration.OverlayAlgorithm;
 import com.supermap.enumeration.GeomType;
-import com.supermap.service.OverlaySymmetricDifferenceService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 @RequiredArgsConstructor
 @Component
@@ -111,18 +107,6 @@ public class OverlayAnalysisTask extends AbstractAnalysisTask<OverlayParam> {
             throw new IllegalArgumentException("叠加分析至少需要2个图层");
         }
 
-        // SRID 一致性校验
-        Integer baseSrid = layers.get(0).getSrid();
-        for (int i = 1; i < layers.size(); i++) {
-            if (!Objects.equals(baseSrid, layers.get(i).getSrid())) {
-                throw new IllegalArgumentException(
-                        "图层SRID不一致: " + layers.get(0).getTableName()
-                        + "(SRID=" + baseSrid + ") 与 "
-                        + layers.get(i).getTableName()
-                        + "(SRID=" + layers.get(i).getSrid() + ")");
-            }
-        }
-
         // 几何类型兼容性校验
         for (LayerInfo layer : layers) {
             GeomType geomType = layer.getGeomType();
@@ -151,10 +135,6 @@ public class OverlayAnalysisTask extends AbstractAnalysisTask<OverlayParam> {
                 geometryDao.dropTable(table);
             }
         }
-    }
-
-    private String executeIntersect(String current, String next) {
-        return overlayIntersectService.execute(current, next);
     }
 
 }

@@ -3,6 +3,8 @@ package com.supermap.modules.analyze.executor;
 import com.supermap.*;
 import com.supermap.common.util.CollectionUtils;
 import com.supermap.enumeration.AnalysisType;
+import com.supermap.modules.analyze.entity.DatasetEntity;
+import com.supermap.modules.analyze.entity.TaskEntity;
 import com.supermap.modules.analyze.entity.TaskStepEntity;
 import com.supermap.modules.analyze.service.TaskStepService;
 import lombok.RequiredArgsConstructor;
@@ -10,6 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
@@ -22,32 +25,44 @@ public class TaskAsyncExecutor {
     private final TaskStatusUpdater taskStatusUpdater;
 
     @Async("analyzeTaskExecutor")
-    public void executeAsync(Long taskId, AnalysisType analysisType, AnalysisContext<AnalysisParam> context) {
+    public void executeAsync(TaskEntity task, AnalysisType analysisType, AnalysisContext<AnalysisParam> context) {
         try {
             AnalysisResult result = analysisEngine.execute(analysisType, context);
 
-            saveSteps(taskId, context.getSteps());
-            taskStatusUpdater.markSuccess(taskId, result);
+            saveSteps(task, context.getSteps());
+            taskStatusUpdater.markSuccess(task.getId(), result);
         } catch (Exception e) {
-            log.error("任务执行失败, taskId={}", taskId, e);
-            taskStatusUpdater.markFailed(taskId, e.getMessage());
+            log.error("任务执行失败, taskId={}", task.getId(), e);
+            taskStatusUpdater.markFailed(task.getId(), e.getMessage());
         }
     }
 
-    private void saveSteps(Long taskId, List<AnalysisStep> steps) {
+    private void saveSteps(TaskEntity task, List<AnalysisStep> steps) {
         if (CollectionUtils.isEmpty(steps)) {
             return;
         }
-        List<TaskStepEntity> entities = steps.stream().map(step -> {
-            TaskStepEntity entity = new TaskStepEntity();
-            entity.setTaskId(taskId);
-            entity.setStepNo(step.getStepNo());
-            entity.setInputTable(step.getInputTable());
-            entity.setOverlayTable(step.getOverlayTable());
-            entity.setOutputTable(step.getOutputTable());
-            return entity;
-        }).toList();
-        taskStepService.saveBatch(entities);
+
+        List<TaskStepEntity> stepEntities = new ArrayList<>(steps.size());
+        for (AnalysisStep step : steps) {
+            // 保存步骤
+            TaskStepEntity stepEntity = new TaskStepEntity();
+            stepEntity.setTaskId(task.getId());
+            stepEntity.setStepNo(step.getStepNo());
+            stepEntity.setInputTable(step.getInputTable());
+            stepEntity.setOverlayTable(step.getOverlayTable());
+            stepEntity.setOutputTable(step.getOutputTable());
+
+            // 把步骤记录到数据集表
+            DatasetEntity datasetEntity = new DatasetEntity();
+            datasetEntity.setDatasetName(step.getOutputTable());
+            datasetEntity.setLayerName(step.getOutputTable());
+            datasetEntity.setTableName(step.getOutputTable());
+            datasetEntity.setGeomType(task.getGeomType());
+//            datasetEntity.setSrid(task.getSrid());
+        }
+
+        taskStepService.saveBatch(stepEntities);
+
     }
 
 }

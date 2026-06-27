@@ -13,15 +13,13 @@ import java.util.List;
 @Mapper
 public interface GeometryDao {
 
-    @Select("""
-                SELECT ST_AsBinary(
-                    ST_Transform(
-                        ST_SetSRID(ST_GeomFromWKB(#{wkb}), #{sourceSrid}),
-                        #{targetSrid}
-                    )
-                )
+    @Update("""
+                CREATE TABLE ${tempTableName} AS
+                SELECT *,
+                       ST_Transform(geom, #{targetSrid}) AS geom
+                FROM ${sourceTable}
             """)
-    byte[] transform(@Param("wkb") byte[] wkb, @Param("sourceSrid") int sourceSrid, @Param("targetSrid") int targetSrid);
+    void transformTable(@Param("sourceTable") String sourceTable, @Param("targetSrid") int targetSrid, @Param("tempTableName") String tempTableName);
 
     @Select("""
             SELECT ST_SRID(geom)

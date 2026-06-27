@@ -24,7 +24,11 @@ public abstract class AbstractExecuteService {
 
     public String execute(String current, String next) {
         SqlInjectionCheck.checkTableName(current, next);
-        return executeInternal(current, next);
+        String result = dsTempSnGenerator.getTempTableName();
+        String sql = buildExecuteSql(current, next, result);
+        executeSqlMapper.executeOverlay(sql);
+
+        return result;
     }
 
     /**
@@ -32,11 +36,11 @@ public abstract class AbstractExecuteService {
      *
      * @param current 当前数据集
      * @param next    下一个数据集
-     * @return 执行结果表名
+     * @return 可执行SQL
      */
-    protected abstract String executeInternal(String current, String next);
+    protected abstract String buildExecuteSql(String current, String next, String result);
 
-    protected String uniqueFieldName(String name, Set<String> usedNames) {
+    protected String getUniqueFieldName(String name, Set<String> usedNames) {
         String result = name;
         int i = 1;
 
@@ -46,10 +50,6 @@ public abstract class AbstractExecuteService {
 
         usedNames.add(result);
         return result;
-    }
-
-    protected String getResultTableName() {
-        return "ds_temp_" + dsTempSnGenerator.generate();
     }
 
 }

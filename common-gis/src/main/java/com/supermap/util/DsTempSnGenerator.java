@@ -15,4 +15,8 @@ public class DsTempSnGenerator extends AbstractSnGenerator {
         super(redisTemplate, "DS:TEMP:SN:");
     }
 
+    public String getTempTableName() {
+        return "ds_temp_" + super.generate();
+    }
+
 }
