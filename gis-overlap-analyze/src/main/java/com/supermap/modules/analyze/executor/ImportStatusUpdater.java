@@ -1,5 +1,6 @@
 package com.supermap.modules.analyze.executor;
 
+import com.supermap.enumeration.GeomType;
 import com.supermap.enumeration.UploadStatus;
 import com.supermap.modules.analyze.dao.DatasetDao;
 import com.supermap.modules.analyze.entity.DatasetEntity;
@@ -14,7 +15,7 @@ public class ImportStatusUpdater {
     private final DatasetDao datasetDao;
 
     @Transactional(rollbackFor = Exception.class)
-    public void markSuccess(Long datasetId, String geomType, Integer srid,
+    public void markSuccess(Long datasetId, GeomType geomType, Integer srid,
                             Long featureCount, Long invalidFeatureCount) {
         DatasetEntity entity = datasetDao.selectById(datasetId);
         entity.setStatus(UploadStatus.SUCCESS);

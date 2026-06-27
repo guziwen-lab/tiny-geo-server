@@ -3,6 +3,7 @@ package com.supermap.modules.analyze.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.supermap.common.util.BeanUtils;
+import com.supermap.common.util.FileUtils;
 import com.supermap.enumeration.DatasetType;
 import com.supermap.enumeration.UploadStatus;
 import com.supermap.modules.analyze.executor.ExportAsyncExecutor;
@@ -65,6 +66,7 @@ public class ExportTaskServiceImpl extends ServiceImpl<ExportTaskDao, ExportTask
 
     private Long createAndTriggerTask(String tableName, DatasetType exportType) {
         String destDir = fileService.getFilePath(exportType.getExtension());
+        FileUtils.mkdir(destDir);
         String fileName = tableName + "." + exportType.getExtension();
 
         FileEntity fileEntity = new FileEntity();

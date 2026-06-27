@@ -58,7 +58,7 @@ public class ImportAsyncExecutor {
             // 5. 更新状态为成功
             importStatusUpdater.markSuccess(
                     entity.getId(),
-                    meta.geomType,
+                    geomType,
                     meta.srid,
                     meta.featureCount,
                     invalidFeatureCount

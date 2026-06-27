@@ -48,4 +48,8 @@ public abstract class AbstractExecuteService {
         return result;
     }
 
+    protected String getResultTableName() {
+        return "ds_temp_" + dsTempSnGenerator.generate();
+    }
+
 }

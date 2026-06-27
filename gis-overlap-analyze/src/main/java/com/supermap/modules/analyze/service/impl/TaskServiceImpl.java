@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.supermap.*;
 import com.supermap.common.util.BeanUtils;
+import com.supermap.enumeration.GeomType;
 import com.supermap.enumeration.TaskStatus;
 import com.supermap.modules.analyze.dto.StartTaskDTO;
 import com.supermap.modules.analyze.dto.TaskDatasetSaveDTO;
@@ -13,6 +14,7 @@ import com.supermap.modules.analyze.entity.TaskDatasetEntity;
 import com.supermap.modules.analyze.service.DatasetService;
 import com.supermap.modules.analyze.service.TaskDatasetService;
 import com.supermap.modules.analyze.executor.TaskAsyncExecutor;
+import com.supermap.resolver.GeomTypeResolver;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -57,15 +59,25 @@ public class TaskServiceImpl extends ServiceImpl<TaskDao, TaskEntity> implements
         taskEntity.setAnalysisType(dto.getAnalysisType());
         taskEntity.setSubType(dto.getSubType());
         taskEntity.setCreatedAt(Instant.now());
+
+        GeomType geomType = dto.getGeomType();
+        List<TaskDatasetSaveDTO> datasetIds = dto.getDatasetIds();
+        if (geomType == null) {
+            // 判断导出的类型
+            List<DatasetEntity> datasetEntities = datasetService.listByIds(datasetIds.stream()
+                    .map(TaskDatasetSaveDTO::getDatasetId).toList());
+            geomType = GeomTypeResolver.resolve(dto.getAnalysisType(), datasetEntities);
+        }
+        taskEntity.setGeomType(geomType);
         save(taskEntity);
 
-        List<TaskDatasetSaveDTO> datasetIds = dto.getDatasetIds();
-        List<TaskDatasetEntity> taskDatasetEntities = datasetIds.stream().map(item -> {
-            TaskDatasetEntity taskDatasetEntity = new TaskDatasetEntity();
-            taskDatasetEntity.setDatasetId(item.getDatasetId());
-            taskDatasetEntity.setTaskId(taskEntity.getId());
-            return taskDatasetEntity;
-        }).toList();
+        List<TaskDatasetEntity> taskDatasetEntities = datasetIds.stream()
+                .map(item -> {
+                    TaskDatasetEntity taskDatasetEntity = new TaskDatasetEntity();
+                    taskDatasetEntity.setDatasetId(item.getDatasetId());
+                    taskDatasetEntity.setTaskId(taskEntity.getId());
+                    return taskDatasetEntity;
+                }).toList();
         taskDatasetService.saveBatch(taskDatasetEntities);
 
         return taskEntity.getId();
@@ -121,4 +133,5 @@ public class TaskServiceImpl extends ServiceImpl<TaskDao, TaskEntity> implements
         // 异步执行分析任务
         taskAsyncExecutor.executeAsync(taskId, task.getAnalysisType(), context);
     }
+
 }

@@ -14,7 +14,7 @@ public abstract class AbstractOverlayExecuteService extends AbstractExecuteServi
 
     @Override
     protected String executeInternal(String current, String next) {
-        String result = "ds_temp_" + dsTempSnGenerator.generate();
+        String result = getResultTableName();
 
         List<Column> currentColumns = geometryDao.listColumns(current);
         List<Column> nextColumns = geometryDao.listColumns(next);

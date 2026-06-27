@@ -63,7 +63,7 @@ public class ExportAsyncExecutor {
             cmd.add("SHAPE_ENCODING");
             cmd.add("GBK");
         } else if (DatasetType.GDB == exportType) {
-            cmd.add("FileGDB");
+            cmd.add("OpenFileGDB");
         } else {
             throw new IllegalArgumentException("不支持的导出类型: " + exportType);
         }

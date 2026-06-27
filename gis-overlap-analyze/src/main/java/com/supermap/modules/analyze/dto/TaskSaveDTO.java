@@ -1,6 +1,7 @@
 package com.supermap.modules.analyze.dto;
 
 import com.supermap.enumeration.AnalysisType;
+import com.supermap.enumeration.GeomType;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
@@ -28,6 +29,9 @@ public class TaskSaveDTO {
 
     @Schema(title = "子类型")
     private String subType;
+
+    @Schema(title = "几何类型")
+    private GeomType geomType;
 
     @Schema(title = "任务数据集列表")
     @NotEmpty

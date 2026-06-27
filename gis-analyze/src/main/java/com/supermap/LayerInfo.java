@@ -1,5 +1,6 @@
 package com.supermap;
 
+import com.supermap.enumeration.GeomType;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
@@ -13,7 +14,7 @@ public class LayerInfo {
     private String tableName;
 
     @Schema(title = "几何类型")
-    private String geomType;
+    private GeomType geomType;
 
     @Schema(title = "空间参考系统")
     private Integer srid;

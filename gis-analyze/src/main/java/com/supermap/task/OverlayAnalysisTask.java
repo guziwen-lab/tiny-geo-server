@@ -1,11 +1,14 @@
 package com.supermap.task;
 
 import com.supermap.*;
+import com.supermap.service.OverlayClipService;
+import com.supermap.service.OverlayEraseService;
 import com.supermap.service.OverlayIntersectService;
 import com.supermap.dao.GeometryDao;
 import com.supermap.enumeration.AnalysisType;
 import com.supermap.enumeration.OverlayAlgorithm;
 import com.supermap.enumeration.GeomType;
+import com.supermap.service.OverlaySymmetricDifferenceService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -18,6 +21,12 @@ import java.util.Objects;
 public class OverlayAnalysisTask extends AbstractAnalysisTask<OverlayParam> {
 
     private final OverlayIntersectService overlayIntersectService;
+
+    private final OverlayClipService overlayClipService;
+
+    private final OverlayEraseService overlayEraseService;
+
+    private final OverlaySymmetricDifferenceService overlaySymmetricDifferenceService;
 
     private final GeometryDao geometryDao;
 
@@ -47,18 +56,24 @@ public class OverlayAnalysisTask extends AbstractAnalysisTask<OverlayParam> {
             String output;
             switch (overlayAlgorithm) {
                 case INTERSECT:
-                    output = executeIntersect(current, next);
-                    tempTableList.add(output);  // 添加临时表名到列表，为后续清理
-                    context.addStep(new AnalysisStep(stepNo++, current, next, output)); // 添加分析步骤，为后续保存步骤
-                    current = output;
+                    output = overlayIntersectService.execute(current, next);
+                    break;
+                case ERASE:
+                    output = overlayEraseService.execute(current, next);
+                    break;
+                case CLIP:
+                    output = overlayClipService.execute(current, next);
+                    break;
+                case SYMMETRIC_DIFFERENCE:
+                    output = overlaySymmetricDifferenceService.execute(current, next);
                     break;
                 case UNION:
-                case ERASE:
-                case CLIP:
-                case SYMMETRIC_DIFFERENCE:
-                case IDENTITY:
+                default:
                     throw new RuntimeException("暂不支持的OverlayType");
             }
+            tempTableList.add(output);  // 添加临时表名到列表，为后续清理
+            context.addStep(new AnalysisStep(stepNo++, current, next, output)); // 添加分析步骤，为后续保存步骤
+            current = output;
         }
 
         // 把最后一个临时表改名为结果表
@@ -110,13 +125,8 @@ public class OverlayAnalysisTask extends AbstractAnalysisTask<OverlayParam> {
 
         // 几何类型兼容性校验
         for (LayerInfo layer : layers) {
-            GeomType geomType = GeomType.of(layer.getGeomType());
-            if (geomType == null) {
-                throw new IllegalArgumentException(
-                        "不支持的几何类型: " + layer.getGeomType()
-                        + ", 图层: " + layer.getTableName());
-            }
-            if (!isCompatible(overlayAlgorithm, geomType)) {
+            GeomType geomType = layer.getGeomType();
+            if (!isCompatible(overlayAlgorithm, layer.getGeomType())) {
                 throw new IllegalArgumentException(
                         overlayAlgorithm + "不支持" + geomType.getCode()
                         + "类型, 图层: " + layer.getTableName());

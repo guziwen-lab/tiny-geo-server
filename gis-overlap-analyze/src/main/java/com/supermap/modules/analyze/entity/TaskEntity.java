@@ -1,6 +1,5 @@
 package com.supermap.modules.analyze.entity;
 
-import com.baomidou.mybatisplus.annotation.EnumValue;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
@@ -8,6 +7,7 @@ import com.baomidou.mybatisplus.annotation.TableName;
 import java.time.Instant;
 
 import com.supermap.enumeration.AnalysisType;
+import com.supermap.enumeration.GeomType;
 import com.supermap.enumeration.TaskStatus;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
@@ -40,6 +40,9 @@ public class TaskEntity {
 
     @Schema(title = "结果表名")
     private String resultTableName;
+
+    @Schema(title = "几何类型")
+    private GeomType geomType;
 
     @Schema(title = "附加信息")
     private String message;

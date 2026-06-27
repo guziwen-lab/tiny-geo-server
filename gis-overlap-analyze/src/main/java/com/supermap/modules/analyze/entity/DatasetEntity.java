@@ -3,6 +3,7 @@ package com.supermap.modules.analyze.entity;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.supermap.enumeration.GeomType;
 import com.supermap.enumeration.UploadStatus;
 
 import java.time.Instant;
@@ -40,7 +41,7 @@ public class DatasetEntity {
     private String tableName;
 
     @Schema(title = "几何类型")
-    private String geomType;
+    private GeomType geomType;
 
     @Schema(title = "空间参考系统")
     private Integer srid;
