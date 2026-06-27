@@ -52,16 +52,16 @@ public class OverlayAnalysisTask extends AbstractAnalysisTask<OverlayParam> {
             String output;
             switch (overlayAlgorithm) {
                 case INTERSECT:
-                    output = overlayIntersectService.execute(current, next);
+                    output = overlayIntersectService.execute(current, next, context);
                     break;
                 case ERASE:
-                    output = overlayEraseService.execute(current, next);
+                    output = overlayEraseService.execute(current, next, context);
                     break;
                 case CLIP:
-                    output = overlayClipService.execute(current, next);
+                    output = overlayClipService.execute(current, next, context);
                     break;
                 case SYMMETRIC_DIFFERENCE:
-                    output = overlaySymmetricDifferenceService.execute(current, next);
+                    output = overlaySymmetricDifferenceService.execute(current, next, context);
                     break;
                 case UNION:
                 default:

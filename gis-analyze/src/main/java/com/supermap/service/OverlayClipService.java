@@ -1,5 +1,6 @@
 package com.supermap.service;
 
+import com.supermap.enumeration.GeomType;
 import com.supermap.type.Column;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -15,7 +16,7 @@ import java.util.List;
 public class OverlayClipService extends AbstractOverlayExecuteService {
 
     @Override
-    public String geometryExpression() {
+    public String geometryExpression(GeomType geomType) {
         return "ST_Intersection(a.geom, b.geom)";
     }
 

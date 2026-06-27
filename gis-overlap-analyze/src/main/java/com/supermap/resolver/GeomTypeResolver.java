@@ -36,7 +36,6 @@ public final class GeomTypeResolver {
     /**
      * Overlay 几何类型推导
      */
-
     private static GeomType resolveOverlay(List<DatasetEntity> datasets) {
         GeomType result = datasets.get(0).getGeomType();
         for (int i = 1; i < datasets.size(); i++) {
@@ -45,32 +44,8 @@ public final class GeomTypeResolver {
         return result;
     }
 
-    /**
-     * Overlay 两两推导
-     */
     private static GeomType resolveOverlay(GeomType left, GeomType right) {
-        // Point 与任何图层叠加，结果最多为 Point
-        if (left == GeomType.POINT || right == GeomType.POINT) {
-            return GeomType.POINT;
-        }
-
-        // Line 与 Polygon 叠加，结果为 Line
-        if ((left == GeomType.MULTI_LINE_STRING && right == GeomType.MULTI_POLYGON)
-                || (left == GeomType.MULTI_POLYGON && right == GeomType.MULTI_LINE_STRING)) {
-            return GeomType.MULTI_LINE_STRING;
-        }
-
-        // Line 与 Line
-        if (left == GeomType.MULTI_LINE_STRING && right == GeomType.MULTI_LINE_STRING) {
-            return GeomType.MULTI_LINE_STRING;
-        }
-
-        // Polygon 与 Polygon
-        if (left == GeomType.MULTI_POLYGON && right == GeomType.MULTI_POLYGON) {
-            return GeomType.MULTI_POLYGON;
-        }
-
-        throw new IllegalArgumentException("不支持的几何类型组合：" + left + " + " + right);
+        return left.getDimension() <= right.getDimension() ? left : right;
     }
 
 }

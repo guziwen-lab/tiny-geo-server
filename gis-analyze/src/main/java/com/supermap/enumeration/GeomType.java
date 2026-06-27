@@ -14,11 +14,13 @@ import lombok.Getter;
 @Getter
 public enum GeomType {
 
-    MULTI_POLYGON("Multi Polygon"),
-    POINT("Point"),
-    MULTI_LINE_STRING("Multi Line String");
+    POINT("Point", 0),
+    MULTI_LINE_STRING("Multi Line String", 1),
+    MULTI_POLYGON("Multi Polygon", 2);
 
     private final String code;
+
+    private final int dimension;
 
     public static GeomType of(String code) {
         for (GeomType geomType : GeomType.values()) {

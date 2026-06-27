@@ -1,5 +1,6 @@
 package com.supermap;
 
+import com.supermap.enumeration.GeomType;
 import lombok.Data;
 
 import java.util.ArrayList;
@@ -45,6 +46,11 @@ public class AnalysisContext<T extends AnalysisParam> {
      * 分析步骤记录
      */
     private List<AnalysisStep> steps = new ArrayList<>();
+
+    /**
+     * 几何类型 (导出)
+     */
+    private GeomType geomType;
 
     /**
      * 记录一个分析步骤

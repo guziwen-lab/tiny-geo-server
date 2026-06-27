@@ -1,5 +1,6 @@
 package com.supermap.service;
 
+import com.supermap.enumeration.GeomType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -11,7 +12,7 @@ import org.springframework.stereotype.Service;
 public class OverlayEraseService extends AbstractOverlayExecuteService {
 
     @Override
-    public String geometryExpression() {
+    public String geometryExpression(GeomType geomType) {
         return "ST_Difference(a.geom, b.geom)";
     }
 

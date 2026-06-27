@@ -1,5 +1,8 @@
 package com.supermap.service;
 
+import com.supermap.AnalysisContext;
+import com.supermap.enumeration.GeomType;
+import com.supermap.task.OverlayParam;
 import com.supermap.type.Column;
 
 import java.util.ArrayList;
@@ -10,18 +13,18 @@ import java.util.Set;
 /**
  * @author gzw
  */
-public abstract class AbstractOverlayExecuteService extends AbstractExecuteService {
+public abstract class AbstractOverlayExecuteService extends AbstractExecuteService<OverlayParam> {
 
     @Override
-    protected String buildExecuteSql(String current, String next, String result) {
+    protected String buildExecuteSql(String current, String next, String result, AnalysisContext<OverlayParam> context) {
         List<Column> currentColumns = geometryDao.listColumns(current);
         List<Column> nextColumns = geometryDao.listColumns(next);
-        String selectClause = buildSelectClause(currentColumns, nextColumns, geometryExpression());
+        String selectClause = buildSelectClause(currentColumns, nextColumns, geometryExpression(context.getGeomType()));
 
         return buildSql(current, next, result, selectClause);
     }
 
-    abstract String geometryExpression();
+    abstract String geometryExpression(GeomType geomType);
 
     abstract String buildSql(String current, String next, String result, String selectClause);
 
