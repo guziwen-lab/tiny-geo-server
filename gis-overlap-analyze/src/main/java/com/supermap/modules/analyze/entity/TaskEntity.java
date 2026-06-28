@@ -6,9 +6,9 @@ import com.baomidou.mybatisplus.annotation.TableName;
 
 import java.time.Instant;
 
-import com.supermap.enumeration.AnalysisType;
-import com.supermap.enumeration.GeomType;
-import com.supermap.enumeration.TaskStatus;
+import com.supermap.enums.AnalysisType;
+import com.supermap.enums.GeomType;
+import com.supermap.enums.TaskStatus;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 

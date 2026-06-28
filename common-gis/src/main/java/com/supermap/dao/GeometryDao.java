@@ -60,26 +60,10 @@ public interface GeometryDao {
             """)
     void dropTable(@Param("table") String table);
 
-    @Update("""
-            UPDATE ${table}
-            SET geom = ST_Multi(ST_CollectionExtract(ST_MakeValid(geom), 3))
-            WHERE geom IS NOT NULL and NOT ST_IsValid(geom)
-            """)
-    long fixGeometryTypeByMultipolygon(@Param("table") String table);
-
-    @Update("""
-            UPDATE ${table}
-            SET geom = ST_Multi(ST_CollectionExtract(ST_MakeValid(geom), 2))
-            WHERE geom IS NOT NULL and NOT ST_IsValid(geom)
-            """)
-    long fixGeometryTypeByMultiLineString(@Param("table") String table);
-
-    @Update("""
-            UPDATE ${table}
-            SET geom = ST_Multi(ST_CollectionExtract(ST_MakeValid(geom), 1))
-            WHERE geom IS NOT NULL and NOT ST_IsValid(geom)
-            """)
-    long fixGeometryTypeByPoint(@Param("table") String table);
+    void normalizeGeometry(@Param("table") String table,
+                           @Param("columns") List<Column> columns,
+                           @Param("tempTableName") String tempTableName,
+                           @Param("dimension") int dimension);
 
     @Update("""
             ALTER TABLE ${current} RENAME TO ${resultTableName}
@@ -94,6 +78,16 @@ public interface GeometryDao {
               AND column_name <> 'geom'
             ORDER BY ordinal_position
             """)
-    List<Column> listColumns(@Param("table") String table);
+    List<Column> listAttrColumns(@Param("table") String table);
+
+    @Select("""
+            SELECT COUNT(*)
+            FROM ${tableName}
+            WHERE geom IS NOT NULL
+              AND (
+                NOT ST_IsValid(geom)
+                    OR GeometryType(geom) <> #{geoType})
+            """)
+    int countNeedNormalize(@Param("tableName") String tableName, @Param("geoType") String geoType);
 
 }

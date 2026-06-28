@@ -3,9 +3,9 @@ package com.supermap.task;
 import com.supermap.*;
 import com.supermap.service.*;
 import com.supermap.dao.GeometryDao;
-import com.supermap.enumeration.AnalysisType;
-import com.supermap.enumeration.OverlayAlgorithm;
-import com.supermap.enumeration.GeomType;
+import com.supermap.enums.AnalysisType;
+import com.supermap.enums.OverlayAlgorithm;
+import com.supermap.enums.GeomType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -112,7 +112,7 @@ public class OverlayAnalysisTask extends AbstractAnalysisTask<OverlayParam> {
             GeomType geomType = layer.getGeomType();
             if (!isCompatible(overlayAlgorithm, layer.getGeomType())) {
                 throw new IllegalArgumentException(
-                        overlayAlgorithm + "不支持" + geomType.getCode()
+                        overlayAlgorithm + "不支持" + geomType.getOgr2ogrCode()
                         + "类型, 图层: " + layer.getTableName());
             }
         }

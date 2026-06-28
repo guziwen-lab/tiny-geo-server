@@ -1,8 +1,8 @@
 package com.supermap.modules.analyze.service.impl;
 
 import com.supermap.common.util.StringUtils;
-import com.supermap.enumeration.DatasetType;
-import com.supermap.enumeration.UploadStatus;
+import com.supermap.enums.DatasetType;
+import com.supermap.enums.UploadStatus;
 import com.supermap.modules.analyze.entity.DatasetEntity;
 import com.supermap.modules.analyze.executor.ImportAsyncExecutor;
 import com.supermap.modules.analyze.service.DatasetService;

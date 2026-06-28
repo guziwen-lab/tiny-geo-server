@@ -2,7 +2,7 @@ package com.supermap.modules.analyze.executor;
 
 import com.supermap.*;
 import com.supermap.common.util.CollectionUtils;
-import com.supermap.enumeration.AnalysisType;
+import com.supermap.enums.AnalysisType;
 import com.supermap.modules.analyze.entity.DatasetEntity;
 import com.supermap.modules.analyze.entity.TaskEntity;
 import com.supermap.modules.analyze.entity.TaskStepEntity;

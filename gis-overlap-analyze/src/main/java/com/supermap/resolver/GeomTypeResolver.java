@@ -1,8 +1,8 @@
 package com.supermap.resolver;
 
 import com.supermap.common.util.CollectionUtils;
-import com.supermap.enumeration.AnalysisType;
-import com.supermap.enumeration.GeomType;
+import com.supermap.enums.AnalysisType;
+import com.supermap.enums.GeomType;
 import com.supermap.modules.analyze.entity.DatasetEntity;
 
 import java.util.List;

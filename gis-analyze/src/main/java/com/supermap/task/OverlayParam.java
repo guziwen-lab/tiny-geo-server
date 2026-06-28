@@ -1,7 +1,7 @@
 package com.supermap.task;
 
 import com.supermap.AnalysisParam;
-import com.supermap.enumeration.OverlayAlgorithm;
+import com.supermap.enums.OverlayAlgorithm;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 

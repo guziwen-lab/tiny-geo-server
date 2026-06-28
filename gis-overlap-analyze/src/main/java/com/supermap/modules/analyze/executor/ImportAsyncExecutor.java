@@ -1,7 +1,7 @@
 package com.supermap.modules.analyze.executor;
 
 import com.supermap.dao.GeometryDao;
-import com.supermap.enumeration.GeomType;
+import com.supermap.enums.GeomType;
 import com.supermap.modules.analyze.entity.DatasetEntity;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

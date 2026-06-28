@@ -1,7 +1,7 @@
 package com.supermap.modules.analyze.executor;
 
 import com.supermap.AnalysisResult;
-import com.supermap.enumeration.TaskStatus;
+import com.supermap.enums.TaskStatus;
 import com.supermap.modules.analyze.dao.TaskDao;
 import com.supermap.modules.analyze.entity.TaskEntity;
 import lombok.RequiredArgsConstructor;

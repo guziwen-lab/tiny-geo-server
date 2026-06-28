@@ -1,4 +1,4 @@
-package com.supermap.enumeration;
+package com.supermap.enums;
 
 public enum OverlayAlgorithm {
 

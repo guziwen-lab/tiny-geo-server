@@ -1,7 +1,7 @@
 package com.supermap.service;
 
 import com.supermap.AnalysisContext;
-import com.supermap.enumeration.GeomType;
+import com.supermap.enums.GeomType;
 import com.supermap.task.OverlayParam;
 import com.supermap.type.Column;
 
@@ -17,8 +17,8 @@ public abstract class AbstractOverlayExecuteService extends AbstractExecuteServi
 
     @Override
     protected String buildExecuteSql(String current, String next, String result, AnalysisContext<OverlayParam> context) {
-        List<Column> currentColumns = geometryDao.listColumns(current);
-        List<Column> nextColumns = geometryDao.listColumns(next);
+        List<Column> currentColumns = geometryDao.listAttrColumns(current);
+        List<Column> nextColumns = geometryDao.listAttrColumns(next);
         String selectClause = buildSelectClause(currentColumns, nextColumns, geometryExpression(context.getGeomType()));
 
         return buildSql(current, next, result, selectClause);

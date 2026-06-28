@@ -1,7 +1,7 @@
 package com.supermap.modules.analyze.executor;
 
-import com.supermap.enumeration.GeomType;
-import com.supermap.enumeration.UploadStatus;
+import com.supermap.enums.GeomType;
+import com.supermap.enums.UploadStatus;
 import com.supermap.modules.analyze.dao.DatasetDao;
 import com.supermap.modules.analyze.entity.DatasetEntity;
 import lombok.RequiredArgsConstructor;

@@ -1,7 +1,7 @@
 package com.supermap.modules.analyze.dto;
 
-import com.supermap.enumeration.AnalysisType;
-import com.supermap.enumeration.GeomType;
+import com.supermap.enums.AnalysisType;
+import com.supermap.enums.GeomType;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;

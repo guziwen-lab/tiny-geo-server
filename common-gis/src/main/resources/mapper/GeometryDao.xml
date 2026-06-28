@@ -3,4 +3,13 @@
 
 <mapper namespace="com.supermap.dao.GeometryDao">
 
+    <update id="normalizeGeometry">
+        CREATE TABLE ${tempTableName} AS
+        SELECT
+        <foreach collection="columns" item="col" separator="," close=",">
+            #{col.name}
+        </foreach>
+        ST_Multi(ST_CollectionExtract(ST_MakeValid(geom), #{dimension})) AS geom
+        FROM ${table}
+    </update>
 </mapper>

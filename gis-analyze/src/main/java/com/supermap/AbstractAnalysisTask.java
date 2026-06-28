@@ -1,9 +1,10 @@
 package com.supermap;
 
-import com.supermap.common.util.StringUtils;
 import com.supermap.dao.GeometryDao;
-import com.supermap.enumeration.GeomType;
+import com.supermap.enums.GeomType;
 import com.supermap.service.GeometryService;
+import com.supermap.type.Column;
+import com.supermap.type.NormalizeResult;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -19,8 +20,6 @@ public abstract class AbstractAnalysisTask<T extends AnalysisParam> implements A
 
     @Autowired
     private GeometryDao geometryDao;
-
-    private final List<String> tempTableList = new ArrayList<>();
 
     @Override
     public AnalysisResult execute(AnalysisContext<T> context) {
@@ -44,7 +43,7 @@ public abstract class AbstractAnalysisTask<T extends AnalysisParam> implements A
             throw e;
         } finally {
             logCost(start);
-            cleanUpTempTable();
+            cleanUpTempTable(context);
             cleanUp(context);
         }
     }
@@ -65,6 +64,7 @@ public abstract class AbstractAnalysisTask<T extends AnalysisParam> implements A
     protected void beforeExecute(AnalysisContext<T> context) {
         log.info("[{}] analysis start, context={}", getTaskName(), context);
 
+        setColumns(context);
         fixGeometry(context);
         unifiedSrid(context);
     }
@@ -91,10 +91,11 @@ public abstract class AbstractAnalysisTask<T extends AnalysisParam> implements A
     protected void cleanUp(AnalysisContext<T> context) {
     }
 
-    private void cleanUpTempTable() {
-        for (String table : tempTableList) {
+    private void cleanUpTempTable(AnalysisContext<T> context) {
+        for (String table : context.getTempTableList()) {
             geometryDao.dropTable(table);
         }
+        context.setTempTableList(new ArrayList<>());
     }
 
     /**
@@ -120,35 +121,33 @@ public abstract class AbstractAnalysisTask<T extends AnalysisParam> implements A
     }
 
     /**
+     * 设置输入图层的字段信息
+     */
+    private void setColumns(AnalysisContext<T> context) {
+        List<LayerInfo> inputLayers = context.getInputLayers();
+
+        for (LayerInfo inputLayer : inputLayers) {
+            String tableName = inputLayer.getTableName();
+            List<Column> columns = geometryDao.listAttrColumns(tableName);
+            inputLayer.setColumns(columns);
+        }
+    }
+
+    /**
      * 修复几何类型
      */
     private void fixGeometry(AnalysisContext<T> context) {
         List<LayerInfo> inputLayers = context.getInputLayers();
-        List<LayerInfo> newLayers = new ArrayList<>(inputLayers.size());
 
-        for (LayerInfo inputLayer : inputLayers) {
-            GeomType geomType = inputLayer.getGeomType();
-            String tableName = inputLayer.getTableName();
-            String tempTableName = switch (geomType) {
-                case MULTI_POLYGON -> geometryService.fixGeometryTypeByMultipolygon(tableName);
-                case POINT -> geometryService.fixGeometryTypeByPoint(tableName);
-                case MULTI_LINE_STRING -> geometryService.fixGeometryTypeByMultiLineString(tableName);
-            };
-
-            if (StringUtils.equals(tableName, tempTableName)) {
-                newLayers.add(inputLayer);
-            } else {
-                tempTableList.add(tempTableName);
-
-                LayerInfo layerInfo = new LayerInfo();
-                layerInfo.setTableName(tempTableName);
-                layerInfo.setSrid(inputLayer.getSrid());
-                layerInfo.setGeomType(inputLayer.getGeomType());
-                newLayers.add(layerInfo);
+        for (LayerInfo layer : inputLayers) {
+            GeomType geomType = layer.getGeomType();
+            String tableName = layer.getTableName();
+            NormalizeResult normalizeResult = geometryService.normalizeGeometry(tableName, layer.getColumns(), geomType);
+            if (normalizeResult.normalized()) {
+                context.getTempTableList().add(normalizeResult.tableName());
+                layer.setTableName(normalizeResult.tableName());
             }
         }
-
-        context.setInputLayers(newLayers);
     }
 
     /**
@@ -158,26 +157,15 @@ public abstract class AbstractAnalysisTask<T extends AnalysisParam> implements A
         List<LayerInfo> layers = context.getInputLayers();
 
         Integer targetSrid = decideTargetSrid(layers);
-
-        List<LayerInfo> newLayers = new ArrayList<>();
-
         for (LayerInfo layer : layers) {
-            if (Objects.equals(layer.getSrid(), targetSrid)) {
-                newLayers.add(layer);
-                continue;
+            if (!Objects.equals(layer.getSrid(), targetSrid)) {
+                String tempTableName = geometryService.transformTable(layer.getTableName(), targetSrid);
+                context.getTempTableList().add(tempTableName);
+
+                layer.setTableName(tempTableName);
+                layer.setSrid(targetSrid);
             }
-
-            String tempTableName = geometryService.transformTable(layer.getTableName(), targetSrid);
-            tempTableList.add(tempTableName);
-
-            LayerInfo layerInfo = new LayerInfo();
-            layerInfo.setTableName(tempTableName);
-            layerInfo.setSrid(targetSrid);
-            layerInfo.setGeomType(layer.getGeomType());
-            newLayers.add(layerInfo);
         }
-
-        context.setInputLayers(newLayers);
     }
 
     /**
@@ -186,7 +174,7 @@ public abstract class AbstractAnalysisTask<T extends AnalysisParam> implements A
      * @param layers 输入图层
      * @return 目标空间参考
      */
-    private Integer decideTargetSrid(List<LayerInfo> layers) {
+    protected Integer decideTargetSrid(List<LayerInfo> layers) {
         if (layers == null || layers.isEmpty()) {
             throw new IllegalArgumentException("输入图层不能为空");
         }

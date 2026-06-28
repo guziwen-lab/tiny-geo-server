@@ -3,8 +3,8 @@ package com.supermap.modules.analyze.entity;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
-import com.supermap.enumeration.GeomType;
-import com.supermap.enumeration.UploadStatus;
+import com.supermap.enums.GeomType;
+import com.supermap.enums.UploadStatus;
 
 import java.time.Instant;
 

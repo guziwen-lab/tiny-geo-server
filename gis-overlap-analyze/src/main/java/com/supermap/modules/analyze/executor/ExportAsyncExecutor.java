@@ -1,6 +1,6 @@
 package com.supermap.modules.analyze.executor;
 
-import com.supermap.enumeration.DatasetType;
+import com.supermap.enums.DatasetType;
 import com.supermap.modules.analyze.entity.ExportTaskEntity;
 import com.supermap.modules.sys.entity.FileEntity;
 import com.supermap.modules.sys.service.FileService;

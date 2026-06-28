@@ -1,6 +1,6 @@
 package com.supermap;
 
-import com.supermap.enumeration.GeomType;
+import com.supermap.enums.GeomType;
 import lombok.Data;
 
 import java.util.ArrayList;
@@ -58,5 +58,7 @@ public class AnalysisContext<T extends AnalysisParam> {
     public void addStep(AnalysisStep step) {
         this.steps.add(step);
     }
+
+    private List<String> tempTableList = new ArrayList<>();
 
 }
