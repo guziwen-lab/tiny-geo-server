@@ -3,7 +3,7 @@ package com.supermap.service;
 import com.supermap.dao.GeometryDao;
 import com.supermap.enums.GeomType;
 import com.supermap.type.Column;
-import com.supermap.type.NormalizeResult;
+import com.supermap.type.TableProcessResult;
 import com.supermap.util.DsAnalyzeTempSnGenerator;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -28,16 +28,16 @@ public class GeometryService {
         return tempTableName;
     }
 
-    public NormalizeResult normalizeGeometry(String tableName, List<Column> columns, GeomType geomType) {
+    public TableProcessResult normalizeGeometry(String tableName, List<Column> columns, GeomType geomType) {
         String tempTableName = dsAnalyzeTempSnGenerator.getTempTableName();
         int i = geometryDao.countNeedNormalize(tableName, geomType.getPostgisCode());
         if (i == 0)
-            return new NormalizeResult(tableName, false);
+            return new TableProcessResult(tableName, false);
 
         geometryDao.normalizeGeometry(tableName, columns, tempTableName, geomType.getDimension());
         geometryDao.createGistIndex(tempTableName);
 
-        return new NormalizeResult(tempTableName, true);
+        return new TableProcessResult(tempTableName, true);
     }
 
 }

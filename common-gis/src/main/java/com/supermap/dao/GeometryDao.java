@@ -58,7 +58,7 @@ public interface GeometryDao {
     @Delete("""
             DROP TABLE IF EXISTS ${table}
             """)
-    void dropTable(@Param("table") String table);
+    void dropTableIfExists(@Param("table") String table);
 
     void normalizeGeometry(@Param("table") String table,
                            @Param("columns") List<Column> columns,

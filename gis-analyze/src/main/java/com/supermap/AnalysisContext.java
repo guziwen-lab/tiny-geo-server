@@ -61,4 +61,8 @@ public class AnalysisContext<T extends AnalysisParam> {
 
     private List<String> tempTableList = new ArrayList<>();
 
+    public void addTempTable(String tableName) {
+        tempTableList.add(tableName);
+    }
+
 }

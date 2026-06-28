@@ -132,7 +132,7 @@ public class OverlayAnalysisTask extends AbstractAnalysisTask<OverlayParam> {
     protected void cleanUp(AnalysisContext<OverlayParam> context) {
         if (context.isCleanTemp()) {
             for (String table : tempTableList) {
-                geometryDao.dropTable(table);
+                geometryDao.dropTableIfExists(table);
             }
         }
     }

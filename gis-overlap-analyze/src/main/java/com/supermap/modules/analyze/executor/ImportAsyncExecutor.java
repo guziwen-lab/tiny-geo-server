@@ -60,7 +60,7 @@ public class ImportAsyncExecutor {
             log.error("数据集导入失败, datasetId={}, table={}", entity.getId(), tableName, e);
             // 清理已创建的表
             try {
-                geometryDao.dropTable(tableName);
+                geometryDao.dropTableIfExists(tableName);
             } catch (Exception dropEx) {
                 log.error("清理失败表失败: {}", tableName, dropEx);
             }

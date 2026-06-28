@@ -4,11 +4,10 @@ import com.supermap.dao.GeometryDao;
 import com.supermap.enums.GeomType;
 import com.supermap.service.GeometryService;
 import com.supermap.type.Column;
-import com.supermap.type.NormalizeResult;
+import com.supermap.type.TableProcessResult;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -93,9 +92,9 @@ public abstract class AbstractAnalysisTask<T extends AnalysisParam> implements A
 
     private void cleanUpTempTable(AnalysisContext<T> context) {
         for (String table : context.getTempTableList()) {
-            geometryDao.dropTable(table);
+            geometryDao.dropTableIfExists(table);
         }
-        context.setTempTableList(new ArrayList<>());
+        context.getTempTableList().clear();
     }
 
     /**
@@ -142,10 +141,10 @@ public abstract class AbstractAnalysisTask<T extends AnalysisParam> implements A
         for (LayerInfo layer : inputLayers) {
             GeomType geomType = layer.getGeomType();
             String tableName = layer.getTableName();
-            NormalizeResult normalizeResult = geometryService.normalizeGeometry(tableName, layer.getColumns(), geomType);
-            if (normalizeResult.normalized()) {
-                context.getTempTableList().add(normalizeResult.tableName());
-                layer.setTableName(normalizeResult.tableName());
+            TableProcessResult result = geometryService.normalizeGeometry(tableName, layer.getColumns(), geomType);
+            if (result.changed()) {
+                context.getTempTableList().add(result.tableName());
+                layer.setTableName(result.tableName());
             }
         }
     }
