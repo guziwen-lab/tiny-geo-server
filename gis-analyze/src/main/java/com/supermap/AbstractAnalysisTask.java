@@ -160,6 +160,7 @@ public abstract class AbstractAnalysisTask<T extends AnalysisParam> implements A
                 layer.setSrid(targetSrid);
             }
         }
+        context.setSrid(targetSrid);
     }
 
     /**

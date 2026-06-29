@@ -4,7 +4,6 @@ import com.supermap.AnalysisContext;
 import com.supermap.AnalysisParam;
 import com.supermap.LayerInfo;
 import com.supermap.dao.ExecuteSqlMapper;
-import com.supermap.dao.GeometryDao;
 import com.supermap.security.SqlInjectionCheck;
 import com.supermap.util.DsTempSnGenerator;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,9 +21,6 @@ public abstract class AbstractExecuteService<T extends AnalysisParam> {
     @Autowired
     protected ExecuteSqlMapper executeSqlMapper;
 
-    @Autowired
-    protected GeometryDao geometryDao;
-
     public LayerInfo execute(LayerInfo current, LayerInfo next, AnalysisContext<T> context) {
         SqlInjectionCheck.checkTableName(current.getTableName(), next.getTableName());
         String result = dsTempSnGenerator.getTempTableName();
@@ -32,9 +28,9 @@ public abstract class AbstractExecuteService<T extends AnalysisParam> {
         executeSqlMapper.executeOverlay(sql);
 
         LayerInfo resultLayerInfo = new LayerInfo();
-        resultLayerInfo.setSrid(current.getSrid());
-        current.setGeomType(context.getGeomType());
-        current.setTableName(result);
+        resultLayerInfo.setSrid(context.getSrid());
+        resultLayerInfo.setGeomType(context.getGeomType());
+        resultLayerInfo.setTableName(result);
 
         return resultLayerInfo;
     }

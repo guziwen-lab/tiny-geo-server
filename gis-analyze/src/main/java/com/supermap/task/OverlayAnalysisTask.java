@@ -1,6 +1,7 @@
 package com.supermap.task;
 
 import com.supermap.*;
+import com.supermap.common.util.StringUtils;
 import com.supermap.service.*;
 import com.supermap.dao.GeometryDao;
 import com.supermap.enums.AnalysisType;
@@ -90,7 +91,12 @@ public class OverlayAnalysisTask extends AbstractAnalysisTask<OverlayParam> {
         return AnalysisResult.builder()
                 .taskId(context.getTaskId())
                 .resultTableName(resultTableName)
+                .resultLayerName(StringUtils.isEmpty(context.getResultLayerName())
+                        ? resultTableName
+                        : context.getResultLayerName())
                 .featureCount(featureCount)
+                .srid(context.getSrid())
+                .geomType(context.getGeomType())
                 .message("Overlay analysis completed")
                 .build();
     }

@@ -48,6 +48,11 @@ public class AnalysisContext<T extends AnalysisParam> {
     private List<AnalysisStep> steps = new ArrayList<>();
 
     /**
+     * SRID
+     */
+    private Integer srid;
+
+    /**
      * 几何类型 (导出)
      */
     private GeomType geomType;

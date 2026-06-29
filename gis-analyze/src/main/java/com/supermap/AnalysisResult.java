@@ -1,5 +1,6 @@
 package com.supermap;
 
+import com.supermap.enums.GeomType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -25,9 +26,24 @@ public class AnalysisResult {
     private String resultTableName;
 
     /**
+     * 输出图层名称
+     */
+    private String resultLayerName;
+
+    /**
      * 要素数量
      */
     private long featureCount;
+
+    /**
+     * SRID
+     */
+    private Integer srid;
+
+    /**
+     * Geometry 类型
+     */
+    private GeomType geomType;
 
     /**
      * 执行耗时(ms)
