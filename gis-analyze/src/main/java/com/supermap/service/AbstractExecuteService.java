@@ -2,6 +2,7 @@ package com.supermap.service;
 
 import com.supermap.AnalysisContext;
 import com.supermap.AnalysisParam;
+import com.supermap.LayerInfo;
 import com.supermap.dao.ExecuteSqlMapper;
 import com.supermap.dao.GeometryDao;
 import com.supermap.security.SqlInjectionCheck;
@@ -24,13 +25,18 @@ public abstract class AbstractExecuteService<T extends AnalysisParam> {
     @Autowired
     protected GeometryDao geometryDao;
 
-    public String execute(String current, String next, AnalysisContext<T> context) {
-        SqlInjectionCheck.checkTableName(current, next);
+    public LayerInfo execute(LayerInfo current, LayerInfo next, AnalysisContext<T> context) {
+        SqlInjectionCheck.checkTableName(current.getTableName(), next.getTableName());
         String result = dsTempSnGenerator.getTempTableName();
         String sql = buildExecuteSql(current, next, result, context);
         executeSqlMapper.executeOverlay(sql);
 
-        return result;
+        LayerInfo resultLayerInfo = new LayerInfo();
+        resultLayerInfo.setSrid(current.getSrid());
+        current.setGeomType(context.getGeomType());
+        current.setTableName(result);
+
+        return resultLayerInfo;
     }
 
     /**
@@ -40,7 +46,7 @@ public abstract class AbstractExecuteService<T extends AnalysisParam> {
      * @param next    下一个数据集
      * @return 可执行SQL
      */
-    protected abstract String buildExecuteSql(String current, String next, String result, AnalysisContext<T> context);
+    protected abstract String buildExecuteSql(LayerInfo current, LayerInfo next, String result, AnalysisContext<T> context);
 
     protected String getUniqueFieldName(String name, Set<String> usedNames) {
         String result = name;

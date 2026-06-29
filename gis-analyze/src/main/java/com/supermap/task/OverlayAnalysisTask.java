@@ -45,11 +45,11 @@ public class OverlayAnalysisTask extends AbstractAnalysisTask<OverlayParam> {
         String resultTableName = context.getResultTableName();
 
         List<LayerInfo> layers = context.getInputLayers();
-        String current = layers.get(0).getTableName();
+        LayerInfo current = layers.get(0);
         int stepNo = 1;
         for (int i = 1; i < layers.size(); i++) {
-            String next = layers.get(i).getTableName();
-            String output;
+            LayerInfo next = layers.get(i);
+            LayerInfo output;
             switch (overlayAlgorithm) {
                 case INTERSECT:
                     output = overlayIntersectService.execute(current, next, context);
@@ -67,13 +67,15 @@ public class OverlayAnalysisTask extends AbstractAnalysisTask<OverlayParam> {
                 default:
                     throw new RuntimeException("暂不支持的OverlayType");
             }
-            tempTableList.add(output);  // 添加临时表名到列表，为后续清理
-            context.addStep(new AnalysisStep(stepNo++, current, next, output)); // 添加分析步骤，为后续保存步骤
+            // 添加临时表名到列表，为后续清理
+            tempTableList.add(output.getTableName());
+            // 添加分析步骤，为后续保存步骤
+            context.addStep(new AnalysisStep(stepNo++, current.getTableName(), next.getTableName(), output.getTableName()));
             current = output;
         }
 
         // 把最后一个临时表改名为结果表
-        geometryDao.renameTable(current, resultTableName);
+        geometryDao.renameTable(current.getTableName(), resultTableName);
 
         // 修正最后一步的输出表名为结果表名
         List<AnalysisStep> steps = context.getSteps();

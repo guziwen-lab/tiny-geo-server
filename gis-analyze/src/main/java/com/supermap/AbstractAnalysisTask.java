@@ -1,6 +1,5 @@
 package com.supermap;
 
-import com.supermap.dao.GeometryDao;
 import com.supermap.enums.GeomType;
 import com.supermap.service.GeometryService;
 import com.supermap.type.Column;
@@ -8,17 +7,13 @@ import com.supermap.type.TableProcessResult;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 @Slf4j
 public abstract class AbstractAnalysisTask<T extends AnalysisParam> implements AnalysisTask<T> {
 
     @Autowired
     private GeometryService geometryService;
-
-    @Autowired
-    private GeometryDao geometryDao;
 
     @Override
     public AnalysisResult execute(AnalysisContext<T> context) {
@@ -92,7 +87,7 @@ public abstract class AbstractAnalysisTask<T extends AnalysisParam> implements A
 
     private void cleanUpTempTable(AnalysisContext<T> context) {
         for (String table : context.getTempTableList()) {
-            geometryDao.dropTableIfExists(table);
+            geometryService.dropTableIfExists(table);
         }
         context.getTempTableList().clear();
     }
@@ -127,7 +122,7 @@ public abstract class AbstractAnalysisTask<T extends AnalysisParam> implements A
 
         for (LayerInfo inputLayer : inputLayers) {
             String tableName = inputLayer.getTableName();
-            List<Column> columns = geometryDao.listAttrColumns(tableName);
+            List<Column> columns = geometryService.listAttrColumns(tableName);
             inputLayer.setColumns(columns);
         }
     }
@@ -143,7 +138,7 @@ public abstract class AbstractAnalysisTask<T extends AnalysisParam> implements A
             String tableName = layer.getTableName();
             TableProcessResult result = geometryService.normalizeGeometry(tableName, layer.getColumns(), geomType);
             if (result.changed()) {
-                context.getTempTableList().add(result.tableName());
+                context.addTempTable(result.tableName());
                 layer.setTableName(result.tableName());
             }
         }
@@ -159,7 +154,7 @@ public abstract class AbstractAnalysisTask<T extends AnalysisParam> implements A
         for (LayerInfo layer : layers) {
             if (!Objects.equals(layer.getSrid(), targetSrid)) {
                 String tempTableName = geometryService.transformTable(layer.getTableName(), targetSrid);
-                context.getTempTableList().add(tempTableName);
+                context.addTempTable(tempTableName);
 
                 layer.setTableName(tempTableName);
                 layer.setSrid(targetSrid);

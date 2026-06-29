@@ -1,14 +1,12 @@
 package com.supermap.service;
 
 import com.supermap.AnalysisContext;
+import com.supermap.LayerInfo;
 import com.supermap.enums.GeomType;
 import com.supermap.task.OverlayParam;
 import com.supermap.type.Column;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * @author gzw
@@ -16,12 +14,12 @@ import java.util.Set;
 public abstract class AbstractOverlayExecuteService extends AbstractExecuteService<OverlayParam> {
 
     @Override
-    protected String buildExecuteSql(String current, String next, String result, AnalysisContext<OverlayParam> context) {
-        List<Column> currentColumns = geometryDao.listAttrColumns(current);
-        List<Column> nextColumns = geometryDao.listAttrColumns(next);
+    protected String buildExecuteSql(LayerInfo current, LayerInfo next, String result, AnalysisContext<OverlayParam> context) {
+        List<Column> currentColumns = current.getColumns();
+        List<Column> nextColumns = next.getColumns();
         String selectClause = buildSelectClause(currentColumns, nextColumns, geometryExpression(context.getGeomType()));
 
-        return buildSql(current, next, result, selectClause);
+        return buildSql(current.getTableName(), next.getTableName(), result, selectClause);
     }
 
     abstract String geometryExpression(GeomType geomType);

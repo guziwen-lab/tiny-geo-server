@@ -28,7 +28,7 @@ import com.supermap.modules.analyze.dto.TaskSaveDTO;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
-import java.util.List;
+import java.util.*;
 
 @Slf4j
 @Service("taskService")

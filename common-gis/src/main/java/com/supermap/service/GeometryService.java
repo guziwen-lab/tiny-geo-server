@@ -40,4 +40,12 @@ public class GeometryService {
         return new TableProcessResult(tempTableName, true);
     }
 
+    public void dropTableIfExists(String table) {
+        geometryDao.dropTableIfExists(table);
+    }
+
+    public List<Column> listAttrColumns(String tableName) {
+        return geometryDao.listAttrColumns(tableName);
+    }
+
 }
