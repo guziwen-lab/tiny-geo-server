@@ -5,7 +5,7 @@ import com.supermap.AnalysisParam;
 import com.supermap.LayerInfo;
 import com.supermap.dao.ExecuteSqlMapper;
 import com.supermap.security.SqlInjectionCheck;
-import com.supermap.util.DsTempSnGenerator;
+import com.supermap.util.TempTableNameGenerator;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Set;
@@ -16,14 +16,14 @@ import java.util.Set;
 public abstract class AbstractExecuteService<T extends AnalysisParam> {
 
     @Autowired
-    protected DsTempSnGenerator dsTempSnGenerator;
+    protected TempTableNameGenerator tempTableNameGenerator;
 
     @Autowired
     protected ExecuteSqlMapper executeSqlMapper;
 
     public LayerInfo execute(LayerInfo current, LayerInfo next, AnalysisContext<T> context) {
         SqlInjectionCheck.checkTableName(current.getTableName(), next.getTableName());
-        String result = dsTempSnGenerator.getTempTableName();
+        String result = tempTableNameGenerator.getTableName();
         String sql = buildExecuteSql(current, next, result, context);
         executeSqlMapper.executeOverlay(sql);
 

@@ -1,6 +1,7 @@
 package com.supermap.util;
 
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.BoundValueOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 
@@ -11,10 +12,11 @@ import java.util.concurrent.TimeUnit;
 /**
  * @author gzw
  */
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class AbstractSnGenerator {
 
-    private final RedisTemplate<String, String> redisTemplate;
+    @Autowired
+    private RedisTemplate<String, String> redisTemplate;
 
     private final String SN_PREFIX;
 

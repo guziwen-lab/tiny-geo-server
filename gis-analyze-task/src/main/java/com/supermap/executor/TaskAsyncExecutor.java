@@ -6,12 +6,14 @@ import com.supermap.enums.AnalysisType;
 import com.supermap.entity.DatasetEntity;
 import com.supermap.entity.TaskEntity;
 import com.supermap.entity.TaskStepEntity;
+import com.supermap.service.DatasetService;
 import com.supermap.service.TaskStepService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,6 +25,7 @@ public class TaskAsyncExecutor {
     private final AnalysisEngine analysisEngine;
     private final TaskStepService taskStepService;
     private final TaskStatusUpdater taskStatusUpdater;
+    private final DatasetService datasetService;
 
     @Async("analyzeTaskExecutor")
     public void executeAsync(TaskEntity task, AnalysisType analysisType, AnalysisContext<AnalysisParam> context) {
@@ -31,6 +34,17 @@ public class TaskAsyncExecutor {
 
             saveSteps(task, context.getSteps());
             taskStatusUpdater.markSuccess(task.getId(), result);
+
+            // 记录到数据集
+            DatasetEntity datasetEntity = new DatasetEntity();
+            datasetEntity.setDatasetName(result.getResultTableName());
+            datasetEntity.setLayerName(result.getResultLayerName());
+            datasetEntity.setTableName(result.getResultTableName());
+            datasetEntity.setGeomType(task.getGeomType());
+            datasetEntity.setSrid(result.getSrid());
+            datasetEntity.setFeatureCount(result.getFeatureCount());
+            datasetEntity.setCreatedAt(Instant.now());
+            datasetService.save(datasetEntity);
         } catch (Exception e) {
             log.error("任务执行失败, taskId={}", task.getId(), e);
             taskStatusUpdater.markFailed(task.getId(), e.getMessage());

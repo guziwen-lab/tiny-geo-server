@@ -4,7 +4,7 @@ import com.supermap.dao.GeometryDao;
 import com.supermap.enums.GeomType;
 import com.supermap.type.Column;
 import com.supermap.type.TableProcessResult;
-import com.supermap.util.DsAnalyzeTempSnGenerator;
+import com.supermap.util.TempTableNameGenerator;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -19,17 +19,17 @@ public class GeometryService {
 
     private final GeometryDao geometryDao;
 
-    private final DsAnalyzeTempSnGenerator dsAnalyzeTempSnGenerator;
+    private final TempTableNameGenerator tempTableNameGenerator;
 
     public String transformTable(String sourceTable, int targetSrid) {
-        String tempTableName = dsAnalyzeTempSnGenerator.getTempTableName();
+        String tempTableName = tempTableNameGenerator.getTableName();
         geometryDao.transformTable(sourceTable, targetSrid, tempTableName);
         geometryDao.createGistIndex(tempTableName);
         return tempTableName;
     }
 
     public TableProcessResult normalizeGeometry(String tableName, List<Column> columns, GeomType geomType) {
-        String tempTableName = dsAnalyzeTempSnGenerator.getTempTableName();
+        String tempTableName = tempTableNameGenerator.getTableName();
         int i = geometryDao.countNeedNormalize(tableName, geomType.getPostgisCode());
         if (i == 0)
             return new TableProcessResult(tableName, false);

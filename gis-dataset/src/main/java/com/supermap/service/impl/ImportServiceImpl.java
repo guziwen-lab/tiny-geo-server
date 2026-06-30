@@ -7,7 +7,7 @@ import com.supermap.entity.DatasetEntity;
 import com.supermap.service.ImportAsyncExecutor;
 import com.supermap.service.DatasetService;
 import com.supermap.service.ImportService;
-import com.supermap.util.DsSnGenerator;
+import com.supermap.util.DatasetTableNameGenerator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -32,7 +32,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class ImportServiceImpl implements ImportService {
 
-    private final DsSnGenerator dsSnGenerator;
+    private final DatasetTableNameGenerator datasetTableNameGenerator;
     private final DatasetService datasetService;
     private final ImportAsyncExecutor importAsyncExecutor;
 
@@ -42,7 +42,7 @@ public class ImportServiceImpl implements ImportService {
     @Override
     public Long importShp(String shpPath) {
         String layerName = getFileNameWithoutExtension(shpPath);
-        String tableName = "ds_" + dsSnGenerator.generate();
+        String tableName = "ds_" + datasetTableNameGenerator.generate();
 
         // 创建占位实体，状态为处理中
         DatasetEntity entity = new DatasetEntity();
@@ -84,7 +84,7 @@ public class ImportServiceImpl implements ImportService {
         // 创建占位实体，状态为处理中
         List<DatasetEntity> entities = new ArrayList<>();
         for (String ln : targetLayers) {
-            String tableName = "ds_" + dsSnGenerator.generate();
+            String tableName = "ds_" + datasetTableNameGenerator.generate();
 
             DatasetEntity entity = new DatasetEntity();
             entity.setDatasetName(ln);
