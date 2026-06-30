@@ -1,0 +1,61 @@
+gdal:
+  pgConn: PG:host=localhost port=5432 dbname=tiny_geo_server user=postgres password=123456
+server:
+  port: 8080
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/tiny_geo_server?useUnicode=true&characterEncoding=UTF-8
+    username: postgres
+    password: 123456
+    driver-class-name: org.postgresql.Driver
+  servlet:
+    multipart:
+      max-file-size: 100MB
+      max-request-size: 100MB
+  data:
+    redis:
+      host: localhost
+      password: 123456
+      port: 6379
+      database: 1
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    tags-sorter: alpha
+    operations-sorter: alpha
+  api-docs:
+    path: /v3/api-docs
+  group-configs:
+    - group: 'sys'
+      packages-to-scan:
+        - com.supermap.modules.sys
+    - group: 'log'
+      packages-to-scan:
+        - com.supermap.modules.log
+    - group: 'security'
+      packages-to-scan:
+        - com.supermap.modules.security
+    - group: 'gis-overlap-analyze'
+      packages-to-scan:
+        - com.supermap
+  default-flat-param-object: true
+knife4j:
+  enable: true
+  setting:
+    language: zh_cn
+    swagger-model-name: 实体类列表
+mybatis-plus:
+  mapper-locations: classpath*:/mapper/**/*.xml
+thread:
+  core-pool-size: 8
+  maximum-pool-size: 8
+  keep-alive-time: 10000
+login:
+  retry:
+    max-retry-count: 5
+file:
+  base-path: /Users/guziwen/Java/temp/tiny-gis-platform/file
+  external-url-prefix: http://localhost/file
+logging:
+  level:
+    com.supermap: debug

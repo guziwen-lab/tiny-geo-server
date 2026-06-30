@@ -10,7 +10,6 @@ import com.supermap.enums.GeomType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @RequiredArgsConstructor
@@ -28,8 +27,6 @@ public class OverlayAnalysisTask extends AbstractAnalysisTask<OverlayParam> {
     private final GeometryDao geometryDao;
 
     private OverlayAlgorithm overlayAlgorithm;
-
-    private final List<String> tempTableList = new ArrayList<>();
 
     @Override
     public AnalysisType getType() {
@@ -69,7 +66,7 @@ public class OverlayAnalysisTask extends AbstractAnalysisTask<OverlayParam> {
                     throw new RuntimeException("暂不支持的OverlayType");
             }
             // 添加临时表名到列表，为后续清理
-            tempTableList.add(output.getTableName());
+            context.addTempTable(output.getTableName());
             // 添加分析步骤，为后续保存步骤
             context.addStep(new AnalysisStep(stepNo++, current.getTableName(), next.getTableName(), output.getTableName()));
             current = output;
@@ -138,10 +135,8 @@ public class OverlayAnalysisTask extends AbstractAnalysisTask<OverlayParam> {
 
     @Override
     protected void cleanUp(AnalysisContext<OverlayParam> context) {
-        if (context.isCleanTemp()) {
-            for (String table : tempTableList) {
-                geometryDao.dropTableIfExists(table);
-            }
+        for (String table : context.getTempTableList()) {
+            geometryDao.dropTableIfExists(table);
         }
     }
 

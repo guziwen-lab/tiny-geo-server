@@ -32,8 +32,9 @@
         <module>common-gis</module>
         <module>common-db</module>
         <module>common-office</module>
-        <module>gis-overlap-analyze</module>
+        <module>gis-dataset</module>
         <module>gis-analyze</module>
+        <module>gis-analyze-task</module>
     </modules>
 
     <dependencies>

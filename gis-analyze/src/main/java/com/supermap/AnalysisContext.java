@@ -33,11 +33,6 @@ public class AnalysisContext<T extends AnalysisParam> {
     private String resultTableName;
 
     /**
-     * 是否清理中间表
-     */
-    private boolean isCleanTemp = false;
-
-    /**
      * 参数
      */
     private T param;
