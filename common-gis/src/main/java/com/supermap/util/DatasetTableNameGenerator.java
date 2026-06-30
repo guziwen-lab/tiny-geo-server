@@ -15,7 +15,7 @@ public class DatasetTableNameGenerator extends AbstractSnGenerator {
     }
 
     public String getTableName() {
-        return "ds_" + super.generate();
+        return "dataset.ds_" + super.generate();
     }
 
 }

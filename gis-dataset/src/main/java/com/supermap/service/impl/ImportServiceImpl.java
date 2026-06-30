@@ -42,7 +42,7 @@ public class ImportServiceImpl implements ImportService {
     @Override
     public Long importShp(String shpPath) {
         String layerName = getFileNameWithoutExtension(shpPath);
-        String tableName = "ds_" + datasetTableNameGenerator.generate();
+        String tableName = datasetTableNameGenerator.getTableName();
 
         // 创建占位实体，状态为处理中
         DatasetEntity entity = new DatasetEntity();
@@ -84,7 +84,7 @@ public class ImportServiceImpl implements ImportService {
         // 创建占位实体，状态为处理中
         List<DatasetEntity> entities = new ArrayList<>();
         for (String ln : targetLayers) {
-            String tableName = "ds_" + datasetTableNameGenerator.generate();
+            String tableName = datasetTableNameGenerator.getTableName();
 
             DatasetEntity entity = new DatasetEntity();
             entity.setDatasetName(ln);
