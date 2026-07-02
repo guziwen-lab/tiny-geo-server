@@ -111,8 +111,8 @@ public class TaskServiceImpl extends ServiceImpl<TaskDao, TaskEntity> implements
         }
 
         String schemaName = datasetProperties.getSchema();
-        for (int i = 1; i < datasets.size(); i++) {
-            if (!datasets.get(i).getSchemaName().equals(schemaName)) {
+        for (DatasetEntity dataset : datasets) {
+            if (!dataset.getSchemaName().equals(schemaName)) {
                 throw new IllegalArgumentException("Datasets must be in the config schema");
             }
         }

@@ -73,6 +73,7 @@ public class TaskAsyncExecutor {
             stepEntity.setInputTable(step.getInputTable());
             stepEntity.setOverlayTable(step.getOverlayTable());
             stepEntity.setOutputTable(step.getOutputTable());
+            stepEntities.add(stepEntity);
         }
 
         taskStepService.saveBatch(stepEntities);

@@ -29,8 +29,6 @@ public class OverlayAnalysisTask extends AbstractAnalysisTask<OverlayParam> {
 
     private final GeometryDao geometryDao;
 
-    private OverlayAlgorithm overlayAlgorithm;
-
     @Override
     public AnalysisType getType() {
         return AnalysisType.OVERLAY;
@@ -51,7 +49,7 @@ public class OverlayAnalysisTask extends AbstractAnalysisTask<OverlayParam> {
         for (int i = 1; i < layers.size(); i++) {
             LayerInfo next = layers.get(i);
             LayerInfo output;
-            switch (overlayAlgorithm) {
+            switch (context.getParam().getOverlayAlgorithm()) {
                 case INTERSECT:
                     output = overlayIntersectService.execute(current, next, context);
                     break;
@@ -107,7 +105,6 @@ public class OverlayAnalysisTask extends AbstractAnalysisTask<OverlayParam> {
         OverlayAlgorithm overlayAlgorithm = context.getParam().getOverlayAlgorithm();
         if (overlayAlgorithm == null)
             throw new IllegalArgumentException("叠加分析类型不能为空");
-        this.overlayAlgorithm = overlayAlgorithm;
 
         List<LayerInfo> layers = context.getInputLayers();
 
