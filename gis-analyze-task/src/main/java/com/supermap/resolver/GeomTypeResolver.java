@@ -1,7 +1,7 @@
 package com.supermap.resolver;
 
 import com.supermap.common.util.CollectionUtils;
-import com.supermap.entity.DatasetEntity;
+import com.supermap.modules.dataset.entity.DatasetEntity;
 import com.supermap.enums.AnalysisType;
 import com.supermap.enums.GeomType;
 
@@ -12,8 +12,7 @@ public final class GeomTypeResolver {
     private GeomTypeResolver() {
     }
 
-    public static GeomType resolve(AnalysisType analysisType,
-                                   List<DatasetEntity> datasets) {
+    public static GeomType resolve(AnalysisType analysisType, List<DatasetEntity> datasets) {
         if (CollectionUtils.isEmpty(datasets)) {
             throw new IllegalArgumentException("数据集不能为空");
         }

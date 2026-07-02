@@ -5,6 +5,7 @@ import com.supermap.LayerInfo;
 import com.supermap.enums.GeomType;
 import com.supermap.task.OverlayParam;
 import com.supermap.type.Column;
+import com.supermap.util.TableNameUtils;
 
 import java.util.*;
 
@@ -19,7 +20,10 @@ public abstract class AbstractOverlayExecuteService extends AbstractExecuteServi
         List<Column> nextColumns = next.getColumns();
         String selectClause = buildSelectClause(currentColumns, nextColumns, geometryExpression(context.getGeomType()));
 
-        return buildSql(current.getTableName(), next.getTableName(), result, selectClause);
+        String currentTableName = TableNameUtils.getTableNameWithSchema(context.getSchema(), current.getTableName());
+        String nextTableName = TableNameUtils.getTableNameWithSchema(context.getSchema(), next.getTableName());
+        String resultTableName = TableNameUtils.getTableNameWithSchema(context.getSchema(), result);
+        return buildSql(currentTableName, nextTableName, resultTableName, selectClause);
     }
 
     abstract String geometryExpression(GeomType geomType);

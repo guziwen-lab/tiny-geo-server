@@ -15,7 +15,7 @@ public class TempTableNameGenerator extends AbstractSnGenerator {
     }
 
     public String getTableName() {
-        return "dataset.ds_temp_" + super.generate();
+        return "ds_temp_" + super.generate();
     }
 
 }

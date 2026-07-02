@@ -28,6 +28,11 @@ public class AnalysisContext<T extends AnalysisParam> {
     private String resultLayerName;
 
     /**
+     * schema
+     */
+    private String schema;
+
+    /**
      * 结果表名
      */
     private String resultTableName;

@@ -4,12 +4,12 @@
 <mapper namespace="com.supermap.dao.GeometryDao">
 
     <update id="normalizeGeometry">
-        CREATE TABLE ${tempTableName} AS
+        CREATE TABLE ${schema}.${tempTableName} AS
         SELECT
         <foreach collection="columns" item="col" separator="," close=",">
-            #{col.name}
+            ${col}
         </foreach>
         ST_Multi(ST_CollectionExtract(ST_MakeValid(geom), #{dimension})) AS geom
-        FROM ${table}
+        FROM ${schema}.${table}
     </update>
 </mapper>

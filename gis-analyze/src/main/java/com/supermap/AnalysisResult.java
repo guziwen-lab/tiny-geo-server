@@ -21,6 +21,11 @@ public class AnalysisResult {
     private Long taskId;
 
     /**
+     * 结果表schema
+     */
+    private String schemaName;
+
+    /**
      * 结果表名
      */
     private String resultTableName;

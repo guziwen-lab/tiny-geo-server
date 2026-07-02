@@ -7,11 +7,14 @@ import com.supermap.dao.GeometryDao;
 import com.supermap.enums.AnalysisType;
 import com.supermap.enums.OverlayAlgorithm;
 import com.supermap.enums.GeomType;
+import com.supermap.util.TableNameUtils;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
 
+@Slf4j
 @RequiredArgsConstructor
 @Component
 public class OverlayAnalysisTask extends AbstractAnalysisTask<OverlayParam> {
@@ -73,7 +76,8 @@ public class OverlayAnalysisTask extends AbstractAnalysisTask<OverlayParam> {
         }
 
         // 把最后一个临时表改名为结果表
-        geometryDao.renameTable(current.getTableName(), resultTableName);
+        geometryDao.renameTable(TableNameUtils.getTableNameWithSchema(context.getSchema(), current.getTableName()),
+                resultTableName);
 
         // 修正最后一步的输出表名为结果表名
         List<AnalysisStep> steps = context.getSteps();
@@ -82,8 +86,8 @@ public class OverlayAnalysisTask extends AbstractAnalysisTask<OverlayParam> {
             lastStep.setOutputTable(resultTableName);
         }
 
-        geometryDao.analyzeTable(resultTableName);
-        long featureCount = geometryDao.getFeatureCount(resultTableName);
+        long featureCount = geometryDao.getFeatureCount(
+                TableNameUtils.getTableNameWithSchema(context.getSchema(), resultTableName));
 
         return AnalysisResult.builder()
                 .taskId(context.getTaskId())
@@ -136,7 +140,8 @@ public class OverlayAnalysisTask extends AbstractAnalysisTask<OverlayParam> {
     @Override
     protected void cleanUp(AnalysisContext<OverlayParam> context) {
         for (String table : context.getTempTableList()) {
-            geometryDao.dropTableIfExists(table);
+            String tableName = TableNameUtils.getTableNameWithSchema(context.getSchema(), table);
+            geometryDao.dropTableIfExists(tableName);
         }
     }
 

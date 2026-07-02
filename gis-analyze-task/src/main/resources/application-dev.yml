@@ -1,5 +1,7 @@
-gdal:
-  pgConn: PG:host=localhost port=5432 dbname=tiny_geo_server user=postgres password=123456
+dataset:
+  import:
+    pg-connect: PG:host=localhost port=5432 dbname=tiny_geo_server user=postgres password=123456
+    schema: dataset
 server:
   port: 8080
 spring:
@@ -35,9 +37,12 @@ springdoc:
     - group: 'security'
       packages-to-scan:
         - com.supermap.modules.security
-    - group: 'gis-overlap-analyze'
+    - group: 'gis-analyze-task'
       packages-to-scan:
-        - com.supermap
+        - com.supermap.modules.analyzetask
+    - group: 'gis-dataset'
+      packages-to-scan:
+        - com.supermap.modules.dataset
   default-flat-param-object: true
 knife4j:
   enable: true

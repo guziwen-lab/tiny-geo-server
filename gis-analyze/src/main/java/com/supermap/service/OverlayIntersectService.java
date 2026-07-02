@@ -19,11 +19,11 @@ public class OverlayIntersectService extends AbstractOverlayExecuteService {
     @Override
     public String buildSql(String current, String next, String result, String selectClause) {
         return """
-                CREATE TABLE "%s" AS
+                CREATE TABLE %s AS
                 SELECT
                 %s
-                FROM "%s" a
-                JOIN "%s" b
+                FROM %s a
+                JOIN %s b
                   ON ST_Intersects(a.geom, b.geom)
                 """.formatted(
                 result,

@@ -14,12 +14,15 @@ import java.util.List;
 public interface GeometryDao {
 
     @Update("""
-                CREATE TABLE ${tempTableName} AS
+                CREATE TABLE ${schema}.${tempTableName} AS
                 SELECT *,
                        ST_Transform(geom, #{targetSrid}) AS geom
-                FROM ${sourceTable}
+                FROM ${schema}.${sourceTable}
             """)
-    void transformTable(@Param("sourceTable") String sourceTable, @Param("targetSrid") int targetSrid, @Param("tempTableName") String tempTableName);
+    void transformTable(@Param("schema") String schema,
+                        @Param("sourceTable") String sourceTable,
+                        @Param("targetSrid") int targetSrid,
+                        @Param("tempTableName") String tempTableName);
 
     @Select("""
             SELECT ST_SRID(geom)
@@ -43,25 +46,24 @@ public interface GeometryDao {
     void analyzeTable(@Param("table") String table);
 
     @Select("""
-            SELECT reltuples::bigint
-                          FROM pg_class
-                          WHERE relname=#{table}
+            select count(1) from ${table}
             """)
     long getFeatureCount(@Param("table") String table);
 
     @Update("""
-            CREATE INDEX IF NOT EXISTS idx_gist_${table}
-            ON ${table} USING gist (geom)
+            CREATE INDEX IF NOT EXISTS  ${table}_geom_gix
+            ON ${schema}.${table} USING gist (geom)
             """)
-    void createGistIndex(@Param("table") String table);
+    void createGistIndex(@Param("schema") String schema, @Param("table") String table);
 
     @Delete("""
             DROP TABLE IF EXISTS ${table}
             """)
     void dropTableIfExists(@Param("table") String table);
 
-    void normalizeGeometry(@Param("table") String table,
-                           @Param("columns") List<Column> columns,
+    void normalizeGeometry(@Param("schema") String schema,
+                           @Param("table") String table,
+                           @Param("columns") List<String> columns,
                            @Param("tempTableName") String tempTableName,
                            @Param("dimension") int dimension);
 
@@ -76,18 +78,21 @@ public interface GeometryDao {
             FROM information_schema.columns
             WHERE table_name = #{table}
               AND column_name <> 'geom'
+              AND table_schema = #{schema}
             ORDER BY ordinal_position
             """)
-    List<Column> listAttrColumns(@Param("table") String table);
+    List<Column> listAttrColumns(@Param("schema") String schema, @Param("table") String table);
 
     @Select("""
             SELECT COUNT(*)
-            FROM ${tableName}
+            FROM ${schema}.${tableName}
             WHERE geom IS NOT NULL
               AND (
                 NOT ST_IsValid(geom)
                     OR GeometryType(geom) <> #{geoType})
             """)
-    int countNeedNormalize(@Param("tableName") String tableName, @Param("geoType") String geoType);
+    int countNeedNormalize(@Param("schema") String schema,
+                           @Param("tableName") String tableName,
+                           @Param("geoType") String geoType);
 
 }

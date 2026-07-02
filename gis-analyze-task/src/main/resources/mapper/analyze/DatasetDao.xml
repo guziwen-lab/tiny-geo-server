@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
-<mapper namespace="com.supermap.dao.DatasetDao">
+<mapper namespace="com.supermap.modules.dataset.dao.DatasetDao">
 
-    <resultMap type="com.supermap.entity.DatasetEntity" id="datasetMap">
+    <resultMap type="com.supermap.modules.dataset.entity.DatasetEntity" id="datasetMap">
         <result property="id" column="id"/>
         <result property="datasetName" column="dataset_name"/>
         <result property="datasetType" column="dataset_type"/>

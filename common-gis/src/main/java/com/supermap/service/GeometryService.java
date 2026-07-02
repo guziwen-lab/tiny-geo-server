@@ -21,21 +21,25 @@ public class GeometryService {
 
     private final TempTableNameGenerator tempTableNameGenerator;
 
-    public String transformTable(String sourceTable, int targetSrid) {
+    public String transformTable(String schema, String sourceTable, int targetSrid) {
         String tempTableName = tempTableNameGenerator.getTableName();
-        geometryDao.transformTable(sourceTable, targetSrid, tempTableName);
-        geometryDao.createGistIndex(tempTableName);
+        geometryDao.transformTable(schema, sourceTable, targetSrid, tempTableName);
+        geometryDao.createGistIndex(schema, tempTableName);
         return tempTableName;
     }
 
-    public TableProcessResult normalizeGeometry(String tableName, List<Column> columns, GeomType geomType) {
+    public TableProcessResult normalizeGeometry(String schema,
+                                                String tableName,
+                                                List<Column> columns,
+                                                GeomType geomType) {
         String tempTableName = tempTableNameGenerator.getTableName();
-        int i = geometryDao.countNeedNormalize(tableName, geomType.getPostgisCode());
+        int i = geometryDao.countNeedNormalize(schema, tableName, geomType.getPostgisCode());
         if (i == 0)
             return new TableProcessResult(tableName, false);
 
-        geometryDao.normalizeGeometry(tableName, columns, tempTableName, geomType.getDimension());
-        geometryDao.createGistIndex(tempTableName);
+        List<String> columnNames = columns.stream().map(Column::name).toList();
+        geometryDao.normalizeGeometry(schema, tableName, columnNames, tempTableName, geomType.getDimension());
+        geometryDao.createGistIndex(schema, tempTableName);
 
         return new TableProcessResult(tempTableName, true);
     }
@@ -44,8 +48,8 @@ public class GeometryService {
         geometryDao.dropTableIfExists(table);
     }
 
-    public List<Column> listAttrColumns(String tableName) {
-        return geometryDao.listAttrColumns(tableName);
+    public List<Column> listAttrColumns(String schema, String tableName) {
+        return geometryDao.listAttrColumns(schema, tableName);
     }
 
 }

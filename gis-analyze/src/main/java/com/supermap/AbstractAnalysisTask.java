@@ -4,6 +4,7 @@ import com.supermap.enums.GeomType;
 import com.supermap.service.GeometryService;
 import com.supermap.type.Column;
 import com.supermap.type.TableProcessResult;
+import com.supermap.util.TableNameUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -17,20 +18,27 @@ public abstract class AbstractAnalysisTask<T extends AnalysisParam> implements A
 
     @Override
     public AnalysisResult execute(AnalysisContext<T> context) {
+        log.debug("[{}] analysis start, context={}", getTaskName(), context);
+        
         long start = System.currentTimeMillis();
 
         try {
+            log.debug("[{}] validate start", getTaskName());
             validate(context);
 
+            log.debug("[{}] beforeExecute start", getTaskName());
             beforeExecute(context);
 
+            log.debug("[{}] doExecute start", getTaskName());
             AnalysisResult result = doExecute(context);
 
             long cost = System.currentTimeMillis() - start;
             result.setCost(cost);
 
+            log.debug("[{}] afterExecute start", getTaskName());
             afterExecute(context, result);
 
+            log.debug("[{}] analysis success", getTaskName());
             return result;
         } catch (Exception e) {
             onError(context, e);
@@ -56,8 +64,6 @@ public abstract class AbstractAnalysisTask<T extends AnalysisParam> implements A
      * 执行前处理
      */
     protected void beforeExecute(AnalysisContext<T> context) {
-        log.info("[{}] analysis start, context={}", getTaskName(), context);
-
         setColumns(context);
         fixGeometry(context);
         unifiedSrid(context);
@@ -72,7 +78,6 @@ public abstract class AbstractAnalysisTask<T extends AnalysisParam> implements A
      * 执行成功后处理
      */
     protected void afterExecute(AnalysisContext<T> context, AnalysisResult result) {
-        log.info("[{}] analysis success, result={}", getTaskName(), result);
     }
 
     /**
@@ -87,7 +92,8 @@ public abstract class AbstractAnalysisTask<T extends AnalysisParam> implements A
 
     private void cleanUpTempTable(AnalysisContext<T> context) {
         for (String table : context.getTempTableList()) {
-            geometryService.dropTableIfExists(table);
+            String tableName = TableNameUtils.getTableNameWithSchema(context.getSchema(), table);
+            geometryService.dropTableIfExists(tableName);
         }
         context.getTempTableList().clear();
     }
@@ -96,7 +102,6 @@ public abstract class AbstractAnalysisTask<T extends AnalysisParam> implements A
      * 异常处理
      */
     protected void onError(AnalysisContext<T> context, Exception e) {
-        log.error("[{}] analysis failed, context={}", getTaskName(), context, e);
     }
 
     /**
@@ -104,7 +109,7 @@ public abstract class AbstractAnalysisTask<T extends AnalysisParam> implements A
      */
     protected void logCost(long startTime) {
         long cost = System.currentTimeMillis() - startTime;
-        log.info("[{}] analysis finished, cost={} ms", getTaskName(), cost);
+        log.debug("[{}] analysis finished, cost={} ms", getTaskName(), cost);
     }
 
     /**
@@ -119,10 +124,11 @@ public abstract class AbstractAnalysisTask<T extends AnalysisParam> implements A
      */
     private void setColumns(AnalysisContext<T> context) {
         List<LayerInfo> inputLayers = context.getInputLayers();
+        String schema = context.getSchema();
 
         for (LayerInfo inputLayer : inputLayers) {
             String tableName = inputLayer.getTableName();
-            List<Column> columns = geometryService.listAttrColumns(tableName);
+            List<Column> columns = geometryService.listAttrColumns(schema, tableName);
             inputLayer.setColumns(columns);
         }
     }
@@ -132,11 +138,12 @@ public abstract class AbstractAnalysisTask<T extends AnalysisParam> implements A
      */
     private void fixGeometry(AnalysisContext<T> context) {
         List<LayerInfo> inputLayers = context.getInputLayers();
+        String schema = context.getSchema();
 
         for (LayerInfo layer : inputLayers) {
             GeomType geomType = layer.getGeomType();
             String tableName = layer.getTableName();
-            TableProcessResult result = geometryService.normalizeGeometry(tableName, layer.getColumns(), geomType);
+            TableProcessResult result = geometryService.normalizeGeometry(schema, tableName, layer.getColumns(), geomType);
             if (result.changed()) {
                 context.addTempTable(result.tableName());
                 layer.setTableName(result.tableName());
@@ -149,11 +156,12 @@ public abstract class AbstractAnalysisTask<T extends AnalysisParam> implements A
      */
     private void unifiedSrid(AnalysisContext<T> context) {
         List<LayerInfo> layers = context.getInputLayers();
+        String schema = context.getSchema();
 
         Integer targetSrid = decideTargetSrid(layers);
         for (LayerInfo layer : layers) {
             if (!Objects.equals(layer.getSrid(), targetSrid)) {
-                String tempTableName = geometryService.transformTable(layer.getTableName(), targetSrid);
+                String tempTableName = geometryService.transformTable(schema, layer.getTableName(), targetSrid);
                 context.addTempTable(tempTableName);
 
                 layer.setTableName(tempTableName);

@@ -5,15 +5,17 @@ import com.supermap.AnalysisParam;
 import com.supermap.LayerInfo;
 import com.supermap.dao.ExecuteSqlMapper;
 import com.supermap.security.SqlInjectionCheck;
+import com.supermap.type.Column;
 import com.supermap.util.TempTableNameGenerator;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.List;
 import java.util.Set;
 
 /**
  * @author gzw
  */
-public abstract class AbstractExecuteService<T extends AnalysisParam> {
+public abstract class AbstractExecuteService<T extends AnalysisParam> implements ExecuteService<T> {
 
     @Autowired
     protected TempTableNameGenerator tempTableNameGenerator;
@@ -21,16 +23,24 @@ public abstract class AbstractExecuteService<T extends AnalysisParam> {
     @Autowired
     protected ExecuteSqlMapper executeSqlMapper;
 
+    @Autowired
+    private GeometryService geometryService;
+
+    @Override
     public LayerInfo execute(LayerInfo current, LayerInfo next, AnalysisContext<T> context) {
         SqlInjectionCheck.checkTableName(current.getTableName(), next.getTableName());
-        String result = tempTableNameGenerator.getTableName();
-        String sql = buildExecuteSql(current, next, result, context);
+        String resultTableName = tempTableNameGenerator.getTableName();
+
+        String sql = buildExecuteSql(current, next, resultTableName, context);
+
         executeSqlMapper.executeOverlay(sql);
 
         LayerInfo resultLayerInfo = new LayerInfo();
         resultLayerInfo.setSrid(context.getSrid());
         resultLayerInfo.setGeomType(context.getGeomType());
-        resultLayerInfo.setTableName(result);
+        resultLayerInfo.setTableName(resultTableName);
+        List<Column> columns = geometryService.listAttrColumns(context.getSchema(), resultTableName);
+        resultLayerInfo.setColumns(columns);
 
         return resultLayerInfo;
     }
@@ -42,7 +52,10 @@ public abstract class AbstractExecuteService<T extends AnalysisParam> {
      * @param next    下一个数据集
      * @return 可执行SQL
      */
-    protected abstract String buildExecuteSql(LayerInfo current, LayerInfo next, String result, AnalysisContext<T> context);
+    protected abstract String buildExecuteSql(LayerInfo current,
+                                              LayerInfo next,
+                                              String resultTableName,
+                                              AnalysisContext<T> context);
 
     protected String getUniqueFieldName(String name, Set<String> usedNames) {
         String result = name;
