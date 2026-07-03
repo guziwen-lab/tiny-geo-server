@@ -9,6 +9,8 @@ import java.util.Collections;
 import java.util.List;
 
 /**
+ * Intersect 保留两侧属性 + 取交集，Clip 只保留 A 侧属性 + 取交集
+ *
  * @author gzw
  */
 @Service
