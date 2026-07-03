@@ -16,8 +16,8 @@ import java.util.List;
 public class OverlayClipService extends AbstractOverlayExecuteService {
 
     @Override
-    public String geometryExpression(GeomType geomType) {
-        return GeometryExpression.wrap("ST_Intersection(a.geom,b.geom)", geomType);
+    public String geometryExpression(GeomType geomType, int srid) {
+        return GeometryExpression.wrap("ST_Intersection(a.geom,b.geom)", geomType, srid);
     }
 
     @Override

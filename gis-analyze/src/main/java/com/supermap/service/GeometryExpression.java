@@ -7,7 +7,7 @@ public final class GeometryExpression {
     private GeometryExpression() {
     }
 
-    public static String wrap(String expr, GeomType geomType) {
+    public static String wrap(String expr, GeomType geomType, int srid) {
         return switch (geomType) {
             case POINT, MULTI_POINT -> """
                     ST_Multi(
@@ -15,24 +15,24 @@ public final class GeometryExpression {
                             %s,
                             1
                         )
-                    )
-                    """.formatted(expr);
+                    )::geometry(MULTIPOINT, %d)
+                    """.formatted(expr, srid);
             case LINE_STRING, MULTI_LINE_STRING -> """
                     ST_Multi(
                         ST_CollectionExtract(
                             %s,
                             2
                         )
-                    )
-                    """.formatted(expr);
+                    )::geometry(MULTILINESTRING, %d)
+                    """.formatted(expr, srid);
             case POLYGON, MULTI_POLYGON -> """
                     ST_Multi(
                         ST_CollectionExtract(
                             %s,
                             3
                         )
-                    )
-                    """.formatted(expr);
+                    )::geometry(MULTIPOLYGON, %d)
+                    """.formatted(expr, srid);
         };
     }
 

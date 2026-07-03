@@ -16,9 +16,9 @@ import java.util.List;
 public class OverlayEraseService extends AbstractOverlayExecuteService {
 
     @Override
-    public String geometryExpression(GeomType geomType) {
+    public String geometryExpression(GeomType geomType, int srid) {
         // b.geom 为 NULL（A要素与B整体不相交）时，COALESCE 回退到原始几何，保证不相交要素不丢失
-        return GeometryExpression.wrap("COALESCE(ST_Difference(a.geom, b.geom), a.geom)", geomType);
+        return GeometryExpression.wrap("COALESCE(ST_Difference(a.geom, b.geom), a.geom)", geomType, srid);
     }
 
     @Override

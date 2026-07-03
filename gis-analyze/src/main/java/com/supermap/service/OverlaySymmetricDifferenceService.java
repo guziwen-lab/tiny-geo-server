@@ -16,14 +16,14 @@ import java.util.List;
 public class OverlaySymmetricDifferenceService extends AbstractOverlayExecuteService {
 
     @Override
-    public String geometryExpression(GeomType geomType) {
+    public String geometryExpression(GeomType geomType, int srid) {
         // FULL OUTER JOIN 两侧均可能产生 NULL：
         // - a.geom 为 NULL → B-only 要素，返回 b.geom
         // - b.geom 为 NULL → A-only 要素，返回 a.geom
         // - 两者都不为 NULL → 计算对称差
         return GeometryExpression.wrap(
                 "CASE WHEN a.geom IS NULL THEN b.geom WHEN b.geom IS NULL THEN a.geom ELSE ST_SymDifference(a.geom, b.geom) END",
-                geomType);
+                geomType, srid);
     }
 
     @Override

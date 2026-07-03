@@ -18,7 +18,8 @@ public abstract class AbstractOverlayExecuteService extends AbstractExecuteServi
     protected String buildExecuteSql(LayerInfo current, LayerInfo next, String result, AnalysisContext<OverlayParam> context) {
         List<Column> currentColumns = current.getColumns();
         List<Column> nextColumns = next.getColumns();
-        String selectClause = buildSelectClause(currentColumns, nextColumns, geometryExpression(context.getGeomType()));
+        String selectClause = buildSelectClause(currentColumns, nextColumns,
+                geometryExpression(context.getGeomType(), context.getSrid()));
 
         String currentTableName = TableNameUtils.getTableNameWithSchema(context.getSchema(), current.getTableName());
         String nextTableName = TableNameUtils.getTableNameWithSchema(context.getSchema(), next.getTableName());
@@ -26,7 +27,7 @@ public abstract class AbstractOverlayExecuteService extends AbstractExecuteServi
         return buildSql(currentTableName, nextTableName, resultTableName, selectClause);
     }
 
-    abstract String geometryExpression(GeomType geomType);
+    abstract String geometryExpression(GeomType geomType, int srid);
 
     abstract String buildSql(String current, String next, String result, String selectClause);
 
