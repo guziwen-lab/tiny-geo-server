@@ -154,16 +154,43 @@ public class FileServiceImpl extends ServiceImpl<FileDao, FileEntity> implements
         if (fileEntity == null)
             throw new RuntimeException("文件不存在");
 
+        String filePath = fileEntity.getFilePath();
+        boolean isDirectory = FileUtils.isDirectory(filePath);
+        File rename = null;
+        if (isDirectory) {
+            String tmpDirPath = FileUtils.getTmpDirPath();
+            FileUtils.copy(filePath, tmpDirPath, true);
+
+            String name = FileUtils.getName(filePath);
+            File destDir = new File(tmpDirPath + File.separator + name);
+
+            rename = FileUtils.rename(destDir, fileEntity.getFileName(), true);
+
+            File zip = new File(tmpDirPath, fileEntity.getFileName() + ".zip");
+            // 压缩
+            ZipUtils.zipDir(rename, zip);
+
+            filePath = zip.getAbsolutePath();
+        }
+
         response.setContentType(MediaType.APPLICATION_OCTET_STREAM_VALUE);
         String fileName = fileEntity.getFileName();
+        if (isDirectory) {
+            fileName = fileEntity.getFileName() + ".zip";
+        }
         String disposition = "attachment; filename=" + URLEncoder.encode(fileName, StandardCharsets.UTF_8);
         response.setHeader("Content-Disposition", disposition);
 
         try (OutputStream outputStream = response.getOutputStream();
-             FileInputStream inputStream = new FileInputStream(fileEntity.getFilePath())) {
+             FileInputStream inputStream = new FileInputStream(filePath)) {
             IOUtils.copy(inputStream, outputStream);
         } catch (IOException e) {
             throw new RuntimeException(e);
+        } finally {
+            if (isDirectory) {
+                FileUtils.del(filePath);
+                FileUtils.del(rename);
+            }
         }
     }
 
@@ -265,6 +292,10 @@ public class FileServiceImpl extends ServiceImpl<FileDao, FileEntity> implements
          *     alias /Users/guziwen/Java/temp/general-backend/file;
          * }
          */
+        boolean directory = FileUtils.isDirectory(filePath);
+        if (directory)
+            throw new RuntimeException("改文件为目录");
+
         return filePath.replaceFirst(basePath, externalUrlPrefix);
     }
 
