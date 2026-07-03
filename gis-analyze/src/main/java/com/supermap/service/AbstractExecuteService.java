@@ -41,6 +41,7 @@ public abstract class AbstractExecuteService<T extends AnalysisParam> implements
         LayerInfo resultLayerInfo = new LayerInfo();
         resultLayerInfo.setSrid(context.getSrid());
         resultLayerInfo.setGeomType(context.getGeomType());
+        resultLayerInfo.setOriginalTableName(resultTableName);
         resultLayerInfo.setTableName(resultTableName);
         List<Column> columns = geometryService.listAttrColumns(context.getSchema(), resultTableName);
         resultLayerInfo.setColumns(columns);

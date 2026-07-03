@@ -16,6 +16,9 @@ public class LayerInfo {
     @Schema(title = "表名")
     private String tableName;
 
+    @Schema(title = "原始表名")
+    private String originalTableName;
+
     @Schema(title = "几何类型")
     private GeomType geomType;
 

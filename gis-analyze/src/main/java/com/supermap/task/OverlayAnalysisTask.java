@@ -60,7 +60,10 @@ public class OverlayAnalysisTask extends AbstractAnalysisTask<OverlayParam> {
             // 添加临时表名到列表，为后续清理
             context.addTempTable(output.getTableName());
             // 添加分析步骤，为后续保存步骤
-            context.addStep(new AnalysisStep(stepNo++, current.getTableName(), next.getTableName(), output.getTableName()));
+            context.addStep(new AnalysisStep(stepNo++,
+                    current.getOriginalTableName(),
+                    next.getOriginalTableName(),
+                    output.getOriginalTableName()));
             current = output;
         }
 

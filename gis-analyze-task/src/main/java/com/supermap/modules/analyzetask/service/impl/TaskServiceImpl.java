@@ -128,6 +128,7 @@ public class TaskServiceImpl extends ServiceImpl<TaskDao, TaskEntity> implements
         context.setTaskId(taskId);
         context.setInputLayers(datasets.stream().map(item -> {
             LayerInfo layerInfo = new LayerInfo();
+            layerInfo.setOriginalTableName(item.getTableName());
             layerInfo.setTableName(item.getTableName());
             layerInfo.setGeomType(item.getGeomType());
             layerInfo.setSrid(item.getSrid());
