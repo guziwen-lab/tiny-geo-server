@@ -4,6 +4,7 @@ import com.supermap.config.DatasetProperties;
 import com.supermap.dao.GeometryDao;
 import com.supermap.enums.GeomType;
 import com.supermap.modules.dataset.entity.DatasetEntity;
+import com.supermap.service.GeometryService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Async;
@@ -25,6 +26,7 @@ import java.util.stream.Collectors;
 public class ImportAsyncService {
 
     private final GeometryDao geometryDao;
+    private final GeometryService geometryService;
     private final ImportStatusUpdater importStatusUpdater;
     private final DatasetProperties datasetProperties;
 
@@ -38,8 +40,9 @@ public class ImportAsyncService {
             // 2. 查询图层元数据
             TableMeta meta = queryLayerMeta(sourcePath, exportLayerName);
 
-            // 3. 检查几何类型
-            GeomType geomType = GeomType.of(meta.geomType);
+            // 3. 检查几何类型（优先以 PostgreSQL 实际存储的几何类型为准）
+            GeomType geomType = geometryService.resolveActualGeomType(
+                    datasetProperties.getSchema() + "." + tableName, meta.geomType);
             if (geomType == null) {
                 throw new RuntimeException("几何类型不支持: " + meta.geomType);
             }
@@ -93,6 +96,10 @@ public class ImportAsyncService {
             cmd.add("--config");
             cmd.add("SHAPE_ENCODING");
             cmd.add("GBK");
+            // Shapefile 的 Polygon 图层可能实际包含 MultiPolygon，
+            // 强制提升为 Multi 类型避免 PostgreSQL COPY 阶段几何类型不匹配
+            cmd.add("-nlt");
+            cmd.add("PROMOTE_TO_MULTI");
         }
 
         log.info("执行导入命令: {}", String.join(" ", cmd));

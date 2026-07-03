@@ -44,7 +44,7 @@ public final class GeomTypeResolver {
     }
 
     private static GeomType resolveOverlay(GeomType left, GeomType right) {
-        return left.getDimension() <= right.getDimension() ? left : right;
+        return left.getCollectionExtractType() <= right.getCollectionExtractType() ? left : right;
     }
 
 }

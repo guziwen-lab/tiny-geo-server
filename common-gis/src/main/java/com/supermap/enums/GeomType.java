@@ -14,22 +14,40 @@ import lombok.Getter;
 @Getter
 public enum GeomType {
 
-    POINT("Point", "POINT", 1),
-    MULTI_POINT("Multi Point", "MULTIPOINT", 1),
-    LINE_STRING("Line String", "LINESTRING", 2),
-    MULTI_LINE_STRING("Multi Line String", "MULTILINESTRING", 2),
-    POLYGON("Polygon", "POLYGON", 3),
-    MULTI_POLYGON("Multi Polygon", "MULTIPOLYGON", 3);
+    POINT("Point", "ST_Point", 1),
+    MULTI_POINT("Multi Point", "ST_MultiPoint", 1),
+    LINE_STRING("Line String", "ST_LineString", 2),
+    MULTI_LINE_STRING("Multi Line String", "ST_MultiLineString", 2),
+    POLYGON("Polygon", "ST_Polygon", 3),
+    MULTI_POLYGON("Multi Polygon", "ST_MultiPolygon", 3);
 
-    private final String ogr2ogrCode;
+    /**
+     * OGR2OGR 几何类型
+     */
+    private final String geometryName;
 
-    private final String postgisCode;
+    /**
+     * PostGIS 几何类型
+     */
+    private final String postgisGeometryType;
 
-    private final int dimension;
+    /**
+     * ST_CollectionExtract 类型
+     */
+    private final int collectionExtractType;
 
-    public static GeomType of(String code) {
+    public static GeomType ofOgr2ogrCode(String code) {
         for (GeomType geomType : GeomType.values()) {
-            if (geomType.getOgr2ogrCode().equals(code)) {
+            if (geomType.getGeometryName().equals(code)) {
+                return geomType;
+            }
+        }
+        return null;
+    }
+
+    public static GeomType ofPostgisCode(String code) {
+        for (GeomType geomType : GeomType.values()) {
+            if (geomType.getPostgisGeometryType().equals(code)) {
                 return geomType;
             }
         }
@@ -37,24 +55,31 @@ public enum GeomType {
     }
 
     public boolean isPoint() {
-        return dimension == 0;
+        return collectionExtractType == 0;
     }
 
     public boolean isLine() {
-        return dimension == 1;
+        return collectionExtractType == 1;
     }
 
     public boolean isPolygon() {
-        return dimension == 2;
+        return collectionExtractType == 2;
     }
 
     public int collectionExtractType() {
-        return switch (dimension) {
+        return switch (collectionExtractType) {
             case 0 -> 1;
             case 1 -> 2;
             case 2 -> 3;
             default -> throw new IllegalStateException();
         };
+    }
+
+    /**
+     * 返回 ogr2ogr -nlt 参数可识别的类型值，如 MULTIPOLYGON、LINESTRING 等
+     */
+    public String getOgr2ogrNltValue() {
+        return getGeometryName().replace(" ", "").toUpperCase();
     }
 
 }

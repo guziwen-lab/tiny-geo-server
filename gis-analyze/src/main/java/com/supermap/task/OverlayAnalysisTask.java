@@ -118,7 +118,7 @@ public class OverlayAnalysisTask extends AbstractAnalysisTask<OverlayParam> {
             GeomType geomType = layer.getGeomType();
             if (!isCompatible(overlayAlgorithm, layer.getGeomType())) {
                 throw new IllegalArgumentException(
-                        overlayAlgorithm + "不支持" + geomType.getOgr2ogrCode()
+                        overlayAlgorithm + "不支持" + geomType.getGeometryName()
                         + "类型, 图层: " + layer.getTableName());
             }
         }

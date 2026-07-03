@@ -33,12 +33,12 @@ public class GeometryService {
                                                 List<Column> columns,
                                                 GeomType geomType) {
         String tempTableName = tempTableNameGenerator.getTableName();
-        int i = geometryDao.countNeedNormalize(schema, tableName, geomType.getPostgisCode());
+        int i = geometryDao.countNeedNormalize(schema, tableName, geomType.getPostgisGeometryType());
         if (i == 0)
             return new TableProcessResult(tableName, false);
 
         List<String> columnNames = columns.stream().map(Column::name).toList();
-        geometryDao.normalizeGeometry(schema, tableName, columnNames, tempTableName, geomType.getDimension());
+        geometryDao.normalizeGeometry(schema, tableName, columnNames, tempTableName, geomType.getCollectionExtractType());
         geometryDao.createGistIndex(schema, tempTableName);
 
         return new TableProcessResult(tempTableName, true);
@@ -61,16 +61,15 @@ public class GeometryService {
     }
 
     /**
-     * 查询表的实际几何类型，返回 ogr2ogr 可用的类型名称（如 MULTIPOLYGON）
+     * 从 PostgreSQL 目标表读取实际几何类型；读取失败或表为空时回退到源文件声明的类型
      */
-    public String getOgr2ogrGeometryType(String table) {
-        String pgType = geometryDao.getGeometryType(table);
-        if (pgType == null) {
-            return "GEOMETRY";
+    public GeomType resolveActualGeomType(String tableName, String fallbackGeomType) {
+        String pgType = geometryDao.getGeometryType(tableName);
+        GeomType geomType = GeomType.ofPostgisCode(pgType);
+        if (geomType != null) {
+            return geomType;
         }
-        // ST_GeometryType 返回形如 "ST_MultiPolygon" 的字符串，
-        // 去掉 "ST_" 前缀并转大写即可得到 ogr2ogr 的 -nlt 参数值
-        return pgType.startsWith("ST_") ? pgType.substring(3).toUpperCase() : pgType.toUpperCase();
+        return GeomType.ofOgr2ogrCode(fallbackGeomType);
     }
 
 }

@@ -2,6 +2,7 @@ package com.supermap.modules.dataset.service;
 
 import com.supermap.config.DatasetProperties;
 import com.supermap.enums.DatasetType;
+import com.supermap.enums.GeomType;
 import com.supermap.modules.dataset.entity.ExportTaskEntity;
 import com.supermap.modules.sys.entity.FileEntity;
 import com.supermap.service.GeometryService;
@@ -60,7 +61,7 @@ public class ExportAsyncExecutor {
         String qualifiedTableName = schema + "." + tableName;
 
         // 查询实际几何类型，解决泛型 geometry 列导致 OpenFileGDB 报 "Unsupported geometry type" 的问题
-        String geomType = geometryService.getOgr2ogrGeometryType(qualifiedTableName);
+        GeomType geomType = geometryService.resolveActualGeomType(qualifiedTableName, "GEOMETRY");
 
         List<String> cmd = new ArrayList<>();
         cmd.add("ogr2ogr");
@@ -87,7 +88,7 @@ public class ExportAsyncExecutor {
 
         // 明确指定输出几何类型，避免泛型 geometry 列导致导出失败
         cmd.add("-nlt");
-        cmd.add(geomType);
+        cmd.add(geomType.getOgr2ogrNltValue());
 
         cmd.add(targetPath); // 目标输出文件/文件夹路径
         cmd.add(datasetProperties.getPgConnect());     // 源数据库连接串
