@@ -1,5 +1,8 @@
-package com.supermap;
+package com.supermap.task;
 
+import com.supermap.AnalysisContext;
+import com.supermap.AnalysisParam;
+import com.supermap.AnalysisResult;
 import com.supermap.enums.AnalysisType;
 
 public interface AnalysisTask<T extends AnalysisParam> {

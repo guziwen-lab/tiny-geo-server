@@ -1,5 +1,9 @@
-package com.supermap;
+package com.supermap.task;
 
+import com.supermap.AnalysisContext;
+import com.supermap.AnalysisParam;
+import com.supermap.AnalysisResult;
+import com.supermap.LayerInfo;
 import com.supermap.enums.GeomType;
 import com.supermap.service.GeometryService;
 import com.supermap.type.Column;

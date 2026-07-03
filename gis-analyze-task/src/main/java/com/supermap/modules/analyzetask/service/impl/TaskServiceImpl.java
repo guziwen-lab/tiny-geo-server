@@ -17,6 +17,7 @@ import com.supermap.modules.dataset.service.DatasetService;
 import com.supermap.modules.analyzetask.service.TaskDatasetService;
 import com.supermap.modules.analyzetask.executor.TaskAsyncExecutor;
 import com.supermap.resolver.GeomTypeResolver;
+import com.supermap.task.AnalysisTask;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
