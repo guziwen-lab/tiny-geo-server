@@ -6,6 +6,9 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 import java.util.concurrent.ThreadPoolExecutor;
 
+/**
+ * 导入导出是IO密集型任务，核心线程可以多一些
+ */
 @Configuration
 public class DatasetTaskExecutor {
 
@@ -14,7 +17,6 @@ public class DatasetTaskExecutor {
         int cpuCores = Runtime.getRuntime().availableProcessors();
 
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-        // 上传是IO密集型任务，核心线程可以多一些
         executor.setCorePoolSize(cpuCores);
         executor.setMaxPoolSize(cpuCores * 2);
         executor.setQueueCapacity(200);
@@ -32,7 +34,6 @@ public class DatasetTaskExecutor {
         int cpuCores = Runtime.getRuntime().availableProcessors();
 
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-        // 上传是IO密集型任务，核心线程可以多一些
         executor.setCorePoolSize(cpuCores);
         executor.setMaxPoolSize(cpuCores * 2);
         executor.setQueueCapacity(200);
