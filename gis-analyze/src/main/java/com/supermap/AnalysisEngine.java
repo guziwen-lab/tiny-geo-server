@@ -1,5 +1,6 @@
 package com.supermap;
 
+import com.supermap.common.util.CollectionUtils;
 import com.supermap.enums.AnalysisType;
 import org.springframework.stereotype.Service;
 
@@ -14,8 +15,7 @@ public class AnalysisEngine {
     private final Map<AnalysisType, AnalysisTask<?>> taskMap;
 
     public AnalysisEngine(List<AnalysisTask<?>> tasks) {
-        this.taskMap = tasks.stream()
-                .collect(Collectors.toMap(AnalysisTask::getType, Function.identity()));
+        this.taskMap = CollectionUtils.toMap(tasks, AnalysisTask::getType, Function.identity());
     }
 
     @SuppressWarnings("unchecked")
