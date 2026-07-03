@@ -3,9 +3,12 @@ package com.supermap.modules.dataset.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.supermap.common.util.BeanUtils;
+import com.supermap.common.util.CollectionUtils;
 import com.supermap.common.util.FileUtils;
 import com.supermap.enums.DatasetType;
 import com.supermap.enums.UploadStatus;
+import com.supermap.modules.dataset.entity.DatasetEntity;
+import com.supermap.modules.dataset.service.DatasetService;
 import com.supermap.modules.dataset.service.ExportAsyncExecutor;
 import com.supermap.modules.sys.entity.FileEntity;
 import com.supermap.modules.sys.service.FileService;
@@ -22,6 +25,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Timestamp;
 import java.time.Instant;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Service("exportTaskService")
@@ -30,6 +36,8 @@ public class ExportTaskServiceImpl extends ServiceImpl<ExportTaskDao, ExportTask
     private final FileService fileService;
 
     private final ExportAsyncExecutor exportAsyncExecutor;
+
+    private final DatasetService datasetService;
 
     @Override
     public Page<ExportTaskEntity> queryPage(ExportTaskDTO dto) {
@@ -54,20 +62,33 @@ public class ExportTaskServiceImpl extends ServiceImpl<ExportTaskDao, ExportTask
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public Long exportShp(String tableName) {
-        return createAndTriggerTask(tableName, DatasetType.SHP);
+    public Long exportShp(Long datasetId) {
+        DatasetEntity datasetEntity = datasetService.getById(datasetId);
+        if (datasetEntity == null)
+            throw new RuntimeException("数据集不存在");
+
+        return createAndTriggerTask(Collections.singletonList(datasetEntity.getTableName()), DatasetType.SHP);
     }
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public Long exportGdb(String tableName) {
-        return createAndTriggerTask(tableName, DatasetType.GDB);
+    public Long exportGdb(List<Long> datasetIds) {
+        List<DatasetEntity> datasetEntities = datasetService.listByIds(datasetIds);
+        if (CollectionUtils.isEmpty(datasetEntities))
+            throw new RuntimeException("数据集不存在");
+
+        List<String> tableNames = datasetEntities.stream()
+                .map(DatasetEntity::getTableName)
+                .collect(Collectors.toList());
+
+        return createAndTriggerTask(tableNames, DatasetType.GDB);
     }
 
-    private Long createAndTriggerTask(String tableName, DatasetType exportType) {
+    private Long createAndTriggerTask(List<String> tableNames, DatasetType exportType) {
+        String firstTable = tableNames.get(0);
         String destDir = fileService.getFilePath(exportType.getExtension());
         FileUtils.mkdir(destDir);
-        String fileName = tableName + "." + exportType.getExtension();
+        String fileName = firstTable + "." + exportType.getExtension();
 
         FileEntity fileEntity = new FileEntity();
         fileEntity.setFileName(fileName);
@@ -80,18 +101,18 @@ public class ExportTaskServiceImpl extends ServiceImpl<ExportTaskDao, ExportTask
         fileEntity.setRefCount(0);
         fileService.save(fileEntity);
 
-        ExportTaskEntity entity = new ExportTaskEntity();
-        entity.setTableName(tableName);
-        entity.setExportType(exportType);
-        entity.setFileId(fileEntity.getId());
-        entity.setStatus(UploadStatus.PROCESSING);
-        entity.setCreatedAt(Instant.now());
-        save(entity);
+        ExportTaskEntity taskEntity = new ExportTaskEntity();
+        taskEntity.setTableName(String.join(",", tableNames));
+        taskEntity.setExportType(exportType);
+        taskEntity.setFileId(fileEntity.getId());
+        taskEntity.setStatus(UploadStatus.PROCESSING);
+        taskEntity.setCreatedAt(Instant.now());
+        save(taskEntity);
 
-        // 异步执行导出，传入配置的格式类型
-        exportAsyncExecutor.exportLayerAsync(entity, fileEntity);
+        // 异步执行导出
+        exportAsyncExecutor.exportLayerAsync(taskEntity, fileEntity);
 
-        return entity.getId();
+        return taskEntity.getId();
     }
 
 }

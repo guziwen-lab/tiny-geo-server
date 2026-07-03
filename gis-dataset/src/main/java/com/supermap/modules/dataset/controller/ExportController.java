@@ -1,6 +1,7 @@
 package com.supermap.modules.dataset.controller;
 
 import java.util.Arrays;
+import java.util.List;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import io.swagger.v3.oas.annotations.Operation;
@@ -30,15 +31,15 @@ public class ExportController {
 
     private final ExportTaskService exportTaskService;
 
-    @PostMapping("/shp")
-    public R<Long> exportShp(@RequestParam String tableName) {
-        Long taskId = exportTaskService.exportShp(tableName);
+    @PostMapping("/shp/{datasetId}")
+    public R<Long> exportShp(@PathVariable Long datasetId) {
+        Long taskId = exportTaskService.exportShp(datasetId);
         return R.ok(taskId);
     }
 
     @PostMapping("/gdb")
-    public R<Long> exportGdb(@RequestParam String tableName) {
-        Long taskId = exportTaskService.exportGdb(tableName);
+    public R<Long> exportGdb(@RequestBody List<Long> datasetIds) {
+        Long taskId = exportTaskService.exportGdb(datasetIds);
         return R.ok(taskId);
     }
 

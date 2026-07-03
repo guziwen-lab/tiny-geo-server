@@ -44,6 +44,9 @@ public class TaskEntity {
     @Schema(title = "结果表名")
     private String resultTableName;
 
+    @Schema(title = "结果数据集id")
+    private Long resultDatasetId;
+
     @Schema(title = "几何类型")
     private GeomType geomType;
 

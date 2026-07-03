@@ -6,6 +6,8 @@ import com.supermap.modules.dataset.entity.ExportTaskEntity;
 import com.supermap.modules.dataset.dto.ExportTaskDTO;
 import com.supermap.modules.dataset.dto.ExportTaskSaveDTO;
 
+import java.util.List;
+
 /**
  * 导出geo数据
  *
@@ -19,9 +21,9 @@ public interface ExportTaskService extends IService<ExportTaskEntity> {
 
     void updateDTOById(ExportTaskSaveDTO dto);
 
-    Long exportShp(String tableName);
+    Long exportShp(Long datasetId);
 
-    Long exportGdb(String tableName);
+    Long exportGdb(List<Long> datasetIds);
 
 }
 

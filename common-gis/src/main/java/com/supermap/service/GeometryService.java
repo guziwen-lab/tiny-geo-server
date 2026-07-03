@@ -52,4 +52,17 @@ public class GeometryService {
         return geometryDao.listAttrColumns(schema, tableName);
     }
 
+    /**
+     * 查询表的实际几何类型，返回 ogr2ogr 可用的类型名称（如 MULTIPOLYGON）
+     */
+    public String getOgr2ogrGeometryType(String table) {
+        String pgType = geometryDao.getGeometryType(table);
+        if (pgType == null) {
+            return "GEOMETRY";
+        }
+        // ST_GeometryType 返回形如 "ST_MultiPolygon" 的字符串，
+        // 去掉 "ST_" 前缀并转大写即可得到 ogr2ogr 的 -nlt 参数值
+        return pgType.startsWith("ST_") ? pgType.substring(3).toUpperCase() : pgType.toUpperCase();
+    }
+
 }

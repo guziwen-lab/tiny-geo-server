@@ -4,6 +4,7 @@ import com.supermap.config.DatasetProperties;
 import com.supermap.enums.DatasetType;
 import com.supermap.modules.dataset.entity.ExportTaskEntity;
 import com.supermap.modules.sys.entity.FileEntity;
+import com.supermap.service.GeometryService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Async;
@@ -14,6 +15,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -26,24 +28,40 @@ public class ExportAsyncExecutor {
 
     private final DatasetProperties datasetProperties;
 
+    private final GeometryService geometryService;
+
     @Async("exportTaskExecutor")
-    public void exportLayerAsync(ExportTaskEntity entity, FileEntity fileEntity) {
+    public void exportLayerAsync(ExportTaskEntity taskEntity, FileEntity fileEntity) {
         try {
-            // 执行 ogr2ogr 导出
-            execOgr2ogr(entity.getTableName(), fileEntity.getFilePath(), entity.getExportType());
+            // tableName 字段可能包含逗号分隔的多个表名
+            List<String> tableNames = Arrays.asList(taskEntity.getTableName().split(","));
+
+            for (int i = 0; i < tableNames.size(); i++) {
+                String tableName = tableNames.get(i);
+                boolean append = (i > 0);
+                execOgr2ogr(tableName, fileEntity.getFilePath(), taskEntity.getExportType(), append);
+            }
 
             // 成功状态回写
-            exportStatusUpdater.markSuccess(entity.getId());
+            exportStatusUpdater.markSuccess(taskEntity.getId());
         } catch (Exception e) {
-            log.error("数据集导出失败, taskId={}, table={}", entity.getId(), entity.getTableName(), e);
-            exportStatusUpdater.markFailed(entity.getId(), e.getMessage());
+            log.error("数据集导出失败, taskId={}, table={}", taskEntity.getId(), taskEntity.getTableName(), e);
+            exportStatusUpdater.markFailed(taskEntity.getId(), e.getMessage());
         }
     }
 
     /**
      * 核心逻辑：执行 ogr2ogr 从 PostgreSQL 导出数据
+     *
+     * @param append 是否为追加模式（多表导出到同一个 GDB 时，第二张表起使用追加模式）
      */
-    private void execOgr2ogr(String tableName, String targetPath, DatasetType exportType) {
+    private void execOgr2ogr(String tableName, String targetPath, DatasetType exportType, boolean append) {
+        String schema = datasetProperties.getSchema();
+        String qualifiedTableName = schema + "." + tableName;
+
+        // 查询实际几何类型，解决泛型 geometry 列导致 OpenFileGDB 报 "Unsupported geometry type" 的问题
+        String geomType = geometryService.getOgr2ogrGeometryType(qualifiedTableName);
+
         List<String> cmd = new ArrayList<>();
         cmd.add("ogr2ogr");
         cmd.add("-f");
@@ -61,9 +79,19 @@ public class ExportAsyncExecutor {
             throw new IllegalArgumentException("不支持的导出类型: " + exportType);
         }
 
+        // 追加模式：多表导出到同一个目标文件时，第二张表起需要 -update -append
+        if (append) {
+            cmd.add("-update");
+            cmd.add("-append");
+        }
+
+        // 明确指定输出几何类型，避免泛型 geometry 列导致导出失败
+        cmd.add("-nlt");
+        cmd.add(geomType);
+
         cmd.add(targetPath); // 目标输出文件/文件夹路径
         cmd.add(datasetProperties.getPgConnect());     // 源数据库连接串
-        cmd.add(tableName);  // 导出表名
+        cmd.add(qualifiedTableName);  // schema.tableName
 
         log.info("执行导出命令: {}", String.join(" ", cmd));
 
