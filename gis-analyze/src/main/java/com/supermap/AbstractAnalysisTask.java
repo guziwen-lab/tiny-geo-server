@@ -19,7 +19,7 @@ public abstract class AbstractAnalysisTask<T extends AnalysisParam> implements A
     @Override
     public AnalysisResult execute(AnalysisContext<T> context) {
         log.debug("[{}] analysis start, context={}", getTaskName(), context);
-        
+
         long start = System.currentTimeMillis();
 
         try {
@@ -45,7 +45,6 @@ public abstract class AbstractAnalysisTask<T extends AnalysisParam> implements A
             throw e;
         } finally {
             logCost(start);
-            cleanUpTempTable(context);
             cleanUp(context);
         }
     }
@@ -88,14 +87,10 @@ public abstract class AbstractAnalysisTask<T extends AnalysisParam> implements A
      * 清理中间结果
      */
     protected void cleanUp(AnalysisContext<T> context) {
-    }
-
-    private void cleanUpTempTable(AnalysisContext<T> context) {
         for (String table : context.getTempTableList()) {
             String tableName = TableNameUtils.getTableNameWithSchema(context.getSchema(), table);
             geometryService.dropTableIfExists(tableName);
         }
-        context.getTempTableList().clear();
     }
 
     /**

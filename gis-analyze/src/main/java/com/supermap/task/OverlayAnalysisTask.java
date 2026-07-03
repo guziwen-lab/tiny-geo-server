@@ -134,12 +134,4 @@ public class OverlayAnalysisTask extends AbstractAnalysisTask<OverlayParam> {
         };
     }
 
-    @Override
-    protected void cleanUp(AnalysisContext<OverlayParam> context) {
-        for (String table : context.getTempTableList()) {
-            String tableName = TableNameUtils.getTableNameWithSchema(context.getSchema(), table);
-            geometryDao.dropTableIfExists(tableName);
-        }
-    }
-
 }
