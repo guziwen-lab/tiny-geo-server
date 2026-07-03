@@ -43,7 +43,6 @@ public class ExportAsyncExecutor {
                 execOgr2ogr(tableName, fileEntity.getFilePath(), taskEntity.getExportType(), append);
             }
 
-            // 成功状态回写
             exportStatusUpdater.markSuccess(taskEntity.getId());
         } catch (Exception e) {
             log.error("数据集导出失败, taskId={}, table={}", taskEntity.getId(), taskEntity.getTableName(), e);

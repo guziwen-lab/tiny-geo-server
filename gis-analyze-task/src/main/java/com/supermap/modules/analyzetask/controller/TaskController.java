@@ -45,7 +45,7 @@ public class TaskController {
 
     @Operation(summary = "根据主键查询")
     @GetMapping("/info/{id}")
-    public R<TaskEntity> info(@PathVariable("id") Long id) {
+    public R<TaskEntity> info(@PathVariable Long id) {
         TaskEntity task = taskService.getById(id);
         return R.ok(task);
     }
