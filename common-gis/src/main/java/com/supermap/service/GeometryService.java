@@ -48,6 +48,14 @@ public class GeometryService {
         geometryDao.dropTableIfExists(table);
     }
 
+    /**
+     * 为结果表添加自增主键（id 列需已通过 row_number() 生成）
+     */
+    public void addPrimaryKey(String schema, String table) {
+        geometryDao.alterIdNotNull(schema, table);
+        geometryDao.addPrimaryKey(schema, table);
+    }
+
     public List<Column> listAttrColumns(String schema, String tableName) {
         return geometryDao.listAttrColumns(schema, tableName);
     }

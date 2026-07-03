@@ -33,7 +33,10 @@ public abstract class AbstractExecuteService<T extends AnalysisParam> implements
 
         String sql = buildExecuteSql(current, next, resultTableName, context);
 
-        executeSqlMapper.executeOverlay(sql);
+        executeSqlMapper.executeSql(sql);
+
+        // 为结果表添加主键
+        geometryService.addPrimaryKey(context.getSchema(), resultTableName);
 
         LayerInfo resultLayerInfo = new LayerInfo();
         resultLayerInfo.setSrid(context.getSrid());

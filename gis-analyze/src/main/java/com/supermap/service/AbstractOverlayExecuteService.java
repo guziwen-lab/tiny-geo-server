@@ -37,6 +37,9 @@ public abstract class AbstractOverlayExecuteService extends AbstractExecuteServi
         Set<String> usedNames = new HashSet<>();
         List<String> selectItems = new ArrayList<>();
 
+        // 结果表主键
+        selectItems.add("row_number() OVER () AS id");
+
         // 当前图层字段
         for (Column column : currentColumns) {
             String alias = getUniqueFieldName(column.name(), usedNames);

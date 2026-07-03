@@ -34,17 +34,18 @@ public class TaskAsyncExecutor {
             AnalysisResult result = analysisEngine.execute(analysisType, context);
 
             saveSteps(task, context.getSteps());
-            taskStatusUpdater.markSuccess(task.getId(), result);
 
             // 结果记录到数据集
-            saveResultToDataset(result, context);
+            DatasetEntity resultDatasetEntity = saveResultToDataset(result, context);
+
+            taskStatusUpdater.markSuccess(task.getId(), result, resultDatasetEntity);
         } catch (Exception e) {
             log.error("任务执行失败, taskId={}", task.getId(), e);
             taskStatusUpdater.markFailed(task.getId(), e.getMessage());
         }
     }
 
-    private void saveResultToDataset(AnalysisResult result, AnalysisContext<AnalysisParam> context) {
+    private DatasetEntity saveResultToDataset(AnalysisResult result, AnalysisContext<AnalysisParam> context) {
         DatasetEntity datasetEntity = new DatasetEntity();
         datasetEntity.setDatasetName(result.getResultTableName());
         datasetEntity.setLayerName(result.getResultLayerName());
@@ -57,6 +58,8 @@ public class TaskAsyncExecutor {
         datasetEntity.setStatus(UploadStatus.SUCCESS);
         datasetEntity.setSchemaName(context.getSchema());
         datasetService.save(datasetEntity);
+
+        return datasetEntity;
     }
 
     private void saveSteps(TaskEntity task, List<AnalysisStep> steps) {

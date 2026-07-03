@@ -13,6 +13,6 @@ public interface ExecuteSqlMapper {
     @Update("""
             ${sql}
             """)
-    void executeOverlay(@Param("sql") String sql);
+    void executeSql(@Param("sql") String sql);
 
 }
