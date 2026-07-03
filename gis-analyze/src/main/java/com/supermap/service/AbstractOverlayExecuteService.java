@@ -3,6 +3,7 @@ package com.supermap.service;
 import com.supermap.AnalysisContext;
 import com.supermap.LayerInfo;
 import com.supermap.enums.GeomType;
+import com.supermap.enums.OverlayAlgorithm;
 import com.supermap.task.OverlayParam;
 import com.supermap.type.Column;
 import com.supermap.util.TableNameUtils;
@@ -26,6 +27,8 @@ public abstract class AbstractOverlayExecuteService extends AbstractExecuteServi
         String resultTableName = TableNameUtils.getTableNameWithSchema(context.getSchema(), result);
         return buildSql(currentTableName, nextTableName, resultTableName, selectClause);
     }
+
+    public abstract OverlayAlgorithm getAlgorithm();
 
     abstract String geometryExpression(GeomType geomType, int srid);
 

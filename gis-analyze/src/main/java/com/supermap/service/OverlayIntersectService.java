@@ -1,6 +1,7 @@
 package com.supermap.service;
 
 import com.supermap.enums.GeomType;
+import com.supermap.enums.OverlayAlgorithm;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -10,6 +11,11 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 public class OverlayIntersectService extends AbstractOverlayExecuteService {
+
+    @Override
+    public OverlayAlgorithm getAlgorithm() {
+        return OverlayAlgorithm.INTERSECT;
+    }
 
     @Override
     public String geometryExpression(GeomType geomType, int srid) {

@@ -1,6 +1,7 @@
 package com.supermap.task;
 
 import com.supermap.*;
+import com.supermap.common.util.CollectionUtils;
 import com.supermap.common.util.StringUtils;
 import com.supermap.service.*;
 import com.supermap.dao.GeometryDao;
@@ -8,26 +9,32 @@ import com.supermap.enums.AnalysisType;
 import com.supermap.enums.OverlayAlgorithm;
 import com.supermap.enums.GeomType;
 import com.supermap.util.TableNameUtils;
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
 
 @Slf4j
 @RequiredArgsConstructor
 @Component
 public class OverlayAnalysisTask extends AbstractAnalysisTask<OverlayParam> {
 
-    private final OverlayIntersectService overlayIntersectService;
+    private final List<AbstractOverlayExecuteService> overlayExecuteServices;
 
-    private final OverlayClipService overlayClipService;
-
-    private final OverlayEraseService overlayEraseService;
-
-    private final OverlaySymmetricDifferenceService overlaySymmetricDifferenceService;
+    private Map<OverlayAlgorithm, AbstractOverlayExecuteService> overlayExecuteServiceMap;
 
     private final GeometryDao geometryDao;
+
+    @PostConstruct
+    public void init() {
+        overlayExecuteServiceMap = CollectionUtils.toMap(overlayExecuteServices,
+                AbstractOverlayExecuteService::getAlgorithm,
+                Function.identity());
+    }
 
     @Override
     public AnalysisType getType() {
@@ -48,24 +55,8 @@ public class OverlayAnalysisTask extends AbstractAnalysisTask<OverlayParam> {
         int stepNo = 1;
         for (int i = 1; i < layers.size(); i++) {
             LayerInfo next = layers.get(i);
-            LayerInfo output;
-            switch (context.getParam().getOverlayAlgorithm()) {
-                case INTERSECT:
-                    output = overlayIntersectService.execute(current, next, context);
-                    break;
-                case ERASE:
-                    output = overlayEraseService.execute(current, next, context);
-                    break;
-                case CLIP:
-                    output = overlayClipService.execute(current, next, context);
-                    break;
-                case SYMMETRIC_DIFFERENCE:
-                    output = overlaySymmetricDifferenceService.execute(current, next, context);
-                    break;
-                case UNION:
-                default:
-                    throw new RuntimeException("暂不支持的OverlayType");
-            }
+            LayerInfo output = getOverlayExecuteService(context.getParam().getOverlayAlgorithm())
+                    .execute(current, next, context);
             // 添加临时表名到列表，为后续清理
             context.addTempTable(output.getTableName());
             // 添加分析步骤，为后续保存步骤
@@ -98,6 +89,14 @@ public class OverlayAnalysisTask extends AbstractAnalysisTask<OverlayParam> {
                 .geomType(context.getGeomType())
                 .message("Overlay analysis completed")
                 .build();
+    }
+
+    private AbstractOverlayExecuteService getOverlayExecuteService(OverlayAlgorithm overlayAlgorithm) {
+        AbstractOverlayExecuteService service = overlayExecuteServiceMap.get(overlayAlgorithm);
+        if (service == null) {
+            throw new IllegalArgumentException("Unsupported overlay algorithm: " + overlayAlgorithm);
+        }
+        return service;
     }
 
     @Override
