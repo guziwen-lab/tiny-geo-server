@@ -1,4 +1,4 @@
-package com.supermap.modules.analyzetask.executor;
+package com.supermap.modules.analyzetask.service;
 
 import com.supermap.AnalysisResult;
 import com.supermap.enums.TaskStatus;
@@ -13,7 +13,7 @@ import java.time.Instant;
 
 @Component
 @RequiredArgsConstructor
-public class TaskStatusUpdater {
+public class TaskStatusUpdateService {
 
     private final TaskDao taskDao;
 

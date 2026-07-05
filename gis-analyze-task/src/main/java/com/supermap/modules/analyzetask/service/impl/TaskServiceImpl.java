@@ -15,7 +15,7 @@ import com.supermap.modules.analyzetask.entity.TaskDatasetEntity;
 
 import com.supermap.modules.dataset.service.DatasetService;
 import com.supermap.modules.analyzetask.service.TaskDatasetService;
-import com.supermap.modules.analyzetask.executor.TaskAsyncExecutor;
+import com.supermap.modules.analyzetask.service.TaskAsyncService;
 import com.supermap.resolver.GeomTypeResolver;
 import com.supermap.task.AnalysisTask;
 import lombok.RequiredArgsConstructor;
@@ -42,7 +42,7 @@ public class TaskServiceImpl extends ServiceImpl<TaskDao, TaskEntity> implements
 
     private final TaskDatasetService taskDatasetService;
 
-    private final TaskAsyncExecutor taskAsyncExecutor;
+    private final TaskAsyncService taskAsyncService;
 
     private final DatasetService datasetService;
 
@@ -143,7 +143,7 @@ public class TaskServiceImpl extends ServiceImpl<TaskDao, TaskEntity> implements
         context.setParam(analysisTask.buildParam(task.getSubType()));
 
         // 异步执行分析任务
-        taskAsyncExecutor.executeAsync(task, task.getAnalysisType(), context);
+        taskAsyncService.executeAsync(task, task.getAnalysisType(), context);
     }
 
 }

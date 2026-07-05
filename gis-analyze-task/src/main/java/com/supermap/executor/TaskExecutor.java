@@ -1,4 +1,4 @@
-package com.supermap.modules.analyzetask.executor;
+package com.supermap.executor;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

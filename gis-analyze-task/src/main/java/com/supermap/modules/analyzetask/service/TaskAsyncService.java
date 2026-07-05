@@ -1,4 +1,4 @@
-package com.supermap.modules.analyzetask.executor;
+package com.supermap.modules.analyzetask.service;
 
 import com.supermap.*;
 import com.supermap.common.util.CollectionUtils;
@@ -8,7 +8,6 @@ import com.supermap.modules.dataset.entity.DatasetEntity;
 import com.supermap.modules.analyzetask.entity.TaskEntity;
 import com.supermap.modules.analyzetask.entity.TaskStepEntity;
 import com.supermap.modules.dataset.service.DatasetService;
-import com.supermap.modules.analyzetask.service.TaskStepService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Async;
@@ -21,11 +20,11 @@ import java.util.List;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class TaskAsyncExecutor {
+public class TaskAsyncService {
 
     private final AnalysisEngine analysisEngine;
     private final TaskStepService taskStepService;
-    private final TaskStatusUpdater taskStatusUpdater;
+    private final TaskStatusUpdateService taskStatusUpdateService;
     private final DatasetService datasetService;
 
     @Async("analyzeTaskExecutor")
@@ -38,10 +37,10 @@ public class TaskAsyncExecutor {
             // 结果记录到数据集
             DatasetEntity resultDatasetEntity = saveResultToDataset(result, context);
 
-            taskStatusUpdater.markSuccess(task.getId(), result, resultDatasetEntity);
+            taskStatusUpdateService.markSuccess(task.getId(), result, resultDatasetEntity);
         } catch (Exception e) {
             log.error("任务执行失败, taskId={}", task.getId(), e);
-            taskStatusUpdater.markFailed(task.getId(), e.getMessage());
+            taskStatusUpdateService.markFailed(task.getId(), e.getMessage());
         }
     }
 
