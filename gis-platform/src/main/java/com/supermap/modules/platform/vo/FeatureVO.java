@@ -1,6 +1,6 @@
 package com.supermap.modules.platform.vo;
 
-import com.supermap.modules.platform.entity.FeatureEntity;
+import com.supermap.modules.dataset.entity.FeatureEntity;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.EqualsAndHashCode;

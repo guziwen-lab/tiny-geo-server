@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.supermap.modules.dataset.dao.FeatureDao">
+    <resultMap type="com.supermap.modules.dataset.entity.FeatureEntity" id="featureMap">
+        <result property="id" column="id"/>
+        <result property="name" column="name"/>
+        <result property="properties" column="properties"/>
+        <result property="createdAt" column="created_at"/>
+    </resultMap>
+
+    <insert id="saveWithGeoJson">
+        WITH input AS (SELECT #{geoJson}::jsonb AS data)
+
+        INSERT
+        INTO geo_feature (id, name, geom, properties, created_at)
+
+        -- FeatureCollection
+        SELECT generate_snowflake_id(),
+               #{featureEntity.name},
+               ST_Transform(
+                       ST_SetSRID(
+                               ST_GeomFromGeoJSON(
+                                       f.value ->> 'geometry'
+                               ),
+                               4326
+                       ),
+                       4326
+               ),
+               f.value -> 'properties',
+               now()
+
+        FROM input,
+             LATERAL jsonb_array_elements(data -> 'features') AS f(value)
+
+        WHERE data ->> 'type' = 'FeatureCollection'
+
+        UNION ALL
+
+        -- 单 Feature
+        SELECT #{featureEntity.id},
+               #{featureEntity.name},
+               ST_Transform(
+                       ST_SetSRID(
+                               ST_GeomFromGeoJSON(data ->> 'geometry'),
+                               4326
+                       ),
+                       4326
+               ),
+               data -> 'properties',
+               now()
+
+        FROM input
+
+        WHERE data ->> 'type' = 'Feature'
+    </insert>
+
+    <insert id="saveWithWkt">
+        INSERT INTO geo_feature (id, name, geom, properties, created_at)
+        VALUES (#{featureEntity.id},
+                #{featureEntity.name},
+                CASE
+                    WHEN #{srid} = 4326 THEN
+                        ST_SetSRID(ST_GeomFromText(#{wkt}), 4326)
+                    ELSE
+                        ST_Transform(
+                                ST_SetSRID(ST_GeomFromText(#{wkt}), #{srid}),
+                                4326
+                        )
+                    END,
+                #{featureEntity.properties}::jsonb,
+                now())
+    </insert>
+</mapper>

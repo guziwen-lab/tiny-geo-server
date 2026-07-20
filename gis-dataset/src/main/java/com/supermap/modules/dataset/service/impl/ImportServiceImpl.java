@@ -1,14 +1,20 @@
 package com.supermap.modules.dataset.service.impl;
 
+import com.supermap.common.util.JSON;
 import com.supermap.common.util.StringUtils;
 import com.supermap.config.DatasetProperties;
 import com.supermap.enums.DatasetType;
 import com.supermap.enums.UploadStatus;
+import com.supermap.modules.dataset.dao.FeatureDao;
+import com.supermap.modules.dataset.dto.UploadGeoJsonDTO;
+import com.supermap.modules.dataset.dto.UploadWktDTO;
 import com.supermap.modules.dataset.entity.DatasetEntity;
+import com.supermap.modules.dataset.entity.FeatureEntity;
 import com.supermap.modules.dataset.service.ImportAsyncService;
 import com.supermap.modules.dataset.service.DatasetService;
 import com.supermap.modules.dataset.service.ImportService;
 import com.supermap.util.DatasetTableNameGenerator;
+import com.supermap.util.IdentifierGeneratorUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -37,6 +43,7 @@ public class ImportServiceImpl implements ImportService {
     private final DatasetService datasetService;
     private final ImportAsyncService importAsyncService;
     private final DatasetProperties datasetProperties;
+    private final FeatureDao featureDao;
 
     private static final String LAYER_PATTERN = "^Layer:\\s+(.+?)\\s*(?:\\(|$)";
 
@@ -108,6 +115,26 @@ public class ImportServiceImpl implements ImportService {
         }
 
         return entities.stream().map(DatasetEntity::getId).collect(Collectors.toList());
+    }
+
+    @Override
+    public void uploadGeoJson(UploadGeoJsonDTO dto) {
+        FeatureEntity featureEntity = new FeatureEntity();
+        featureEntity.setId(IdentifierGeneratorUtils.nextId());
+        featureEntity.setName(dto.getName());
+        featureDao.saveWithGeoJson(featureEntity, dto.getGeoJson().toString());
+    }
+
+    @Override
+    public void uploadWkt(UploadWktDTO dto) {
+        String wkt = dto.getWkt();
+        Integer srid = dto.getSrid();
+
+        FeatureEntity featureEntity = new FeatureEntity();
+        featureEntity.setId(IdentifierGeneratorUtils.nextId());
+        featureEntity.setName(dto.getName());
+        featureEntity.setProperties(JSON.toJSONString(dto.getProperties()));
+        featureDao.saveWithWkt(featureEntity, wkt, srid);
     }
 
     /**

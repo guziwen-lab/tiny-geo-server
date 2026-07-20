@@ -1,8 +1,5 @@
 package com.supermap.modules.platform.controller;
 
-import java.util.Arrays;
-import java.util.List;
-
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.supermap.modules.platform.dto.BboxQueryDTO;
 import com.supermap.modules.platform.vo.FeatureVO;
@@ -14,7 +11,6 @@ import org.springframework.web.bind.annotation.*;
 
 import com.supermap.common.pojo.R;
 import com.supermap.modules.platform.dto.FeatureDTO;
-import com.supermap.modules.platform.entity.FeatureEntity;
 import com.supermap.modules.platform.service.FeatureService;
 
 /**
@@ -49,13 +45,6 @@ public class FeatureController {
     public R<FeatureVO> info(@PathVariable Long id) {
         FeatureVO feature = featureService.getVOById(id);
         return R.ok(feature);
-    }
-
-    @Operation(summary = "删除")
-    @PostMapping("/delete")
-    public R<Void> delete(@RequestBody Long[] ids) {
-        featureService.removeByIds(Arrays.asList(ids));
-        return R.ok();
     }
 
 }

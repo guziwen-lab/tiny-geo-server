@@ -3,7 +3,7 @@ dataset:
     pg-connect: PG:host=localhost port=5432 dbname=tiny_geo_server user=postgres password=123456
     schema: dataset
 server:
-  port: 8080
+  port: 8081
 spring:
   datasource:
     url: jdbc:postgresql://localhost:5432/tiny_geo_server?useUnicode=true&characterEncoding=UTF-8

@@ -1,24 +1,24 @@
 package com.supermap.modules.platform.service.impl;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.supermap.modules.platform.dao.SearchFeatureDao;
 import com.supermap.modules.platform.dto.BboxQueryDTO;
 import com.supermap.modules.platform.vo.FeatureVO;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 
-import com.supermap.modules.platform.dao.FeatureDao;
-import com.supermap.modules.platform.entity.FeatureEntity;
 import com.supermap.modules.platform.service.FeatureService;
 import com.supermap.modules.platform.dto.FeatureDTO;
 
-import java.util.List;
-
 @Service("featureService")
-public class FeatureServiceImpl extends ServiceImpl<FeatureDao, FeatureEntity> implements FeatureService {
+@RequiredArgsConstructor
+public class FeatureServiceImpl implements FeatureService {
+    
+    private final SearchFeatureDao searchFeatureDao;
 
     @Override
     public Page<FeatureVO> queryPage(FeatureDTO dto) {
-        return baseMapper.queryPage(dto.page(), dto);
+        return searchFeatureDao.queryPage(dto.page(), dto);
     }
 
     @Override
@@ -28,15 +28,15 @@ public class FeatureServiceImpl extends ServiceImpl<FeatureDao, FeatureEntity> i
         boolean crossDateline = minX > maxX;
 
         if (!crossDateline) {
-            return baseMapper.queryNormalBbox(dto);
+            return searchFeatureDao.queryNormalBbox(dto);
         } else {
-            return baseMapper.queryCrossDatelineBbox(dto);
+            return searchFeatureDao.queryCrossDatelineBbox(dto);
         }
     }
 
     @Override
     public FeatureVO getVOById(Long id) {
-        return baseMapper.getVOById(id);
+        return searchFeatureDao.getVOById(id);
     }
 
 }
