@@ -13,7 +13,7 @@ import com.supermap.modules.platform.dto.FeatureDTO;
 @Service("featureService")
 @RequiredArgsConstructor
 public class FeatureServiceImpl implements FeatureService {
-    
+
     private final SearchFeatureDao searchFeatureDao;
 
     @Override
