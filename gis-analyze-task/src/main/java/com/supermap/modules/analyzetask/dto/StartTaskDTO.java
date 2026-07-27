@@ -8,6 +8,6 @@ import lombok.Data;
 @Data
 public class StartTaskDTO {
 
-    private Boolean isCleanTemp = false;
+    private String resultLayerName;
 
 }

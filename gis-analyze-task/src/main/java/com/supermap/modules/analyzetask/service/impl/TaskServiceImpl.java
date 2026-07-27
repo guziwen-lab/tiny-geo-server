@@ -4,7 +4,6 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.supermap.*;
 import com.supermap.common.util.BeanUtils;
-import com.supermap.common.util.CollectionUtils;
 import com.supermap.config.DatasetProperties;
 import com.supermap.enums.GeomType;
 import com.supermap.enums.TaskStatus;
@@ -20,6 +19,7 @@ import com.supermap.resolver.GeomTypeResolver;
 import com.supermap.task.AnalysisTask;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.tika.utils.StringUtils;
 import org.springframework.stereotype.Service;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 
@@ -64,15 +64,9 @@ public class TaskServiceImpl extends ServiceImpl<TaskDao, TaskEntity> implements
         taskEntity.setAnalysisType(dto.getAnalysisType());
         taskEntity.setSubType(dto.getSubType());
         taskEntity.setCreatedAt(Instant.now());
-
-        List<TaskDatasetSaveDTO> datasetIds = dto.getDatasetIds();
-        // 判断导出的类型
-        List<DatasetEntity> datasetEntities = datasetService.listByIds(datasetIds.stream()
-                .map(TaskDatasetSaveDTO::getDatasetId).toList());
-        GeomType geomType = GeomTypeResolver.resolve(dto.getAnalysisType(), datasetEntities);
-        taskEntity.setGeomType(geomType);
         save(taskEntity);
 
+        List<TaskDatasetSaveDTO> datasetIds = dto.getDatasetIds();
         List<TaskDatasetEntity> taskDatasetEntities = datasetIds.stream()
                 .map(item -> {
                     TaskDatasetEntity taskDatasetEntity = new TaskDatasetEntity();
@@ -94,23 +88,17 @@ public class TaskServiceImpl extends ServiceImpl<TaskDao, TaskEntity> implements
 
     @Override
     public void start(Long taskId, StartTaskDTO dto) {
-        TaskEntity task = getById(taskId);
-        if (task == null)
+        TaskEntity taskEntity = getById(taskId);
+        if (taskEntity == null)
             throw new IllegalArgumentException("Task not found");
-        if (task.getStatus().equals(TaskStatus.PROCESSING))
+        if (taskEntity.getStatus().equals(TaskStatus.PROCESSING))
             throw new IllegalArgumentException("Task is already processing");
-        if (task.getStatus().equals(TaskStatus.SUCCESS))
+        if (taskEntity.getStatus().equals(TaskStatus.SUCCESS))
             throw new IllegalArgumentException("Task is already completed");
 
-        List<TaskDatasetEntity> taskDatasetEntities = taskDatasetService.getByTaskId(taskId);
+        List<DatasetEntity> datasets = getDatasetEntityByTaskId(taskId);
 
-        List<DatasetEntity> datasets = datasetService
-                .listByIds(taskDatasetEntities.stream().map(TaskDatasetEntity::getDatasetId).toList());
-
-        if (CollectionUtils.isEmpty(datasets)) {
-            throw new IllegalArgumentException("Datasets not found");
-        }
-
+        // 校验数据集是否在config.schema中
         String schemaName = datasetProperties.getSchema();
         for (DatasetEntity dataset : datasets) {
             if (!dataset.getSchemaName().equals(schemaName)) {
@@ -118,32 +106,68 @@ public class TaskServiceImpl extends ServiceImpl<TaskDao, TaskEntity> implements
             }
         }
 
+        // 构建图层信息
+        List<LayerInfo> layerInfos = buildLayerInfo(datasets);
+
+        // 判断导出的类型
+        GeomType geomType = GeomTypeResolver.resolve(taskEntity.getAnalysisType(), layerInfos);
+        taskEntity.setGeomType(geomType);
+
         // 标记任务为处理中
-        task.setStatus(TaskStatus.PROCESSING);
-        task.setSchemaName(schemaName);
-        updateById(task);
+        taskEntity.setStatus(TaskStatus.PROCESSING);
+        taskEntity.setSchemaName(schemaName);
+        updateById(taskEntity);
 
         // 构建分析上下文
         AnalysisContext<AnalysisParam> context = new AnalysisContext<>();
         context.setTaskId(taskId);
-        context.setInputLayers(datasets.stream().map(item -> {
+        context.setInputLayers(layerInfos);
+        context.setResultLayerName(StringUtils.isEmpty(dto.getResultLayerName()) ?
+                taskEntity.getTaskName() : dto.getResultLayerName());
+        context.setSchema(datasetProperties.getSchema());
+        context.setResultTableName("analyze_" + taskId);
+        context.setGeomType(geomType);
+
+        AnalysisTask<?> analysisTask = analysisEngine.getTask(taskEntity.getAnalysisType());
+        context.setParam(analysisTask.buildParam(taskEntity.getSubType()));
+
+        // 异步执行分析任务
+        taskAsyncService.executeAsync(taskEntity, taskEntity.getAnalysisType(), context);
+    }
+
+    /**
+     * 构建数据集信息
+     *
+     * @param datasets 数据集列表
+     * @return 图层信息列表
+     */
+    private List<LayerInfo> buildLayerInfo(List<DatasetEntity> datasets) {
+        return datasets.stream().map(item -> {
             LayerInfo layerInfo = new LayerInfo();
             layerInfo.setOriginalTableName(item.getTableName());
             layerInfo.setTableName(item.getTableName());
             layerInfo.setGeomType(item.getGeomType());
             layerInfo.setSrid(item.getSrid());
             return layerInfo;
-        }).toList());
-        context.setResultLayerName(task.getTaskName());
-        context.setSchema(datasetProperties.getSchema());
-        context.setResultTableName("analyze_" + taskId);
-        context.setGeomType(task.getGeomType());
+        }).toList();
+    }
 
-        AnalysisTask<?> analysisTask = analysisEngine.getTask(task.getAnalysisType());
-        context.setParam(analysisTask.buildParam(task.getSubType()));
+    /**
+     * 根据任务id获取数据集
+     *
+     * @param taskId 任务id
+     * @return 数据集列表
+     */
+    private List<DatasetEntity> getDatasetEntityByTaskId(Long taskId) {
+        List<TaskDatasetEntity> taskDatasetEntities = taskDatasetService.getByTaskId(taskId);
+        List<DatasetEntity> datasets = datasetService
+                .listByIds(taskDatasetEntities.stream().map(TaskDatasetEntity::getDatasetId).toList());
 
-        // 异步执行分析任务
-        taskAsyncService.executeAsync(task, task.getAnalysisType(), context);
+        // 校验图层是否一致
+        if (taskDatasetEntities.size() != datasets.size())
+            throw new IllegalArgumentException("Datasets not found");
+
+        return datasets;
     }
 
 }

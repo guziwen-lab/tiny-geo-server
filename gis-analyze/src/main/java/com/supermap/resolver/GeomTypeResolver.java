@@ -1,7 +1,7 @@
 package com.supermap.resolver;
 
+import com.supermap.LayerInfo;
 import com.supermap.common.util.CollectionUtils;
-import com.supermap.modules.dataset.entity.DatasetEntity;
 import com.supermap.enums.AnalysisType;
 import com.supermap.enums.GeomType;
 
@@ -12,33 +12,33 @@ public final class GeomTypeResolver {
     private GeomTypeResolver() {
     }
 
-    public static GeomType resolve(AnalysisType analysisType, List<DatasetEntity> datasets) {
-        if (CollectionUtils.isEmpty(datasets)) {
+    public static GeomType resolve(AnalysisType analysisType, List<LayerInfo> layerInfos) {
+        if (CollectionUtils.isEmpty(layerInfos)) {
             throw new IllegalArgumentException("数据集不能为空");
         }
 
         return switch (analysisType) {
             // Overlay 所有算法共用同一套推导规则
-            case OVERLAY -> resolveOverlay(datasets);
+            case OVERLAY -> resolveOverlay(layerInfos);
 
             // Buffer 永远输出面
             case BUFFER -> GeomType.MULTI_POLYGON;
 
             // Dissolve 保持输入类型
-            case DISSOLVE -> datasets.get(0).getGeomType();
+            case DISSOLVE -> layerInfos.get(0).getGeomType();
 
             // Spatial Join 保持目标图层类型（默认第一个图层）
-            case SPATIAL_JOIN -> datasets.get(0).getGeomType();
+            case SPATIAL_JOIN -> layerInfos.get(0).getGeomType();
         };
     }
 
     /**
      * Overlay 几何类型推导
      */
-    private static GeomType resolveOverlay(List<DatasetEntity> datasets) {
-        GeomType result = datasets.get(0).getGeomType();
-        for (int i = 1; i < datasets.size(); i++) {
-            result = resolveOverlay(result, datasets.get(i).getGeomType());
+    private static GeomType resolveOverlay(List<LayerInfo> layerInfos) {
+        GeomType result = layerInfos.get(0).getGeomType();
+        for (int i = 1; i < layerInfos.size(); i++) {
+            result = resolveOverlay(result, layerInfos.get(i).getGeomType());
         }
         return result;
     }
