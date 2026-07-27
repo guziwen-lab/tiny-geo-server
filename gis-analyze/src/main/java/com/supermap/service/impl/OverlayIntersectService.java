@@ -1,31 +1,27 @@
-package com.supermap.service;
+package com.supermap.service.impl;
 
 import com.supermap.enums.GeomType;
 import com.supermap.enums.OverlayAlgorithm;
-import com.supermap.type.Column;
+import com.supermap.service.AbstractOverlayExecuteService;
+import com.supermap.service.GeometryExpression;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.Collections;
-import java.util.List;
-
 /**
- * Intersect 保留两侧属性 + 取交集，Clip 只保留 A 侧属性 + 取交集
- *
  * @author gzw
  */
 @Service
 @RequiredArgsConstructor
-public class OverlayClipService extends AbstractOverlayExecuteService {
+public class OverlayIntersectService extends AbstractOverlayExecuteService {
 
     @Override
     public OverlayAlgorithm getAlgorithm() {
-        return OverlayAlgorithm.CLIP;
+        return OverlayAlgorithm.INTERSECT;
     }
 
     @Override
     public String geometryExpression(GeomType geomType, int srid) {
-        return GeometryExpression.wrap("ST_Intersection(a.geom,b.geom)", geomType, srid);
+        return GeometryExpression.wrap("ST_Intersection(a.geom, b.geom)", geomType, srid);
     }
 
     @Override
@@ -42,11 +38,6 @@ public class OverlayClipService extends AbstractOverlayExecuteService {
                 selectClause,
                 current,
                 next);
-    }
-
-    @Override
-    protected String buildSelectClause(List<Column> currentColumns, List<Column> nextColumns, String geometryExpression) {
-        return super.buildSelectClause(currentColumns, Collections.emptyList(), geometryExpression);
     }
 
 }

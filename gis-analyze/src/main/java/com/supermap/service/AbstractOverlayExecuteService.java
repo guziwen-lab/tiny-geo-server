@@ -31,9 +31,9 @@ public abstract class AbstractOverlayExecuteService extends AbstractExecuteServi
 
     public abstract OverlayAlgorithm getAlgorithm();
 
-    abstract String geometryExpression(GeomType geomType, int srid);
+    protected abstract String geometryExpression(GeomType geomType, int srid);
 
-    abstract String buildSql(String current, String next, String result, String selectClause);
+    protected abstract String buildSql(String current, String next, String result, String selectClause);
 
     protected String buildSelectClause(List<Column> currentColumns,
                                        List<Column> nextColumns,
