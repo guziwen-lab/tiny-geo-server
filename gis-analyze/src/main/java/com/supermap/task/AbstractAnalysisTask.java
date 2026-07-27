@@ -4,6 +4,7 @@ import com.supermap.AnalysisContext;
 import com.supermap.AnalysisParam;
 import com.supermap.AnalysisResult;
 import com.supermap.LayerInfo;
+import com.supermap.common.util.StringUtils;
 import com.supermap.enums.GeomType;
 import com.supermap.service.GeometryService;
 import com.supermap.type.Column;
@@ -109,6 +110,55 @@ public abstract class AbstractAnalysisTask<T extends AnalysisParam> implements A
     protected void logCost(long startTime) {
         long cost = System.currentTimeMillis() - startTime;
         log.debug("[{}] analysis finished, cost={} ms", getTaskName(), cost);
+    }
+
+    /**
+     * 完成态处理：将最后一个临时表改名为结果表，构建分析结果
+     * <p>
+     * 子类 doExecute 执行完核心分析逻辑后调用此方法，统一处理：
+     * <ol>
+     *   <li>把最后一个临时表改名为结果表</li>
+     *   <li>从临时表列表中移除已改名的表，避免 cleanUp 时无效 DROP</li>
+     *   <li>统计结果表要素数量</li>
+     *   <li>构建并返回 AnalysisResult</li>
+     * </ol>
+     * <p>
+     * 注意：子类在创建最后一步 AnalysisStep 时，应直接使用结果表名作为 outputTable，
+     * 而非临时表名，以避免“先错后改”。
+     *
+     * @param context           分析上下文
+     * @param lastTempTableName 最后一个临时表名（将被改名为结果表）
+     * @param message           结果附加信息
+     * @return 分析结果
+     */
+    protected AnalysisResult finalizeResult(AnalysisContext<T> context,
+                                            String lastTempTableName,
+                                            String message) {
+        String resultTableName = context.getResultTableName();
+        String schema = context.getSchema();
+
+        // 把最后一个临时表改名为结果表
+        geometryService.renameTable(
+                TableNameUtils.getTableNameWithSchema(schema, lastTempTableName),
+                resultTableName);
+
+        // 从临时表列表中移除已改名为结果表的表，避免清理时误操作（实际上临时表已经被改名，不会误操作）
+        context.getTempTableList().remove(lastTempTableName);
+
+        long featureCount = geometryService.getFeatureCount(
+                TableNameUtils.getTableNameWithSchema(schema, resultTableName));
+
+        return AnalysisResult.builder()
+                .taskId(context.getTaskId())
+                .resultTableName(resultTableName)
+                .resultLayerName(StringUtils.isEmpty(context.getResultLayerName())
+                        ? resultTableName
+                        : context.getResultLayerName())
+                .featureCount(featureCount)
+                .srid(context.getSrid())
+                .geomType(context.getGeomType())
+                .message(message)
+                .build();
     }
 
     /**

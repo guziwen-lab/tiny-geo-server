@@ -1,7 +1,6 @@
 package com.supermap.modules.dataset.service;
 
 import com.supermap.config.DatasetProperties;
-import com.supermap.dao.GeometryDao;
 import com.supermap.enums.GeomType;
 import com.supermap.modules.dataset.entity.DatasetEntity;
 import com.supermap.service.GeometryService;
@@ -25,7 +24,6 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class ImportAsyncService {
 
-    private final GeometryDao geometryDao;
     private final GeometryService geometryService;
     private final ImportStatusUpdater importStatusUpdater;
     private final DatasetProperties datasetProperties;
@@ -48,7 +46,7 @@ public class ImportAsyncService {
             }
 
             // 4. 创建空间索引
-            geometryDao.createGistIndex(datasetProperties.getSchema(), tableName);
+            geometryService.createGistIndex(datasetProperties.getSchema(), tableName);
 
             // 5. 更新状态为成功
             importStatusUpdater.markSuccess(
@@ -61,7 +59,7 @@ public class ImportAsyncService {
             log.error("数据集导入失败, datasetId={}, table={}", entity.getId(), tableName, e);
             // 清理已创建的表
             try {
-                geometryDao.dropTableIfExists(tableName);
+                geometryService.dropTableIfExists(tableName);
             } catch (Exception dropEx) {
                 log.error("清理失败表失败: {}", tableName, dropEx);
             }

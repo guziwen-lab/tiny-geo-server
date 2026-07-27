@@ -3,14 +3,12 @@ package com.supermap.task;
 import com.supermap.*;
 import com.supermap.common.util.CollectionUtils;
 import com.supermap.common.util.StringUtils;
-import com.supermap.dao.GeometryDao;
 import com.supermap.enums.AnalysisType;
 import com.supermap.enums.GeomType;
 import com.supermap.security.SqlInjectionCheck;
 import com.supermap.service.impl.IntersectSplitExecuteService;
 import com.supermap.task.param.IntersectSplitParam;
 import com.supermap.type.Column;
-import com.supermap.util.TableNameUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -39,8 +37,6 @@ public class IntersectSplitAnalysisTask extends AbstractAnalysisTask<IntersectSp
 
     private final IntersectSplitExecuteService intersectSplitExecuteService;
 
-    private final GeometryDao geometryDao;
-
     @Override
     public AnalysisType getType() {
         return AnalysisType.INTERSECT_SPLIT;
@@ -60,48 +56,20 @@ public class IntersectSplitAnalysisTask extends AbstractAnalysisTask<IntersectSp
 
     @Override
     protected AnalysisResult doExecute(AnalysisContext<IntersectSplitParam> context) {
-        String resultTableName = context.getResultTableName();
-
         List<LayerInfo> layers = context.getInputLayers();
         // 相交面积拆分仅处理2个图层
         LayerInfo current = layers.get(0);
         LayerInfo next = layers.get(1);
 
         LayerInfo output = intersectSplitExecuteService.execute(current, next, context);
-        // 添加临时表名到列表，为后续清理
-        context.addTempTable(output.getTableName());
-        // 添加分析步骤，为后续保存步骤
+
+        // 添加分析步骤：输出表名直接用结果表名
         context.addStep(new AnalysisStep(1,
                 current.getOriginalTableName(),
                 next.getOriginalTableName(),
-                output.getOriginalTableName()));
+                context.getResultTableName()));
 
-        // 把临时表改名为结果表
-        geometryDao.renameTable(
-                TableNameUtils.getTableNameWithSchema(context.getSchema(), output.getTableName()),
-                resultTableName);
-
-        // 修正最后一步的输出表名为结果表名
-        List<AnalysisStep> steps = context.getSteps();
-        if (!steps.isEmpty()) {
-            AnalysisStep lastStep = steps.get(steps.size() - 1);
-            lastStep.setOutputTable(resultTableName);
-        }
-
-        long featureCount = geometryDao.getFeatureCount(
-                TableNameUtils.getTableNameWithSchema(context.getSchema(), resultTableName));
-
-        return AnalysisResult.builder()
-                .taskId(context.getTaskId())
-                .resultTableName(resultTableName)
-                .resultLayerName(StringUtils.isEmpty(context.getResultLayerName())
-                        ? resultTableName
-                        : context.getResultLayerName())
-                .featureCount(featureCount)
-                .srid(context.getSrid())
-                .geomType(context.getGeomType())
-                .message("Intersect with area split completed")
-                .build();
+        return finalizeResult(context, output.getTableName(), "Intersect with area split completed");
     }
 
     @Override

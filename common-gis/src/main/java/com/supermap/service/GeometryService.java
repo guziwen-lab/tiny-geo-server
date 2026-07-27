@@ -48,6 +48,24 @@ public class GeometryService {
         geometryDao.dropTableIfExists(table);
     }
 
+    public void createGistIndex(String schema, String table) {
+        geometryDao.createGistIndex(schema, table);
+    }
+
+    /**
+     * 重命名表（将临时表改名为结果表，标志分析流程完成）
+     */
+    public void renameTable(String current, String resultTableName) {
+        geometryDao.renameTable(current, resultTableName);
+    }
+
+    /**
+     * 统计表中的要素数量
+     */
+    public long getFeatureCount(String table) {
+        return geometryDao.getFeatureCount(table);
+    }
+
     /**
      * 为结果表添加自增主键（id 列需已通过 row_number() 生成）
      */

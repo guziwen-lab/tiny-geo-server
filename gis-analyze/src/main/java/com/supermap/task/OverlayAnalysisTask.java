@@ -2,14 +2,11 @@ package com.supermap.task;
 
 import com.supermap.*;
 import com.supermap.common.util.CollectionUtils;
-import com.supermap.common.util.StringUtils;
 import com.supermap.service.*;
-import com.supermap.dao.GeometryDao;
 import com.supermap.enums.AnalysisType;
 import com.supermap.enums.OverlayAlgorithm;
 import com.supermap.enums.GeomType;
 import com.supermap.task.param.OverlayParam;
-import com.supermap.util.TableNameUtils;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,8 +24,6 @@ public class OverlayAnalysisTask extends AbstractAnalysisTask<OverlayParam> {
     private final List<AbstractOverlayExecuteService> overlayExecuteServices;
 
     private Map<OverlayAlgorithm, AbstractOverlayExecuteService> overlayExecuteServiceMap;
-
-    private final GeometryDao geometryDao;
 
     @PostConstruct
     public void init() {
@@ -49,8 +44,6 @@ public class OverlayAnalysisTask extends AbstractAnalysisTask<OverlayParam> {
 
     @Override
     protected AnalysisResult doExecute(AnalysisContext<OverlayParam> context) {
-        String resultTableName = context.getResultTableName();
-
         List<LayerInfo> layers = context.getInputLayers();
         LayerInfo current = layers.get(0);
         int stepNo = 1;
@@ -60,39 +53,20 @@ public class OverlayAnalysisTask extends AbstractAnalysisTask<OverlayParam> {
                     .execute(current, next, context);
             // 添加临时表名到列表，为后续清理
             context.addTempTable(output.getTableName());
-            // 添加分析步骤，为后续保存步骤
-            context.addStep(new AnalysisStep(stepNo++,
+            // 添加分析步骤：最后一步输出表名直接用结果表名，中间步骤用临时表名
+            String outputTableName = (i == layers.size() - 1)
+                    ? context.getResultTableName()
+                    : output.getOriginalTableName();
+            context.addStep(new AnalysisStep(
+                    stepNo++,
                     current.getOriginalTableName(),
                     next.getOriginalTableName(),
-                    output.getOriginalTableName()));
+                    outputTableName)
+            );
             current = output;
         }
 
-        // 把最后一个临时表改名为结果表
-        geometryDao.renameTable(TableNameUtils.getTableNameWithSchema(context.getSchema(), current.getTableName()),
-                resultTableName);
-
-        // 修正最后一步的输出表名为结果表名
-        List<AnalysisStep> steps = context.getSteps();
-        if (!steps.isEmpty()) {
-            AnalysisStep lastStep = steps.get(steps.size() - 1);
-            lastStep.setOutputTable(resultTableName);
-        }
-
-        long featureCount = geometryDao.getFeatureCount(
-                TableNameUtils.getTableNameWithSchema(context.getSchema(), resultTableName));
-
-        return AnalysisResult.builder()
-                .taskId(context.getTaskId())
-                .resultTableName(resultTableName)
-                .resultLayerName(StringUtils.isEmpty(context.getResultLayerName())
-                        ? resultTableName
-                        : context.getResultLayerName())
-                .featureCount(featureCount)
-                .srid(context.getSrid())
-                .geomType(context.getGeomType())
-                .message("Overlay analysis completed")
-                .build();
+        return finalizeResult(context, current.getTableName(), "Overlay analysis completed");
     }
 
     private AbstractOverlayExecuteService getOverlayExecuteService(OverlayAlgorithm overlayAlgorithm) {
