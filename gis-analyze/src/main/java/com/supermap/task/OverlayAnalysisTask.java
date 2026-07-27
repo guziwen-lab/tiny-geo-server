@@ -8,6 +8,7 @@ import com.supermap.dao.GeometryDao;
 import com.supermap.enums.AnalysisType;
 import com.supermap.enums.OverlayAlgorithm;
 import com.supermap.enums.GeomType;
+import com.supermap.task.param.OverlayParam;
 import com.supermap.util.TableNameUtils;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;

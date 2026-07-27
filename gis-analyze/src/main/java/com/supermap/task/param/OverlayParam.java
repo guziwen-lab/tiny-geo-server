@@ -1,4 +1,4 @@
-package com.supermap.task;
+package com.supermap.task.param;
 
 import com.supermap.AnalysisParam;
 import com.supermap.enums.OverlayAlgorithm;

@@ -21,6 +21,9 @@ public final class GeomTypeResolver {
             // Overlay 所有算法共用同一套推导规则
             case OVERLAY -> resolveOverlay(layerInfos);
 
+            // 相交面积拆分：与 Overlay 相同，相交结果为面
+            case INTERSECT_SPLIT -> resolveOverlay(layerInfos);
+
             // Buffer 永远输出面
             case BUFFER -> GeomType.MULTI_POLYGON;
 

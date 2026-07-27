@@ -4,7 +4,7 @@ import com.supermap.AnalysisContext;
 import com.supermap.LayerInfo;
 import com.supermap.enums.GeomType;
 import com.supermap.enums.OverlayAlgorithm;
-import com.supermap.task.OverlayParam;
+import com.supermap.task.param.OverlayParam;
 import com.supermap.type.Column;
 import com.supermap.util.TableNameUtils;
 
