@@ -90,11 +90,23 @@ public class IntersectSplitAnalysisTask extends AbstractAnalysisTask<IntersectSp
                                 + geomType.getGeometryName() + ", 图层: " + layer.getTableName());
             }
         }
+    }
 
-        // 校验拆分字段名合法性
+    /**
+     * 校验拆分字段名合法性
+     * <p>
+     * 由于需要Columns，所以在beforeExecute执行完后再校验
+     *
+     * @param context 分析上下文
+     */
+    @Override
+    protected void beforeExecute(AnalysisContext<IntersectSplitParam> context) {
+        super.beforeExecute(context);
+
         IntersectSplitParam param = context.getParam();
         List<String> splitFieldsA = param.getSplitFieldsA();
         List<String> splitFieldsB = param.getSplitFieldsB();
+        List<LayerInfo> layers = context.getInputLayers();
         validateSplitFields(splitFieldsA, layers.get(0).getColumns(), "A");
         validateSplitFields(splitFieldsB, layers.get(1).getColumns(), "B");
     }

@@ -116,6 +116,8 @@ public class TaskServiceImpl extends ServiceImpl<TaskDao, TaskEntity> implements
         // 标记任务为处理中
         taskEntity.setStatus(TaskStatus.PROCESSING);
         taskEntity.setSchemaName(schemaName);
+
+        taskEntity.setMessage("");
         updateById(taskEntity);
 
         // 构建分析上下文
