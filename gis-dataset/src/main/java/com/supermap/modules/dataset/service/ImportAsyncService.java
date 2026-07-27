@@ -144,6 +144,8 @@ public class ImportAsyncService {
                 cmd.add(layerName);
             }
 
+            log.info("执行查询元数据命令: {}", String.join(" ", cmd));
+
             ProcessBuilder pb = new ProcessBuilder(cmd);
             pb.redirectErrorStream(true);
             Process process = pb.start();

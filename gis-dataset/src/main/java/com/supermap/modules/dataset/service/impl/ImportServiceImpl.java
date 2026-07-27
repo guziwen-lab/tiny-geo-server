@@ -142,7 +142,13 @@ public class ImportServiceImpl implements ImportService {
      */
     private List<String> listGdbLayers(String gdbPath) {
         try {
-            ProcessBuilder pb = new ProcessBuilder("ogrinfo", "-so", gdbPath);
+            List<String> cmd = new ArrayList<>();
+            cmd.add("ogrinfo");
+            cmd.add("-so");
+            cmd.add(gdbPath);
+            log.info("执行查询 GDB 中的所有图层名命令: {}", String.join(" ", cmd));
+
+            ProcessBuilder pb = new ProcessBuilder(cmd);
             pb.redirectErrorStream(true);
             Process process = pb.start();
 
