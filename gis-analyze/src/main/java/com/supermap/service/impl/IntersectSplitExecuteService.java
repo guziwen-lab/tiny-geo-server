@@ -2,7 +2,6 @@ package com.supermap.service.impl;
 
 import com.supermap.AnalysisContext;
 import com.supermap.LayerInfo;
-import com.supermap.security.SqlInjectionCheck;
 import com.supermap.service.AbstractExecuteService;
 import com.supermap.service.GeometryExpression;
 import com.supermap.task.param.IntersectSplitParam;
@@ -29,14 +28,8 @@ public class IntersectSplitExecuteService extends AbstractExecuteService<Interse
     protected String buildExecuteSql(LayerInfo current, LayerInfo next, String resultTableName,
                                      AnalysisContext<IntersectSplitParam> context) {
         IntersectSplitParam param = context.getParam();
-        List<String> splitFieldsA = param != null && param.getSplitFieldsA() != null
-                ? param.getSplitFieldsA() : Collections.emptyList();
-        List<String> splitFieldsB = param != null && param.getSplitFieldsB() != null
-                ? param.getSplitFieldsB() : Collections.emptyList();
-
-        // 校验拆分字段名合法性
-        validateSplitFields(splitFieldsA, current.getColumns(), "A");
-        validateSplitFields(splitFieldsB, next.getColumns(), "B");
+        List<String> splitFieldsA = param.getSplitFieldsA();
+        List<String> splitFieldsB = param.getSplitFieldsB();
 
         Set<String> usedNames = new HashSet<>();
         List<String> selectItems = new ArrayList<>();
@@ -92,32 +85,6 @@ public class IntersectSplitExecuteService extends AbstractExecuteService<Interse
                 JOIN %s b
                   ON ST_Intersects(a.geom, b.geom)
                 """.formatted(resultTable, String.join(",\n", selectItems), currentTable, nextTable);
-    }
-
-    /**
-     * 校验拆分字段名合法性及存在性
-     *
-     * @param splitFields 待拆分字段列表
-     * @param columns     图层实际字段列表
-     * @param side        图层标识（A/B），用于错误提示
-     */
-    private void validateSplitFields(List<String> splitFields, List<Column> columns, String side) {
-        if (splitFields == null || splitFields.isEmpty()) {
-            return;
-        }
-        Set<String> availableNames = new HashSet<>();
-        for (Column column : columns) {
-            availableNames.add(column.name().toLowerCase());
-        }
-
-        SqlInjectionCheck.checkColumnName(splitFields.toArray(new String[0]));
-
-        for (String field : splitFields) {
-            if (!availableNames.contains(field.toLowerCase())) {
-                throw new IllegalArgumentException(
-                        "拆分字段 " + field + " 在" + side + "图层中不存在");
-            }
-        }
     }
 
 }

@@ -1,20 +1,21 @@
 package com.supermap.task;
 
 import com.supermap.*;
+import com.supermap.common.util.CollectionUtils;
 import com.supermap.common.util.StringUtils;
 import com.supermap.dao.GeometryDao;
 import com.supermap.enums.AnalysisType;
 import com.supermap.enums.GeomType;
+import com.supermap.security.SqlInjectionCheck;
 import com.supermap.service.impl.IntersectSplitExecuteService;
 import com.supermap.task.param.IntersectSplitParam;
+import com.supermap.type.Column;
 import com.supermap.util.TableNameUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 /**
  * 相交面积拆分分析任务
@@ -121,19 +122,52 @@ public class IntersectSplitAnalysisTask extends AbstractAnalysisTask<IntersectSp
                                 + geomType.getGeometryName() + ", 图层: " + layer.getTableName());
             }
         }
+
+        // 校验拆分字段名合法性
+        IntersectSplitParam param = context.getParam();
+        List<String> splitFieldsA = param.getSplitFieldsA();
+        List<String> splitFieldsB = param.getSplitFieldsB();
+        validateSplitFields(splitFieldsA, layers.get(0).getColumns(), "A");
+        validateSplitFields(splitFieldsB, layers.get(1).getColumns(), "B");
     }
 
     /**
      * 解析逗号分隔的字段列表
      */
     private List<String> parseFields(String s) {
-        if (s == null || s.isBlank()) {
+        if (StringUtils.isEmpty(s)) {
             return Collections.emptyList();
         }
         return Arrays.stream(s.split(","))
                 .map(String::trim)
                 .filter(f -> !f.isEmpty())
                 .toList();
+    }
+
+    /**
+     * 校验拆分字段名合法性及存在性
+     *
+     * @param splitFields 待拆分字段列表
+     * @param columns     图层实际字段列表
+     * @param side        图层标识（A/B），用于错误提示
+     */
+    private void validateSplitFields(List<String> splitFields, List<Column> columns, String side) {
+        if (CollectionUtils.isEmpty(splitFields)) {
+            return;
+        }
+        Set<String> availableNames = new HashSet<>();
+        for (Column column : columns) {
+            availableNames.add(column.name().toLowerCase());
+        }
+
+        SqlInjectionCheck.checkColumnName(splitFields.toArray(new String[0]));
+
+        for (String field : splitFields) {
+            if (!availableNames.contains(field.toLowerCase())) {
+                throw new IllegalArgumentException(
+                        "拆分字段 " + field + " 在" + side + "图层中不存在");
+            }
+        }
     }
 
 }
