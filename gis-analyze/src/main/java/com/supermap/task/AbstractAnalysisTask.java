@@ -221,7 +221,7 @@ public abstract class AbstractAnalysisTask<T extends AnalysisParam> implements A
     }
 
     /**
-     * 根据输入图层决定目标空间参考
+     * 默认取第一个图层的空间参考
      *
      * @param layers 输入图层
      * @return 目标空间参考

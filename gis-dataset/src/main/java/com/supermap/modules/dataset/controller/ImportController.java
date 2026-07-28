@@ -5,6 +5,7 @@ import com.supermap.common.pojo.R;
 import com.supermap.common.util.StringUtils;
 import com.supermap.modules.dataset.dto.UploadGeoJsonDTO;
 import com.supermap.modules.dataset.dto.UploadWktDTO;
+import com.supermap.modules.dataset.dto.BatchImportGdbDTO;
 import com.supermap.modules.dataset.service.ImportService;
 import com.supermap.util.GeometryParserUtils;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -47,6 +48,12 @@ public class ImportController {
     @PostMapping("/gdb")
     public R<List<Long>> importGdb(String path, String layerName) {
         List<Long> ids = importService.importGdb(path, layerName);
+        return R.ok(ids);
+    }
+
+    @PostMapping("/gdb/batch")
+    public R<List<Long>> importGdbBatch(@RequestBody @Validated BatchImportGdbDTO dto) {
+        List<Long> ids = importService.importGdbBatch(dto);
         return R.ok(ids);
     }
 

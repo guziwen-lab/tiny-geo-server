@@ -58,13 +58,13 @@ public class IntersectSplitExecuteService extends AbstractExecuteService<Interse
         // A表拆分字段：按A表原图斑面积比例拆分
         for (String field : splitFieldsA) {
             String splitAlias = getUniqueFieldName(field + "_split", usedNames);
-            selectItems.add("a.\"%s\" * (%s) AS \"%s\"".formatted(field, ratioA, splitAlias));
+            selectItems.add("COALESCE(a.\"%s\", 0) * (%s) AS \"%s\"".formatted(field, ratioA, splitAlias));
         }
 
         // B表拆分字段：按B表原图斑面积比例拆分
         for (String field : splitFieldsB) {
             String splitAlias = getUniqueFieldName(field + "_split", usedNames);
-            selectItems.add("b.\"%s\" * (%s) AS \"%s\"".formatted(field, ratioB, splitAlias));
+            selectItems.add("COALESCE(b.\"%s\", 0) * (%s) AS \"%s\"".formatted(field, ratioB, splitAlias));
         }
 
         // 几何字段

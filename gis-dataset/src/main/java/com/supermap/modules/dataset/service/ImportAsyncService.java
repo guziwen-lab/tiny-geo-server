@@ -34,17 +34,17 @@ public class ImportAsyncService {
         String tableName = entity.getTableName();
         try {
             // 查询图层元数据
-            TableMeta meta = queryLayerMeta(sourcePath, exportLayerName);
+            LayerMeta meta = queryLayerMeta(sourcePath, exportLayerName);
 
             // 如果是追加导入，先校验 srid 和几何类型，避免脏数据写入原表；featureCount累加
-            long featureCount = meta.featureCount;
+            long featureCount = meta.featureCount();
             if (isAppend) {
                 Integer srid = entity.getSrid();
-                if (!Objects.equals(srid, meta.srid)) {
-                    throw new RuntimeException("SRID 不匹配: 原SRID=" + srid + ", 新SRID=" + meta.srid);
+                if (!Objects.equals(srid, meta.srid())) {
+                    throw new RuntimeException("SRID 不匹配: 原SRID=" + srid + ", 新SRID=" + meta.srid());
                 }
 
-                checkGeomTypeCompatible(entity.getGeomType(), meta.geomType);
+                checkGeomTypeCompatible(entity.getGeomType(), meta.geomType());
 
                 featureCount += entity.getFeatureCount();
             }
@@ -54,9 +54,9 @@ public class ImportAsyncService {
 
             // 检查几何类型（优先以 PostgreSQL 实际存储的几何类型为准）
             GeomType geomType = geometryService.resolveActualGeomType(
-                    datasetProperties.getSchema() + "." + tableName, meta.geomType);
+                    datasetProperties.getSchema() + "." + tableName, meta.geomType());
             if (geomType == null) {
-                throw new RuntimeException("几何类型不支持: " + meta.geomType);
+                throw new RuntimeException("几何类型不支持: " + meta.geomType());
             }
 
             // 创建空间索引
@@ -66,7 +66,7 @@ public class ImportAsyncService {
             importStatusUpdater.markSuccess(
                     entity.getId(),
                     geomType,
-                    meta.srid,
+                    meta.srid(),
                     featureCount
             );
         } catch (Exception e) {
@@ -81,6 +81,61 @@ public class ImportAsyncService {
             }
             importStatusUpdater.markFailed(entity.getId(), e.getMessage());
         }
+    }
+
+    /**
+     * 顺序导入同一投影组中的多个 GDB 图层。必须在同一个异步任务中顺序执行，
+     * 否则“首个建表”与后续“追加”会产生竞争。
+     */
+    @Async("importTaskExecutor")
+    public void importLayersAsync(DatasetEntity entity, List<GdbLayerSource> sources) {
+        String tableName = entity.getTableName();
+        try {
+            if (sources.isEmpty()) {
+                throw new IllegalArgumentException("导入图层不能为空");
+            }
+
+            LayerMeta first = inspectLayer(sources.get(0).path(), sources.get(0).layerName());
+            long featureCount = 0;
+            for (int i = 0; i < sources.size(); i++) {
+                GdbLayerSource source = sources.get(i);
+                LayerMeta meta = inspectLayer(source.path(), source.layerName());
+                if (!Objects.equals(first.srid(), meta.srid())) {
+                    throw new RuntimeException("批量导入分组内 SRID 不一致: " + first.srid() + " / " + meta.srid());
+                }
+                checkGeomTypeCompatible(GeomType.ofOgr2ogrCode(first.geomType()), meta.geomType());
+                execOgr2ogr(source.path(), tableName, source.layerName(), i > 0,
+                        i == 0 ? null : GeomType.ofOgr2ogrCode(first.geomType()));
+                featureCount += meta.featureCount();
+            }
+
+            GeomType geomType = geometryService.resolveActualGeomType(
+                    datasetProperties.getSchema() + "." + tableName, first.geomType());
+            if (geomType == null) {
+                throw new RuntimeException("几何类型不支持: " + first.geomType());
+            }
+            geometryService.createGistIndex(datasetProperties.getSchema(), tableName);
+            importStatusUpdater.markSuccess(entity.getId(), geomType, first.srid(), featureCount);
+        } catch (Exception e) {
+            log.error("批量 GDB 导入失败, datasetId={}, table={}", entity.getId(), tableName, e);
+            try {
+                geometryService.dropTableIfExists(tableName);
+            } catch (Exception dropEx) {
+                log.error("清理失败表失败: {}", tableName, dropEx);
+            }
+            importStatusUpdater.markFailed(entity.getId(), e.getMessage());
+        }
+    }
+
+    /** 查询 GDB 图层元数据，供批量导入在建表前按坐标系分组。 */
+    public LayerMeta inspectLayer(String path, String layerName) {
+        return queryLayerMeta(path, layerName);
+    }
+
+    public record GdbLayerSource(String path, String layerName) {
+    }
+
+    public record LayerMeta(String geomType, Integer srid, long featureCount) {
     }
 
     /**
@@ -186,8 +241,10 @@ public class ImportAsyncService {
     /**
      * 导入前查询 shp/gdb 的元数据（几何类型、SRID、要素数量）
      */
-    private TableMeta queryLayerMeta(String path, String layerName) {
-        TableMeta meta = new TableMeta();
+    private LayerMeta queryLayerMeta(String path, String layerName) {
+        String geomType = null;
+        Integer srid = null;
+        long featureCount = 0;
 
         try {
             List<String> cmd = new ArrayList<>();
@@ -206,7 +263,7 @@ public class ImportAsyncService {
 
             Pattern geomPattern = Pattern.compile("^Geometry:\\s+(.+)$");
             Pattern countPattern = Pattern.compile("^Feature Count:\\s+(\\d+)$");
-            Pattern epsgPattern = Pattern.compile("ID\\[\"EPSG\",(\\d+)]");
+            Pattern epsgPattern = Pattern.compile("(?:ID\\[\"EPSG\",|AUTHORITY\\[\"EPSG\",\")(\\d+)\"?]");
 
             try (BufferedReader reader = new BufferedReader(
                     new InputStreamReader(process.getInputStream(), StandardCharsets.UTF_8))) {
@@ -214,19 +271,19 @@ public class ImportAsyncService {
                 while ((line = reader.readLine()) != null) {
                     Matcher geomMatcher = geomPattern.matcher(line);
                     if (geomMatcher.find()) {
-                        meta.geomType = geomMatcher.group(1).trim();
+                        geomType = geomMatcher.group(1).trim();
                         continue;
                     }
 
                     Matcher countMatcher = countPattern.matcher(line);
                     if (countMatcher.find()) {
-                        meta.featureCount = Long.parseLong(countMatcher.group(1));
+                        featureCount = Long.parseLong(countMatcher.group(1));
                         continue;
                     }
 
                     Matcher epsgMatcher = epsgPattern.matcher(line);
                     if (epsgMatcher.find()) {
-                        meta.srid = Integer.parseInt(epsgMatcher.group(1));
+                        srid = Integer.parseInt(epsgMatcher.group(1));
                     }
                 }
             }
@@ -243,13 +300,7 @@ public class ImportAsyncService {
             throw new RuntimeException("ogrinfo 过程被中断", e);
         }
 
-        return meta;
-    }
-
-    private static class TableMeta {
-        String geomType;
-        Integer srid;
-        Long featureCount;
+        return new LayerMeta(geomType, srid, featureCount);
     }
 
 }
