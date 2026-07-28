@@ -51,9 +51,9 @@ public class LoginController {
             return R.error(BizCodeEnum.VALID_PARAM_EXCEPTION);
         }
 
-        boolean flag = captchaService.validate(user.getUuid(), user.getCaptcha());
+       /* boolean flag = captchaService.validate(user.getUuid(), user.getCaptcha());
         if (!flag)
-            return R.error(BizCodeEnum.CAPTCHA_ERROR);
+            return R.error(BizCodeEnum.CAPTCHA_ERROR);*/
 
         String token = loginService.login(user, request);
 

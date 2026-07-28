@@ -110,22 +110,31 @@ public class ImportAsyncService {
         cmd.add("PostgreSQL");
         if (isAppend) {
             cmd.add("-append");
+            cmd.add("-addfields");
         } else {
             cmd.add("-overwrite");
         }
         cmd.add(datasetProperties.getPgConnect());
         cmd.add(sourcePath);
         cmd.add("-nln");
-        cmd.add(tableName);
+
+        if (isAppend) {
+            cmd.add(datasetProperties.getSchema() + "." + tableName);
+        } else {
+            cmd.add(tableName);
+
+            // -lco 为图层创建选项，仅在新建表时生效，追加模式下无需传递
+            cmd.add("-lco");
+            cmd.add("GEOMETRY_NAME=geom");
+            cmd.add("-lco");
+            cmd.add("SPATIAL_INDEX=NONE");
+            cmd.add("-lco");
+            cmd.add("SCHEMA=" + datasetProperties.getSchema());
+        }
+
         if (layerName != null) {
             cmd.add(layerName);
         }
-        cmd.add("-lco");
-        cmd.add("GEOMETRY_NAME=geom");
-        cmd.add("-lco");
-        cmd.add("SPATIAL_INDEX=NONE");
-        cmd.add("-lco");
-        cmd.add("SCHEMA=" + datasetProperties.getSchema());
 
         if (sourcePath.toLowerCase().endsWith(".shp")) {
             cmd.add("--config");
