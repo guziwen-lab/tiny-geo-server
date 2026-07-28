@@ -54,6 +54,10 @@ public enum GeomType {
         return null;
     }
 
+    public boolean isMulti() {
+        return geometryName.startsWith("Multi");
+    }
+
     public boolean isPoint() {
         return collectionExtractType == 0;
     }

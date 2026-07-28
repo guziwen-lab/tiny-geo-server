@@ -3,6 +3,7 @@ package com.supermap.modules.dataset.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.supermap.common.util.BeanUtils;
+import com.supermap.enums.UploadStatus;
 import org.springframework.stereotype.Service;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 
@@ -34,6 +35,11 @@ public class DatasetServiceImpl extends ServiceImpl<DatasetDao, DatasetEntity> i
         DatasetEntity datasetEntity = new DatasetEntity();
         BeanUtils.copyProperties(dto, datasetEntity);
         updateById(datasetEntity);
+    }
+
+    @Override
+    public boolean updateStatusBySuccess(Long id, UploadStatus uploadStatus) {
+        return baseMapper.updateStatusBySuccess(id, uploadStatus) > 0;
     }
 
 }

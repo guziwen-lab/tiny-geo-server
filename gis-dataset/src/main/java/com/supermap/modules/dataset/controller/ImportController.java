@@ -2,6 +2,7 @@ package com.supermap.modules.dataset.controller;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.supermap.common.pojo.R;
+import com.supermap.common.util.StringUtils;
 import com.supermap.modules.dataset.dto.UploadGeoJsonDTO;
 import com.supermap.modules.dataset.dto.UploadWktDTO;
 import com.supermap.modules.dataset.service.ImportService;
@@ -47,6 +48,21 @@ public class ImportController {
     public R<List<Long>> importGdb(String path, String layerName) {
         List<Long> ids = importService.importGdb(path, layerName);
         return R.ok(ids);
+    }
+
+    @PostMapping("/append/shp")
+    public R<Long> importShpAppend(String path, Long datasetId) {
+        Long id = importService.importShp(path, datasetId);
+        return R.ok(id);
+    }
+
+    @PostMapping("/append/gdb")
+    public R<Long> importGdbAppend(String path, String layerName, Long datasetId) {
+        if (StringUtils.isEmpty(layerName))
+            throw new IllegalArgumentException("图层名称不能为空");
+
+        Long id = importService.importGdb(path, layerName, datasetId);
+        return R.ok(id);
     }
 
     @PostMapping("/geojson")

@@ -2,6 +2,7 @@ package com.supermap.modules.dataset.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.supermap.enums.UploadStatus;
 import com.supermap.modules.dataset.entity.DatasetEntity;
 import com.supermap.modules.dataset.dto.DatasetDTO;
 import com.supermap.modules.dataset.dto.DatasetSaveDTO;
@@ -18,6 +19,8 @@ public interface DatasetService extends IService<DatasetEntity> {
     Long saveDTO(DatasetSaveDTO dto);
 
     void updateDTOById(DatasetSaveDTO dto);
+
+    boolean updateStatusBySuccess(Long id, UploadStatus uploadStatus);
 
 }
 

@@ -54,21 +54,38 @@ public class ImportServiceImpl implements ImportService {
         String tableName = datasetTableNameGenerator.getTableName();
 
         // 创建占位实体，状态为处理中
-        DatasetEntity entity = new DatasetEntity();
-        entity.setDatasetName(layerName);
-        entity.setDatasetType(DatasetType.SHP.name());
-        entity.setSourceFile(shpPath);
-        entity.setLayerName(layerName);
-        entity.setSchemaName(datasetProperties.getSchema());
-        entity.setTableName(tableName);
-        entity.setStatus(UploadStatus.PROCESSING);
-        entity.setCreatedAt(Instant.now());
-        datasetService.save(entity);
+        DatasetEntity datasetEntity = new DatasetEntity();
+        datasetEntity.setDatasetName(layerName);
+        datasetEntity.setDatasetType(DatasetType.SHP.name());
+        datasetEntity.setSourceFile(shpPath);
+        datasetEntity.setLayerName(layerName);
+        datasetEntity.setSchemaName(datasetProperties.getSchema());
+        datasetEntity.setTableName(tableName);
+        datasetEntity.setStatus(UploadStatus.PROCESSING);
+        datasetEntity.setCreatedAt(Instant.now());
+        datasetService.save(datasetEntity);
 
         // 异步执行导入
-        importAsyncService.importLayerAsync(entity, shpPath, null);
+        importAsyncService.importLayerAsync(datasetEntity, shpPath, null, false);
 
-        return entity.getId();
+        return datasetEntity.getId();
+    }
+
+    @Override
+    public Long importShp(String shpPath, Long datasetId) {
+        DatasetEntity datasetEntity = checkAndGetDatasetEntity(datasetId);
+
+        importAsyncService.importLayerAsync(datasetEntity, shpPath, null, true);
+
+        return datasetId;
+    }
+
+    private DatasetEntity checkAndGetDatasetEntity(Long datasetId) {
+        if (!datasetService.updateStatusBySuccess(datasetId, UploadStatus.PROCESSING)) {
+            throw new IllegalArgumentException("只能追加导入成功的数据集或数据集不存在");
+        }
+
+        return datasetService.getById(datasetId);
     }
 
     @Transactional(rollbackFor = Exception.class)
@@ -111,10 +128,27 @@ public class ImportServiceImpl implements ImportService {
 
         // 异步执行导入
         for (DatasetEntity entity : entities) {
-            importAsyncService.importLayerAsync(entity, gdbPath, entity.getLayerName());
+            importAsyncService.importLayerAsync(entity, gdbPath, entity.getLayerName(), false);
         }
 
         return entities.stream().map(DatasetEntity::getId).collect(Collectors.toList());
+    }
+
+    @Override
+    public Long importGdb(String gdbPath, String layerName, Long datasetId) {
+        List<String> layerNames = listGdbLayers(gdbPath);
+        if (layerNames.isEmpty()) {
+            throw new RuntimeException("GDB中未找到任何图层: " + gdbPath);
+        }
+        if (!layerNames.contains(layerName)) {
+            throw new RuntimeException("图层不存在: " + layerName);
+        }
+
+        DatasetEntity datasetEntity = checkAndGetDatasetEntity(datasetId);
+
+        importAsyncService.importLayerAsync(datasetEntity, gdbPath, layerName, true);
+
+        return datasetId;
     }
 
     @Override

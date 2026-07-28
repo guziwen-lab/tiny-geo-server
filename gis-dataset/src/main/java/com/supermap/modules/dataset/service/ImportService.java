@@ -12,7 +12,11 @@ public interface ImportService {
 
     Long importShp(String path);
 
+    Long importShp(String path, Long datasetId);
+
     List<Long> importGdb(String path, String layerName);
+
+    Long importGdb(String path, String layerName, Long datasetId);
 
     void uploadGeoJson(UploadGeoJsonDTO dto);
 
