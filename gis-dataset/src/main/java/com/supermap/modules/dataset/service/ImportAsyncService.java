@@ -103,7 +103,7 @@ public class ImportAsyncService {
             for (int i = 0; i < sources.size(); i++) {
                 GdbLayerSource source = sources.get(i);
                 LayerMeta meta = queryLayerMeta(source.path(), source.layerName());
-                if (!Objects.equals(first.srid(), meta.srid())) {
+                if (srid == null && !Objects.equals(first.srid(), meta.srid())) {
                     throw new RuntimeException("批量导入分组内 SRID 不一致: " + first.srid() + " / " + meta.srid());
                 }
                 checkGeomTypeCompatible(GeomType.ofOgr2ogrCode(first.geomType()), meta.geomType());
