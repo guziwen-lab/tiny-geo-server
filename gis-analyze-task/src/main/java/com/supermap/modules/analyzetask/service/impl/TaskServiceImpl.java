@@ -8,6 +8,7 @@ import com.supermap.config.DatasetProperties;
 import com.supermap.enums.TaskStatus;
 import com.supermap.modules.analyzetask.dto.StartTaskDTO;
 import com.supermap.modules.analyzetask.dto.TaskDatasetSaveDTO;
+import com.supermap.modules.business.support.LayerInfoBuilder;
 import com.supermap.modules.dataset.entity.DatasetEntity;
 import com.supermap.modules.analyzetask.entity.TaskDatasetEntity;
 
@@ -137,14 +138,7 @@ public class TaskServiceImpl extends ServiceImpl<TaskDao, TaskEntity> implements
      * @return 图层信息列表
      */
     private List<LayerInfo> buildLayerInfo(List<DatasetEntity> datasets) {
-        return datasets.stream().map(item -> {
-            LayerInfo layerInfo = new LayerInfo();
-            layerInfo.setOriginalTableName(item.getTableName());
-            layerInfo.setTableName(item.getTableName());
-            layerInfo.setGeomType(item.getGeomType());
-            layerInfo.setSrid(item.getSrid());
-            return layerInfo;
-        }).toList();
+        return datasets.stream().map(LayerInfoBuilder::fromDatasetEntity).toList();
     }
 
     /**
