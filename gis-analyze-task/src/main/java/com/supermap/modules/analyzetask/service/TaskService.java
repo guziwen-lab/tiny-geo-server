@@ -14,13 +14,13 @@ import com.supermap.modules.analyzetask.dto.TaskSaveDTO;
  */
 public interface TaskService extends IService<TaskEntity> {
 
-    Page<TaskEntity> queryPage(TaskDTO dto);
-
     Long create(TaskSaveDTO dto);
 
-    void updateDTOById(TaskSaveDTO dto);
-
     void start(Long taskId, StartTaskDTO dto);
+
+    Page<TaskEntity> queryPage(TaskDTO dto);
+
+    void updateDTOById(TaskSaveDTO dto);
 
 }
 

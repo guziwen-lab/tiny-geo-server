@@ -29,6 +29,13 @@ public class TaskController {
 
     private final TaskService taskService;
 
+    @Operation(summary = "创建任务")
+    @PostMapping("/create")
+    public R<Long> create(@RequestBody @Validated TaskSaveDTO dto) {
+        Long id = taskService.create(dto);
+        return R.ok(id);
+    }
+
     @Operation(summary = "启动任务")
     @PostMapping("/start/{taskId}")
     public R<Void> start(@PathVariable Long taskId, @RequestBody StartTaskDTO dto) {
@@ -48,13 +55,6 @@ public class TaskController {
     public R<TaskEntity> info(@PathVariable Long id) {
         TaskEntity task = taskService.getById(id);
         return R.ok(task);
-    }
-
-    @Operation(summary = "创建任务")
-    @PostMapping("/create")
-    public R<Long> create(@RequestBody @Validated TaskSaveDTO dto) {
-        Long id = taskService.create(dto);
-        return R.ok(id);
     }
 
     @Operation(summary = "删除")
