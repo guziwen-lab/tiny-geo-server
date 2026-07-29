@@ -20,7 +20,5 @@ public interface TaskService extends IService<TaskEntity> {
 
     Page<TaskEntity> queryPage(TaskDTO dto);
 
-    void updateDTOById(TaskSaveDTO dto);
-
 }
 

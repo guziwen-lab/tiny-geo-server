@@ -3,7 +3,6 @@ package com.supermap.modules.analyzetask.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.supermap.*;
-import com.supermap.common.util.BeanUtils;
 import com.supermap.config.DatasetProperties;
 import com.supermap.enums.TaskStatus;
 import com.supermap.modules.analyzetask.dto.StartTaskDTO;
@@ -76,13 +75,6 @@ public class TaskServiceImpl extends ServiceImpl<TaskDao, TaskEntity> implements
         taskDatasetService.saveBatch(taskDatasetEntities);
 
         return taskEntity.getId();
-    }
-
-    @Override
-    public void updateDTOById(TaskSaveDTO dto) {
-        TaskEntity taskEntity = new TaskEntity();
-        BeanUtils.copyProperties(dto, taskEntity);
-        updateById(taskEntity);
     }
 
     @Override
