@@ -2,6 +2,7 @@ package com.supermap.task;
 
 import com.supermap.*;
 import com.supermap.common.util.CollectionUtils;
+import com.supermap.resolver.GeomTypeResolver;
 import com.supermap.service.*;
 import com.supermap.enums.AnalysisType;
 import com.supermap.enums.OverlayAlgorithm;
@@ -35,6 +36,11 @@ public class OverlayAnalysisTask extends AbstractAnalysisTask<OverlayParam> {
     @Override
     public AnalysisType getType() {
         return AnalysisType.OVERLAY;
+    }
+
+    @Override
+    public GeomType resultGeomType(AnalysisContext<OverlayParam> context) {
+        return GeomTypeResolver.resolveOverlay(context.getInputLayers());
     }
 
     @Override

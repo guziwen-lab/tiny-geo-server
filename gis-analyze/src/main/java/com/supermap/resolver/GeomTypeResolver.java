@@ -32,13 +32,19 @@ public final class GeomTypeResolver {
 
             // Spatial Join 保持目标图层类型（默认第一个图层）
             case SPATIAL_JOIN -> layerInfos.get(0).getGeomType();
+
+            // 属性过滤：保持输入几何类型
+            case FILTER -> layerInfos.get(0).getGeomType();
+
+            // 属性计算：保持输入几何类型
+            case ATTRIBUTE_CALCULATE -> layerInfos.get(0).getGeomType();
         };
     }
 
     /**
      * Overlay 几何类型推导
      */
-    private static GeomType resolveOverlay(List<LayerInfo> layerInfos) {
+    public static GeomType resolveOverlay(List<LayerInfo> layerInfos) {
         GeomType result = layerInfos.get(0).getGeomType();
         for (int i = 1; i < layerInfos.size(); i++) {
             result = resolveOverlay(result, layerInfos.get(i).getGeomType());

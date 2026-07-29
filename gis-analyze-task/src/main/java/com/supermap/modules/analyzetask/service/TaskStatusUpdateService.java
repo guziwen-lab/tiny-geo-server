@@ -39,6 +39,7 @@ public class TaskStatusUpdateService {
         DatasetEntity resultDatasetEntity = saveResultToDataset(result, context);
 
         TaskEntity update = taskDao.selectById(task.getId());
+        update.setGeomType(context.getGeomType());
         update.setStatus(TaskStatus.SUCCESS);
         update.setResultTableName(result.getResultTableName());
         update.setFeatureCount(result.getFeatureCount());

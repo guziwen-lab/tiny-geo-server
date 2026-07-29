@@ -5,7 +5,6 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.supermap.*;
 import com.supermap.common.util.BeanUtils;
 import com.supermap.config.DatasetProperties;
-import com.supermap.enums.GeomType;
 import com.supermap.enums.TaskStatus;
 import com.supermap.modules.analyzetask.dto.StartTaskDTO;
 import com.supermap.modules.analyzetask.dto.TaskDatasetSaveDTO;
@@ -15,7 +14,6 @@ import com.supermap.modules.analyzetask.entity.TaskDatasetEntity;
 import com.supermap.modules.dataset.service.DatasetService;
 import com.supermap.modules.analyzetask.service.TaskDatasetService;
 import com.supermap.modules.analyzetask.service.TaskAsyncService;
-import com.supermap.resolver.GeomTypeResolver;
 import com.supermap.task.AnalysisTask;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -109,10 +107,6 @@ public class TaskServiceImpl extends ServiceImpl<TaskDao, TaskEntity> implements
         // 构建图层信息
         List<LayerInfo> layerInfos = buildLayerInfo(datasets);
 
-        // 判断导出的类型
-        GeomType geomType = GeomTypeResolver.resolve(taskEntity.getAnalysisType(), layerInfos);
-        taskEntity.setGeomType(geomType);
-
         // 标记任务为处理中
         taskEntity.setStatus(TaskStatus.PROCESSING);
         taskEntity.setSchemaName(schemaName);
@@ -128,7 +122,6 @@ public class TaskServiceImpl extends ServiceImpl<TaskDao, TaskEntity> implements
                 taskEntity.getTaskName() : dto.getResultLayerName());
         context.setSchema(datasetProperties.getSchema());
         context.setResultTableName("analyze_" + taskId);
-        context.setGeomType(geomType);
 
         AnalysisTask<?> analysisTask = analysisEngine.getTask(taskEntity.getAnalysisType());
         context.setParam(analysisTask.buildParam(taskEntity.getSubType()));

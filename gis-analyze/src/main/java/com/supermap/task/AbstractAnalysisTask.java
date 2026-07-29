@@ -68,6 +68,7 @@ public abstract class AbstractAnalysisTask<T extends AnalysisParam> implements A
      * 执行前处理
      */
     protected void beforeExecute(AnalysisContext<T> context) {
+        setResultGeomType(context);
         setColumns(context);
         fixGeometry(context);
         unifiedSrid(context);
@@ -166,6 +167,14 @@ public abstract class AbstractAnalysisTask<T extends AnalysisParam> implements A
      */
     protected String getTaskName() {
         return getClass().getSimpleName();
+    }
+
+    /**
+     * 判断导出的Geom类型
+     */
+    private void setResultGeomType(AnalysisContext<T> context) {
+        GeomType geomType = resultGeomType(context);
+        context.setGeomType(geomType);
     }
 
     /**

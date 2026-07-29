@@ -5,6 +5,7 @@ import com.supermap.common.util.CollectionUtils;
 import com.supermap.common.util.StringUtils;
 import com.supermap.enums.AnalysisType;
 import com.supermap.enums.GeomType;
+import com.supermap.resolver.GeomTypeResolver;
 import com.supermap.security.SqlInjectionCheck;
 import com.supermap.service.impl.IntersectSplitExecuteService;
 import com.supermap.task.param.IntersectSplitParam;
@@ -40,6 +41,11 @@ public class IntersectSplitAnalysisTask extends AbstractAnalysisTask<IntersectSp
     @Override
     public AnalysisType getType() {
         return AnalysisType.INTERSECT_SPLIT;
+    }
+
+    @Override
+    public GeomType resultGeomType(AnalysisContext<IntersectSplitParam> context) {
+        return GeomTypeResolver.resolveOverlay(context.getInputLayers());
     }
 
     @Override
