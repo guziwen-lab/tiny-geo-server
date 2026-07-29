@@ -32,8 +32,8 @@ public class TaskEntity {
     @Schema(title = "分析类型")
     private AnalysisType analysisType;
 
-    @Schema(title = "子类型")
-    private String subType;
+    @Schema(title = "构建任务参数")
+    private String taskParam;
 
     @Schema(title = "状态")
     private TaskStatus status;

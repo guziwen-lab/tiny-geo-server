@@ -26,8 +26,8 @@ public class TaskSaveDTO {
     @Schema(title = "分析类型")
     private AnalysisType analysisType;
 
-    @Schema(title = "子类型")
-    private String subType;
+    @Schema(title = "构建任务参数")
+    private String taskParam;
 
     @Schema(title = "任务数据集列表")
     @NotEmpty

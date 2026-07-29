@@ -60,7 +60,7 @@ public class TaskServiceImpl extends ServiceImpl<TaskDao, TaskEntity> implements
         taskEntity.setTaskName(dto.getTaskName());
         taskEntity.setStatus(TaskStatus.NOT_PROCESSED);
         taskEntity.setAnalysisType(dto.getAnalysisType());
-        taskEntity.setSubType(dto.getSubType());
+        taskEntity.setTaskParam(dto.getTaskParam());
         taskEntity.setCreatedAt(Instant.now());
         save(taskEntity);
 
@@ -117,7 +117,7 @@ public class TaskServiceImpl extends ServiceImpl<TaskDao, TaskEntity> implements
         context.setResultTableName("analyze_" + taskId);
 
         AnalysisTask<?> analysisTask = analysisEngine.getTask(taskEntity.getAnalysisType());
-        context.setParam(analysisTask.buildParam(taskEntity.getSubType()));
+        context.setParam(analysisTask.buildParam(taskEntity.getTaskParam()));
 
         // 异步执行分析任务
         taskAsyncService.executeAsync(taskEntity, taskEntity.getAnalysisType(), context);

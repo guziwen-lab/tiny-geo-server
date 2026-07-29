@@ -50,12 +50,12 @@ public class IntersectSplitAnalysisTask extends AbstractAnalysisTask<IntersectSp
     }
 
     @Override
-    public IntersectSplitParam buildParam(String subType) {
-        if (StringUtils.isEmpty(subType)) {
+    public IntersectSplitParam buildParam(String param) {
+        if (StringUtils.isEmpty(param)) {
             return new IntersectSplitParam(Collections.emptyList(), Collections.emptyList());
         }
         // 格式：A表字段|B表字段，逗号分隔
-        String[] parts = subType.split("\\|", 2);
+        String[] parts = param.split("\\|", 2);
         List<String> splitFieldsA = parseFields(parts[0]);
         List<String> splitFieldsB = parts.length > 1 ? parseFields(parts[1]) : Collections.emptyList();
         return new IntersectSplitParam(splitFieldsA, splitFieldsB);
