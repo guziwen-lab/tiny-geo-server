@@ -8,7 +8,7 @@ import com.supermap.config.DatasetProperties;
 import com.supermap.enums.TaskStatus;
 import com.supermap.modules.analyzetask.dto.StartTaskDTO;
 import com.supermap.modules.analyzetask.dto.TaskDatasetSaveDTO;
-import com.supermap.modules.business.support.LayerInfoBuilder;
+import com.supermap.support.LayerInfoBuilder;
 import com.supermap.modules.dataset.entity.DatasetEntity;
 import com.supermap.modules.analyzetask.entity.TaskDatasetEntity;
 

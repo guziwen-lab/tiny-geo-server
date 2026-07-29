@@ -1,4 +1,4 @@
-package com.supermap.modules.business.support;
+package com.supermap.support;
 
 import com.supermap.AnalysisResult;
 import com.supermap.LayerInfo;
