@@ -7,9 +7,7 @@ import com.supermap.enums.DatasetType;
 import com.supermap.enums.GeomType;
 import com.supermap.enums.UploadStatus;
 import com.supermap.modules.dataset.dao.FeatureDao;
-import com.supermap.modules.dataset.dto.UploadGeoJsonDTO;
-import com.supermap.modules.dataset.dto.UploadWktDTO;
-import com.supermap.modules.dataset.dto.BatchImportGdbDTO;
+import com.supermap.modules.dataset.dto.*;
 import com.supermap.modules.dataset.entity.DatasetEntity;
 import com.supermap.modules.dataset.entity.FeatureEntity;
 import com.supermap.modules.dataset.service.ImportAsyncService;
@@ -162,7 +160,7 @@ public class ImportServiceImpl implements ImportService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public List<Long> importGdbBatch(BatchImportGdbDTO dto) {
-        Map<GdbGroupKey, List<ImportAsyncService.GdbLayerSource>> groups = new LinkedHashMap<>();
+        Map<GdbGroupKey, List<GdbLayerSource>> groups = new LinkedHashMap<>();
         for (String gdbPath : dto.getPaths()) {
             if (StringUtils.isEmpty(gdbPath)) {
                 throw new IllegalArgumentException("GDB 路径不能为空");
@@ -176,7 +174,7 @@ public class ImportServiceImpl implements ImportService {
                 if (!layerNames.contains(layerName)) {
                     throw new IllegalArgumentException("图层不存在: " + layerName + ", GDB=" + gdbPath);
                 }
-                ImportAsyncService.LayerMeta meta = importAsyncService.inspectLayer(gdbPath, layerName);
+                LayerMeta meta = importAsyncService.inspectLayer(gdbPath, layerName);
                 if (meta.srid() == null || meta.srid() <= 0) {
                     throw new IllegalArgumentException("图层没有可识别的 EPSG SRID，无法按坐标系归并: "
                             + gdbPath + " / " + layerName);
@@ -186,19 +184,19 @@ public class ImportServiceImpl implements ImportService {
                 }
                 GdbGroupKey key = new GdbGroupKey(layerName, meta.srid(), meta.geomType());
                 groups.computeIfAbsent(key, ignored -> new ArrayList<>())
-                        .add(new ImportAsyncService.GdbLayerSource(gdbPath, layerName));
+                        .add(new GdbLayerSource(gdbPath, layerName));
             }
         }
 
         List<DatasetEntity> entities = new ArrayList<>();
-        List<Map.Entry<GdbGroupKey, List<ImportAsyncService.GdbLayerSource>>> entries = new ArrayList<>(groups.entrySet());
-        for (Map.Entry<GdbGroupKey, List<ImportAsyncService.GdbLayerSource>> entry : entries) {
+        List<Map.Entry<GdbGroupKey, List<GdbLayerSource>>> entries = new ArrayList<>(groups.entrySet());
+        for (Map.Entry<GdbGroupKey, List<GdbLayerSource>> entry : entries) {
             GdbGroupKey key = entry.getKey();
             DatasetEntity entity = new DatasetEntity();
-            entity.setDatasetName(key.layerName + "_srid_" + key.srid);
+            entity.setDatasetName(key.layerName() + "_srid_" + key.srid());
             entity.setDatasetType(DatasetType.GDB.name());
-            entity.setSourceFile("批量GDB(" + entry.getValue().size() + "个), SRID=" + key.srid);
-            entity.setLayerName(key.layerName);
+            entity.setSourceFile("批量GDB(" + entry.getValue().size() + "个), SRID=" + key.srid());
+            entity.setLayerName(key.layerName());
             entity.setSchemaName(datasetProperties.getSchema());
             entity.setTableName(datasetTableNameGenerator.getTableName());
             entity.setStatus(UploadStatus.PROCESSING);
@@ -290,9 +288,6 @@ public class ImportServiceImpl implements ImportService {
             name = name.substring(0, dot);
         }
         return name;
-    }
-
-    private record GdbGroupKey(String layerName, Integer srid, String geomType) {
     }
 
 }

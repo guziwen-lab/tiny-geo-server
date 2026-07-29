@@ -2,6 +2,8 @@ package com.supermap.modules.dataset.service;
 
 import com.supermap.config.DatasetProperties;
 import com.supermap.enums.GeomType;
+import com.supermap.modules.dataset.dto.GdbLayerSource;
+import com.supermap.modules.dataset.dto.LayerMeta;
 import com.supermap.modules.dataset.entity.DatasetEntity;
 import com.supermap.service.GeometryService;
 import lombok.RequiredArgsConstructor;
@@ -130,12 +132,6 @@ public class ImportAsyncService {
     /** 查询 GDB 图层元数据，供批量导入在建表前按坐标系分组。 */
     public LayerMeta inspectLayer(String path, String layerName) {
         return queryLayerMeta(path, layerName);
-    }
-
-    public record GdbLayerSource(String path, String layerName) {
-    }
-
-    public record LayerMeta(String geomType, Integer srid, long featureCount) {
     }
 
     /**
