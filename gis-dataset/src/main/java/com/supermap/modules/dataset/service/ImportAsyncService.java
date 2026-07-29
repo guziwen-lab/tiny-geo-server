@@ -184,6 +184,9 @@ public class ImportAsyncService {
             // -lco 为图层创建选项，仅在新建表时生效，追加模式下无需传递
             cmd.add("-lco");
             cmd.add("GEOMETRY_NAME=geom");
+            // 统一源要素主键列名，供叠加结果追溯及面积守恒校验使用。
+            cmd.add("-lco");
+            cmd.add("FID=id");
             cmd.add("-lco");
             cmd.add("SPATIAL_INDEX=NONE");
             cmd.add("-lco");

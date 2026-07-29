@@ -2,6 +2,7 @@ package com.supermap.task.impl;
 
 import com.supermap.*;
 import com.supermap.common.util.CollectionUtils;
+import com.supermap.common.util.JSON;
 import com.supermap.common.util.StringUtils;
 import com.supermap.enums.AnalysisType;
 import com.supermap.enums.GeomType;
@@ -10,6 +11,7 @@ import com.supermap.security.SqlInjectionCheck;
 import com.supermap.service.impl.IntersectSplitExecuteService;
 import com.supermap.task.AbstractAnalysisTask;
 import com.supermap.task.param.IntersectSplitParam;
+import com.supermap.task.param.IntersectSplitParam.SplitField;
 import com.supermap.type.Column;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -50,15 +52,16 @@ public class IntersectSplitAnalysisTask extends AbstractAnalysisTask<IntersectSp
     }
 
     @Override
-    public IntersectSplitParam buildParam(String param) {
-        if (StringUtils.isEmpty(param)) {
-            return new IntersectSplitParam(Collections.emptyList(), Collections.emptyList());
+    public IntersectSplitParam buildParam(String json) {
+        if (StringUtils.isEmpty(json)) {
+            return new IntersectSplitParam(Collections.emptyList(), Collections.emptyList(), null, null);
         }
-        // 格式：A表字段|B表字段，逗号分隔
-        String[] parts = param.split("\\|", 2);
-        List<String> splitFieldsA = parseFields(parts[0]);
-        List<String> splitFieldsB = parts.length > 1 ? parseFields(parts[1]) : Collections.emptyList();
-        return new IntersectSplitParam(splitFieldsA, splitFieldsB);
+
+        try {
+            return JSON.parseObject(json, IntersectSplitParam.class);
+        } catch (Exception e) {
+            throw new IllegalArgumentException("相交面积拆分分析任务参数解析失败 JSON: " + json, e);
+        }
     }
 
     @Override
@@ -111,23 +114,26 @@ public class IntersectSplitAnalysisTask extends AbstractAnalysisTask<IntersectSp
         super.beforeExecute(context);
 
         IntersectSplitParam param = context.getParam();
-        List<String> splitFieldsA = param.getSplitFieldsA();
-        List<String> splitFieldsB = param.getSplitFieldsB();
+        List<SplitField> splitFieldsA = param.getSplitFieldsA();
+        List<SplitField> splitFieldsB = param.getSplitFieldsB();
         List<LayerInfo> layers = context.getInputLayers();
         validateSplitFields(splitFieldsA, layers.get(0).getColumns(), "A");
         validateSplitFields(splitFieldsB, layers.get(1).getColumns(), "B");
+        validateResultField(param.getRatioFieldA(), "A比例");
+        validateResultField(param.getRatioFieldB(), "B比例");
     }
 
     /**
      * 解析逗号分隔的字段列表
      */
-    private List<String> parseFields(String s) {
+    private List<SplitField> parseFields(String s) {
         if (StringUtils.isEmpty(s)) {
             return Collections.emptyList();
         }
         return Arrays.stream(s.split(","))
                 .map(String::trim)
                 .filter(f -> !f.isEmpty())
+                .map(SplitField::withDefaultResult)
                 .toList();
     }
 
@@ -138,7 +144,7 @@ public class IntersectSplitAnalysisTask extends AbstractAnalysisTask<IntersectSp
      * @param columns     图层实际字段列表
      * @param side        图层标识（A/B），用于错误提示
      */
-    private void validateSplitFields(List<String> splitFields, List<Column> columns, String side) {
+    private void validateSplitFields(List<SplitField> splitFields, List<Column> columns, String side) {
         if (CollectionUtils.isEmpty(splitFields)) {
             return;
         }
@@ -147,13 +153,20 @@ public class IntersectSplitAnalysisTask extends AbstractAnalysisTask<IntersectSp
             availableNames.add(column.name().toLowerCase());
         }
 
-        SqlInjectionCheck.checkColumnName(splitFields.toArray(new String[0]));
+        SqlInjectionCheck.checkColumnName(splitFields.stream().map(SplitField::sourceField).toArray(String[]::new));
+        SqlInjectionCheck.checkColumnName(splitFields.stream().map(SplitField::resultField).toArray(String[]::new));
 
-        for (String field : splitFields) {
-            if (!availableNames.contains(field.toLowerCase())) {
+        for (SplitField field : splitFields) {
+            if (!availableNames.contains(field.sourceField().toLowerCase())) {
                 throw new IllegalArgumentException(
-                        "拆分字段 " + field + " 在" + side + "图层中不存在");
+                        "拆分字段 " + field.sourceField() + " 在" + side + "图层中不存在");
             }
+        }
+    }
+
+    private void validateResultField(String field, String label) {
+        if (!StringUtils.isEmpty(field)) {
+            SqlInjectionCheck.checkColumnName(field);
         }
     }
 

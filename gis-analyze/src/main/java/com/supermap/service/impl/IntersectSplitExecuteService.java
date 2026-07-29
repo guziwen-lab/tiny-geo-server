@@ -5,6 +5,7 @@ import com.supermap.LayerInfo;
 import com.supermap.service.AbstractExecuteService;
 import com.supermap.service.GeometryExpression;
 import com.supermap.task.param.IntersectSplitParam;
+import com.supermap.task.param.IntersectSplitParam.SplitField;
 import com.supermap.type.Column;
 import com.supermap.util.TableNameUtils;
 import org.springframework.stereotype.Service;
@@ -28,11 +29,17 @@ public class IntersectSplitExecuteService extends AbstractExecuteService<Interse
     protected String buildExecuteSql(LayerInfo current, LayerInfo next, String resultTableName,
                                      AnalysisContext<IntersectSplitParam> context) {
         IntersectSplitParam param = context.getParam();
-        List<String> splitFieldsA = param.getSplitFieldsA();
-        List<String> splitFieldsB = param.getSplitFieldsB();
+        List<SplitField> splitFieldsA = param.getSplitFieldsA();
+        List<SplitField> splitFieldsB = param.getSplitFieldsB();
 
         Set<String> usedNames = new HashSet<>();
         List<String> selectItems = new ArrayList<>();
+
+        // 源要素主键用于面积守恒校验及定位异常图斑。
+        selectItems.add("a.id AS source_a_id");
+        usedNames.add("source_a_id");
+        selectItems.add("b.id AS source_b_id");
+        usedNames.add("source_b_id");
 
         // A表（当前图层）全部属性字段
         for (Column column : current.getColumns()) {
@@ -53,15 +60,26 @@ public class IntersectSplitExecuteService extends AbstractExecuteService<Interse
         String ratioB = intersectionArea + " / NULLIF(ST_Area(b.geom), 0)";
 
         // A表拆分字段：按A表原图斑面积比例拆分
-        for (String field : splitFieldsA) {
-            String splitAlias = getUniqueFieldName(field + "_split", usedNames);
-            selectItems.add("COALESCE(a.\"%s\", 0) * (%s) AS \"%s\"".formatted(field, ratioA, splitAlias));
+        for (SplitField field : splitFieldsA) {
+            String splitAlias = getUniqueFieldName(field.resultField(), usedNames);
+            selectItems.add("COALESCE(a.\"%s\", 0) * (%s) AS \"%s\""
+                    .formatted(field.sourceField(), ratioA, splitAlias));
         }
 
         // B表拆分字段：按B表原图斑面积比例拆分
-        for (String field : splitFieldsB) {
-            String splitAlias = getUniqueFieldName(field + "_split", usedNames);
-            selectItems.add("COALESCE(b.\"%s\", 0) * (%s) AS \"%s\"".formatted(field, ratioB, splitAlias));
+        for (SplitField field : splitFieldsB) {
+            String splitAlias = getUniqueFieldName(field.resultField(), usedNames);
+            selectItems.add("COALESCE(b.\"%s\", 0) * (%s) AS \"%s\""
+                    .formatted(field.sourceField(), ratioB, splitAlias));
+        }
+
+        if (param.getRatioFieldA() != null && !param.getRatioFieldA().isBlank()) {
+            String ratioAlias = getUniqueFieldName(param.getRatioFieldA(), usedNames);
+            selectItems.add("(%s) AS \"%s\"".formatted(ratioA, ratioAlias));
+        }
+        if (param.getRatioFieldB() != null && !param.getRatioFieldB().isBlank()) {
+            String ratioAlias = getUniqueFieldName(param.getRatioFieldB(), usedNames);
+            selectItems.add("(%s) AS \"%s\"".formatted(ratioB, ratioAlias));
         }
 
         // 几何字段
