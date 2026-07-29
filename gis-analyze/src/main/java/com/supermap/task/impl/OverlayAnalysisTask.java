@@ -1,4 +1,4 @@
-package com.supermap.task;
+package com.supermap.task.impl;
 
 import com.supermap.*;
 import com.supermap.common.util.CollectionUtils;
@@ -7,6 +7,7 @@ import com.supermap.service.*;
 import com.supermap.enums.AnalysisType;
 import com.supermap.enums.OverlayAlgorithm;
 import com.supermap.enums.GeomType;
+import com.supermap.task.AbstractAnalysisTask;
 import com.supermap.task.param.OverlayParam;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;

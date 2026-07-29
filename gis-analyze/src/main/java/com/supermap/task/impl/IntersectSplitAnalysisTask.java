@@ -1,4 +1,4 @@
-package com.supermap.task;
+package com.supermap.task.impl;
 
 import com.supermap.*;
 import com.supermap.common.util.CollectionUtils;
@@ -8,6 +8,7 @@ import com.supermap.enums.GeomType;
 import com.supermap.resolver.GeomTypeResolver;
 import com.supermap.security.SqlInjectionCheck;
 import com.supermap.service.impl.IntersectSplitExecuteService;
+import com.supermap.task.AbstractAnalysisTask;
 import com.supermap.task.param.IntersectSplitParam;
 import com.supermap.type.Column;
 import lombok.RequiredArgsConstructor;

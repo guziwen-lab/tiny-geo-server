@@ -7,6 +7,7 @@ import com.supermap.dao.ExecuteSqlMapper;
 import com.supermap.security.SqlInjectionCheck;
 import com.supermap.type.Column;
 import com.supermap.util.TempTableNameGenerator;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
@@ -15,6 +16,7 @@ import java.util.Set;
 /**
  * @author gzw
  */
+@Slf4j
 public abstract class AbstractExecuteService<T extends AnalysisParam> implements ExecuteService<T> {
 
     @Autowired
@@ -32,6 +34,7 @@ public abstract class AbstractExecuteService<T extends AnalysisParam> implements
         String resultTableName = tempTableNameGenerator.getTableName();
 
         String sql = buildExecuteSql(current, next, resultTableName, context);
+        log.debug("[taskId: {}] execute sql: {}", context.getTaskId(), sql);
 
         executeSqlMapper.executeSql(sql);
 
