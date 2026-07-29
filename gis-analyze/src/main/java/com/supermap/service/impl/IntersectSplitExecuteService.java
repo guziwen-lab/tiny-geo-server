@@ -34,9 +34,6 @@ public class IntersectSplitExecuteService extends AbstractExecuteService<Interse
         Set<String> usedNames = new HashSet<>();
         List<String> selectItems = new ArrayList<>();
 
-        // 结果表主键
-        selectItems.add("row_number() OVER () AS id");
-
         // A表（当前图层）全部属性字段
         for (Column column : current.getColumns()) {
             String alias = getUniqueFieldName(column.name(), usedNames);
@@ -73,17 +70,25 @@ public class IntersectSplitExecuteService extends AbstractExecuteService<Interse
         selectItems.add(geomExpr + " AS geom");
 
         // 构建 CREATE TABLE AS SELECT
+        // JOIN 条件：ST_Intersects 走空间索引初筛，ST_Relate('2********') 要求内部相交且交集为二维面，
+        // 排除仅共享边界（共边/共点）导致的空面结果；
+        // 外层 NOT ST_IsEmpty 兜底过滤浮点精度产生的空几何，row_number 在过滤后生成以保证 id 连续
         String currentTable = TableNameUtils.getTableNameWithSchema(context.getSchema(), current.getTableName());
         String nextTable = TableNameUtils.getTableNameWithSchema(context.getSchema(), next.getTableName());
         String resultTable = TableNameUtils.getTableNameWithSchema(context.getSchema(), resultTableName);
 
         return """
                 CREATE TABLE %s AS
+                SELECT row_number() OVER () AS id, t.*
+                FROM (
                 SELECT
                 %s
                 FROM %s a
                 JOIN %s b
                   ON ST_Intersects(a.geom, b.geom)
+                 AND ST_Relate(a.geom, b.geom, '2********')
+                ) t
+                WHERE NOT ST_IsEmpty(t.geom)
                 """.formatted(resultTable, String.join(",\n", selectItems), currentTable, nextTable);
     }
 
