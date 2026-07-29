@@ -16,6 +16,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -51,10 +53,31 @@ public class ImportController {
         return R.ok(ids);
     }
 
+    /**
+     * 按实际 SRID（以及不能混存的图层、几何类型）将一批 GDB 归并为数据集。
+     * SRID 是坐标处理的最小颗粒度，不同高斯分带不会被写入同一张表。
+     */
     @PostMapping("/gdb/batch")
-    public R<List<Long>> importGdbBatch(@RequestBody @Validated BatchImportGdbDTO dto) {
-        List<Long> ids = importService.importGdbBatch(dto);
+    public R<List<Long>> importGdbBatch(@RequestBody @Validated List<BatchImportGdbDTO> dtoList) {
+        List<Long> ids = importService.importGdbBatch(dtoList);
         return R.ok(ids);
+    }
+
+    @PostMapping("/gdb/batch/unified-srid")
+    public R<Long> importGdbBatchUnifiedSrid(String path, String layerName, Integer srid) {
+        File dir = new File(path);
+        File[] files = dir.listFiles(f -> f.isDirectory() && f.getName().endsWith(".gdb"));
+
+        if (files == null)
+            throw new IllegalArgumentException("文件夹为空");
+
+        List<String> paths = new ArrayList<>(files.length);
+        for (File file : files) {
+            paths.add(file.getAbsolutePath());
+        }
+
+        Long id = importService.importGdbBatchUnifiedSrid(paths, layerName, srid);
+        return R.ok(id);
     }
 
     @PostMapping("/append/shp")

@@ -4,8 +4,6 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotEmpty;
 import lombok.Data;
 
-import java.util.List;
-
 /**
  * 一批 GDB 图层导入请求。
  * 同一图层、同一 SRID、同一几何类型的数据会追加到同一个数据集。
@@ -16,8 +14,9 @@ public class BatchImportGdbDTO {
 
     @NotEmpty
     @Schema(title = "GDB 路径列表")
-    private List<String> paths;
+    private String paths;
 
+    @NotEmpty
     @Schema(title = "指定图层名；为空时导入每个 GDB 中的全部图层")
     private String layerName;
 

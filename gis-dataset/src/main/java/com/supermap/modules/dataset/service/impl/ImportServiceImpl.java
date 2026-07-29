@@ -159,9 +159,11 @@ public class ImportServiceImpl implements ImportService {
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public List<Long> importGdbBatch(BatchImportGdbDTO dto) {
+    public List<Long> importGdbBatch(List<BatchImportGdbDTO> dtoList) {
         Map<GdbGroupKey, List<GdbLayerSource>> groups = new LinkedHashMap<>();
-        for (String gdbPath : dto.getPaths()) {
+
+        for (BatchImportGdbDTO dto : dtoList) {
+            String gdbPath = dto.getPaths();
             if (StringUtils.isEmpty(gdbPath)) {
                 throw new IllegalArgumentException("GDB 路径不能为空");
             }
@@ -174,7 +176,7 @@ public class ImportServiceImpl implements ImportService {
                 if (!layerNames.contains(layerName)) {
                     throw new IllegalArgumentException("图层不存在: " + layerName + ", GDB=" + gdbPath);
                 }
-                LayerMeta meta = importAsyncService.inspectLayer(gdbPath, layerName);
+                LayerMeta meta = importAsyncService.queryLayerMeta(gdbPath, layerName);
                 if (meta.srid() == null || meta.srid() <= 0) {
                     throw new IllegalArgumentException("图层没有可识别的 EPSG SRID，无法按坐标系归并: "
                             + gdbPath + " / " + layerName);
@@ -205,7 +207,7 @@ public class ImportServiceImpl implements ImportService {
         }
         datasetService.saveBatch(entities);
         for (int i = 0; i < entities.size(); i++) {
-            importAsyncService.importLayersAsync(entities.get(i), entries.get(i).getValue());
+            importAsyncService.importLayersAsync(entities.get(i), entries.get(i).getValue(), null);
         }
         return entities.stream().map(DatasetEntity::getId).toList();
     }
@@ -228,6 +230,36 @@ public class ImportServiceImpl implements ImportService {
         featureEntity.setName(dto.getName());
         featureEntity.setProperties(JSON.toJSONString(dto.getProperties()));
         featureDao.saveWithWkt(featureEntity, wkt, srid);
+    }
+
+    @Override
+    public Long importGdbBatchUnifiedSrid(List<String> paths, String layerName, Integer srid) {
+        List<GdbLayerSource> sources = new ArrayList<>();
+        for (String gdbPath : paths) {
+            List<String> layerNames = listGdbLayers(gdbPath);
+            if (layerNames.isEmpty())
+                throw new IllegalArgumentException("GDB中未找到任何图层: " + gdbPath);
+            if (!layerNames.contains(layerName))
+                throw new IllegalArgumentException("图层不存在: " + layerName + ", GDB=" + gdbPath);
+
+            GdbLayerSource gdbLayerSource = new GdbLayerSource(gdbPath, layerName);
+            sources.add(gdbLayerSource);
+        }
+
+        DatasetEntity datasetEntity = new DatasetEntity();
+        datasetEntity.setDatasetName(layerName);
+        datasetEntity.setDatasetType(DatasetType.GDB.name());
+        datasetEntity.setSourceFile(String.join(",", paths));
+        datasetEntity.setLayerName(layerName);
+        datasetEntity.setSchemaName(datasetProperties.getSchema());
+        datasetEntity.setTableName(datasetTableNameGenerator.getTableName());
+        datasetEntity.setStatus(UploadStatus.PROCESSING);
+        datasetEntity.setCreatedAt(Instant.now());
+        datasetService.save(datasetEntity);
+
+        importAsyncService.importLayersAsync(datasetEntity, sources, srid);
+
+        return datasetEntity.getId();
     }
 
     /**

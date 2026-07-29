@@ -1,5 +1,6 @@
 package com.supermap.modules.dataset.service;
 
+import com.supermap.common.util.CollectionUtils;
 import com.supermap.config.DatasetProperties;
 import com.supermap.enums.GeomType;
 import com.supermap.modules.dataset.dto.GdbLayerSource;
@@ -52,7 +53,7 @@ public class ImportAsyncService {
             }
 
             // 执行 ogr2ogr 导入
-            execOgr2ogr(sourcePath, tableName, exportLayerName, isAppend, entity.getGeomType());
+            execOgr2ogr(sourcePath, tableName, exportLayerName, isAppend, entity.getGeomType(), null);
 
             // 检查几何类型（优先以 PostgreSQL 实际存储的几何类型为准）
             GeomType geomType = geometryService.resolveActualGeomType(
@@ -90,24 +91,24 @@ public class ImportAsyncService {
      * 否则“首个建表”与后续“追加”会产生竞争。
      */
     @Async("importTaskExecutor")
-    public void importLayersAsync(DatasetEntity entity, List<GdbLayerSource> sources) {
+    public void importLayersAsync(DatasetEntity entity, List<GdbLayerSource> sources, Integer srid) {
         String tableName = entity.getTableName();
         try {
-            if (sources.isEmpty()) {
+            if (CollectionUtils.isEmpty(sources)) {
                 throw new IllegalArgumentException("导入图层不能为空");
             }
 
-            LayerMeta first = inspectLayer(sources.get(0).path(), sources.get(0).layerName());
+            LayerMeta first = queryLayerMeta(sources.get(0).path(), sources.get(0).layerName());
             long featureCount = 0;
             for (int i = 0; i < sources.size(); i++) {
                 GdbLayerSource source = sources.get(i);
-                LayerMeta meta = inspectLayer(source.path(), source.layerName());
+                LayerMeta meta = queryLayerMeta(source.path(), source.layerName());
                 if (!Objects.equals(first.srid(), meta.srid())) {
                     throw new RuntimeException("批量导入分组内 SRID 不一致: " + first.srid() + " / " + meta.srid());
                 }
                 checkGeomTypeCompatible(GeomType.ofOgr2ogrCode(first.geomType()), meta.geomType());
                 execOgr2ogr(source.path(), tableName, source.layerName(), i > 0,
-                        i == 0 ? null : GeomType.ofOgr2ogrCode(first.geomType()));
+                        i == 0 ? null : GeomType.ofOgr2ogrCode(first.geomType()), srid);
                 featureCount += meta.featureCount();
             }
 
@@ -117,7 +118,7 @@ public class ImportAsyncService {
                 throw new RuntimeException("几何类型不支持: " + first.geomType());
             }
             geometryService.createGistIndex(datasetProperties.getSchema(), tableName);
-            importStatusUpdater.markSuccess(entity.getId(), geomType, first.srid(), featureCount);
+            importStatusUpdater.markSuccess(entity.getId(), geomType, srid == null ? first.srid() : srid, featureCount);
         } catch (Exception e) {
             log.error("批量 GDB 导入失败, datasetId={}, table={}", entity.getId(), tableName, e);
             try {
@@ -127,11 +128,6 @@ public class ImportAsyncService {
             }
             importStatusUpdater.markFailed(entity.getId(), e.getMessage());
         }
-    }
-
-    /** 查询 GDB 图层元数据，供批量导入在建表前按坐标系分组。 */
-    public LayerMeta inspectLayer(String path, String layerName) {
-        return queryLayerMeta(path, layerName);
     }
 
     /**
@@ -154,7 +150,12 @@ public class ImportAsyncService {
     /**
      * 执行 ogr2ogr 将数据导入 PostgreSQL
      */
-    private void execOgr2ogr(String sourcePath, String tableName, String layerName, boolean isAppend, GeomType targetGeomType) {
+    private void execOgr2ogr(String sourcePath,
+                             String tableName,
+                             String layerName,
+                             boolean isAppend,
+                             GeomType targetGeomType,
+                             Integer srid) {
         List<String> cmd = new ArrayList<>();
         cmd.add("ogr2ogr");
         cmd.add("-f");
@@ -167,6 +168,12 @@ public class ImportAsyncService {
         }
         cmd.add(datasetProperties.getPgConnect());
         cmd.add(sourcePath);
+
+        if (srid != null) {
+            cmd.add("-t_srs");
+            cmd.add("EPSG:" + srid);
+        }
+
         cmd.add("-nln");
 
         if (isAppend) {
@@ -237,7 +244,7 @@ public class ImportAsyncService {
     /**
      * 导入前查询 shp/gdb 的元数据（几何类型、SRID、要素数量）
      */
-    private LayerMeta queryLayerMeta(String path, String layerName) {
+    public LayerMeta queryLayerMeta(String path, String layerName) {
         String geomType = null;
         Integer srid = null;
         long featureCount = 0;

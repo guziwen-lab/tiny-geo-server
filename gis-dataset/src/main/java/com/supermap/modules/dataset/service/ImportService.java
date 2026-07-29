@@ -22,10 +22,12 @@ public interface ImportService {
     /**
      * 批量导入 GDB，并以实际 SRID 为最小坐标分组单位创建数据集。
      */
-    List<Long> importGdbBatch(BatchImportGdbDTO dto);
+    List<Long> importGdbBatch(List<BatchImportGdbDTO> dtoList);
 
     void uploadGeoJson(UploadGeoJsonDTO dto);
 
     void uploadWkt(UploadWktDTO dto);
+
+    Long importGdbBatchUnifiedSrid(List<String> paths, String layerName, Integer srid);
 
 }
