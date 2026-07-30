@@ -11,7 +11,6 @@ import com.supermap.support.LayerInfoBuilder;
 import com.supermap.modules.dataset.entity.DatasetEntity;
 import com.supermap.modules.analyzetask.entity.TaskDatasetEntity;
 
-import com.supermap.modules.dataset.service.DatasetService;
 import com.supermap.modules.analyzetask.service.TaskDatasetService;
 import com.supermap.modules.analyzetask.service.TaskAsyncService;
 import com.supermap.task.AnalysisTask;
@@ -41,8 +40,6 @@ public class TaskServiceImpl extends ServiceImpl<TaskDao, TaskEntity> implements
     private final TaskDatasetService taskDatasetService;
 
     private final TaskAsyncService taskAsyncService;
-
-    private final DatasetService datasetService;
 
     private final DatasetProperties datasetProperties;
 
@@ -80,13 +77,9 @@ public class TaskServiceImpl extends ServiceImpl<TaskDao, TaskEntity> implements
 
     @Override
     public void start(Long taskId, StartTaskDTO dto) {
-        TaskEntity taskEntity = getById(taskId);
+        TaskEntity taskEntity = baseMapper.getStartableById(taskId);
         if (taskEntity == null)
-            throw new IllegalArgumentException("Task not found");
-        if (taskEntity.getStatus().equals(TaskStatus.PROCESSING))
-            throw new IllegalArgumentException("Task is already processing");
-        if (taskEntity.getStatus().equals(TaskStatus.SUCCESS))
-            throw new IllegalArgumentException("Task is already completed");
+            throw new IllegalArgumentException("Task not found or Task is already processing/success");
 
         List<DatasetEntity> datasets = getDatasetEntityByTaskId(taskId);
 
