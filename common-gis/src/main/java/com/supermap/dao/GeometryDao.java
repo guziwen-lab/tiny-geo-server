@@ -62,12 +62,12 @@ public interface GeometryDao {
     void dropTableIfExists(@Param("table") String table);
 
     @Update("""
-            ALTER TABLE ${schema}.${table} ALTER COLUMN id SET NOT NULL
+            ALTER TABLE ${schema}.${table} ALTER COLUMN serial_id SET NOT NULL
             """)
     void alterIdNotNull(@Param("schema") String schema, @Param("table") String table);
 
     @Update("""
-            ALTER TABLE ${schema}.${table} ADD PRIMARY KEY (id)
+            ALTER TABLE ${schema}.${table} ADD PRIMARY KEY (serial_id)
             """)
     void addPrimaryKey(@Param("schema") String schema, @Param("table") String table);
 
@@ -88,9 +88,9 @@ public interface GeometryDao {
             FROM information_schema.columns c
             WHERE c.table_name = #{table}
               AND c.column_name <> 'geom'
-              AND c.column_name <> 'id'
+              AND c.column_name <> 'serial_id'
               AND c.table_schema = #{schema}
-              AND NOT EXISTS (
+              /*AND NOT EXISTS (
                   SELECT 1
                   FROM information_schema.key_column_usage kcu
                   JOIN information_schema.table_constraints tc
@@ -100,7 +100,7 @@ public interface GeometryDao {
                     AND tc.table_name = c.table_name
                     AND tc.table_schema = c.table_schema
                     AND kcu.column_name = c.column_name
-              )
+              )*/
             ORDER BY c.ordinal_position
             """)
     List<Column> listAttrColumns(@Param("schema") String schema, @Param("table") String table);

@@ -27,4 +27,7 @@ public class TaskDatasetEntity {
 	@Schema(title = "数据集ID")
 	private Long datasetId;
 
+	@Schema(title = "图层顺序")
+	private Integer sort;
+
 }

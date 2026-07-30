@@ -34,6 +34,9 @@ public abstract class AbstractAnalysisTask<T extends AnalysisParam> implements A
             log.debug("[{}] beforeExecute start", getTaskName());
             beforeExecute(context);
 
+            log.debug("[{}] onBeforeExecuted start", getTaskName());
+            onBeforeExecuted(context);
+
             log.debug("[{}] doExecute start", getTaskName());
             AnalysisResult result = doExecute(context);
 
@@ -72,6 +75,12 @@ public abstract class AbstractAnalysisTask<T extends AnalysisParam> implements A
         setColumns(context);
         fixGeometry(context);
         unifiedSrid(context);
+    }
+
+    /**
+     * 执行前处理完成后
+     */
+    protected void onBeforeExecuted(AnalysisContext<T> context) {
     }
 
     /**
@@ -203,6 +212,7 @@ public abstract class AbstractAnalysisTask<T extends AnalysisParam> implements A
             String tableName = layer.getTableName();
             TableProcessResult result = geometryService.normalizeGeometry(schema, tableName, layer.getColumns(), geomType);
             if (result.changed()) {
+                log.debug("[{}] fix geometry, table={}, newTable={}", getTaskName(), tableName, result.tableName());
                 context.addTempTable(result.tableName());
                 layer.setTableName(result.tableName());
             }
@@ -220,6 +230,7 @@ public abstract class AbstractAnalysisTask<T extends AnalysisParam> implements A
         for (LayerInfo layer : layers) {
             if (!Objects.equals(layer.getSrid(), targetSrid)) {
                 String tempTableName = geometryService.transformTable(schema, layer.getTableName(), targetSrid);
+                log.debug("[{}] unifiedSrid, table={}, newTable={}", getTaskName(), layer.getTableName(), tempTableName);
                 context.addTempTable(tempTableName);
 
                 layer.setTableName(tempTableName);

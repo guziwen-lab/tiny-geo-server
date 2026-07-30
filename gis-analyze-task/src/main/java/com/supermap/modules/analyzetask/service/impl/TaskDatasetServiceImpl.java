@@ -3,6 +3,7 @@ package com.supermap.modules.analyzetask.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.supermap.common.util.BeanUtils;
+import com.supermap.modules.dataset.entity.DatasetEntity;
 import org.springframework.stereotype.Service;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 
@@ -39,8 +40,8 @@ public class TaskDatasetServiceImpl extends ServiceImpl<TaskDatasetDao, TaskData
     }
 
     @Override
-    public List<TaskDatasetEntity> getByTaskId(Long taskId) {
-        return list(new LambdaQueryWrapper<TaskDatasetEntity>().eq(TaskDatasetEntity::getTaskId, taskId));
+    public List<DatasetEntity> getDatasetEntityByTaskId(Long taskId) {
+        return baseMapper.getDatasetEntityByTaskId(taskId);
     }
 
 }

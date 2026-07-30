@@ -110,12 +110,11 @@ public class IntersectSplitAnalysisTask extends AbstractAnalysisTask<IntersectSp
      * @param context 分析上下文
      */
     @Override
-    protected void beforeExecute(AnalysisContext<IntersectSplitParam> context) {
-        super.beforeExecute(context);
-
+    protected void onBeforeExecuted(AnalysisContext<IntersectSplitParam> context) {
         IntersectSplitParam param = context.getParam();
         List<SplitField> splitFieldsA = param.getSplitFieldsA();
         List<SplitField> splitFieldsB = param.getSplitFieldsB();
+
         List<LayerInfo> layers = context.getInputLayers();
         validateSplitFields(splitFieldsA, layers.get(0).getColumns(), "A");
         validateSplitFields(splitFieldsB, layers.get(1).getColumns(), "B");

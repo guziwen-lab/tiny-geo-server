@@ -1,6 +1,7 @@
 package com.supermap.task.param;
 
 import com.supermap.AnalysisParam;
+import com.supermap.common.util.StringUtils;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -47,9 +48,15 @@ public class IntersectSplitParam implements AnalysisParam {
 
     /** 一个源字段及其在结果表中的拆分字段名。 */
     public record SplitField(String sourceField, String resultField) {
+
+        public String resultField() {
+            return StringUtils.isEmpty(resultField) ? sourceField + "_split" : resultField;
+        }
+
         public static SplitField withDefaultResult(String sourceField) {
             return new SplitField(sourceField, sourceField + "_split");
         }
+
     }
 
 }

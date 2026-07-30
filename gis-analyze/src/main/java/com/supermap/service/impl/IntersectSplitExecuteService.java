@@ -97,7 +97,7 @@ public class IntersectSplitExecuteService extends AbstractExecuteService<Interse
 
         return """
                 CREATE TABLE %s AS
-                SELECT row_number() OVER () AS id, t.*
+                SELECT row_number() OVER () AS serial_id, t.*
                 FROM (
                 SELECT
                 %s

@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.supermap.modules.analyzetask.entity.TaskDatasetEntity;
 import com.supermap.modules.analyzetask.dto.TaskDatasetDTO;
 import com.supermap.modules.analyzetask.dto.TaskDatasetSaveDTO;
+import com.supermap.modules.dataset.entity.DatasetEntity;
 
 import java.util.List;
 
@@ -21,7 +22,7 @@ public interface TaskDatasetService extends IService<TaskDatasetEntity> {
 
     void updateDTOById(TaskDatasetSaveDTO dto);
 
-    List<TaskDatasetEntity> getByTaskId(Long taskId);
+    List<DatasetEntity> getDatasetEntityByTaskId(Long taskId);
 
 }
 

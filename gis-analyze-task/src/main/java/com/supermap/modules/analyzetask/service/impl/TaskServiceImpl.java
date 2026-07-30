@@ -65,13 +65,14 @@ public class TaskServiceImpl extends ServiceImpl<TaskDao, TaskEntity> implements
         save(taskEntity);
 
         List<TaskDatasetSaveDTO> datasetIds = dto.getDatasetIds();
-        List<TaskDatasetEntity> taskDatasetEntities = datasetIds.stream()
-                .map(item -> {
-                    TaskDatasetEntity taskDatasetEntity = new TaskDatasetEntity();
-                    taskDatasetEntity.setDatasetId(item.getDatasetId());
-                    taskDatasetEntity.setTaskId(taskEntity.getId());
-                    return taskDatasetEntity;
-                }).toList();
+        List<TaskDatasetEntity> taskDatasetEntities = new ArrayList<>(datasetIds.size());
+        for (int i = 0; i < datasetIds.size(); i++) {
+            TaskDatasetEntity taskDatasetEntity = new TaskDatasetEntity();
+            taskDatasetEntity.setDatasetId(datasetIds.get(i).getDatasetId());
+            taskDatasetEntity.setTaskId(taskEntity.getId());
+            taskDatasetEntity.setSort(i);
+            taskDatasetEntities.add(taskDatasetEntity);
+        }
         taskDatasetService.saveBatch(taskDatasetEntities);
 
         return taskEntity.getId();
@@ -140,15 +141,7 @@ public class TaskServiceImpl extends ServiceImpl<TaskDao, TaskEntity> implements
      * @return 数据集列表
      */
     private List<DatasetEntity> getDatasetEntityByTaskId(Long taskId) {
-        List<TaskDatasetEntity> taskDatasetEntities = taskDatasetService.getByTaskId(taskId);
-        List<DatasetEntity> datasets = datasetService
-                .listByIds(taskDatasetEntities.stream().map(TaskDatasetEntity::getDatasetId).toList());
-
-        // 校验图层是否一致
-        if (taskDatasetEntities.size() != datasets.size())
-            throw new IllegalArgumentException("Datasets not found");
-
-        return datasets;
+        return taskDatasetService.getDatasetEntityByTaskId(taskId);
     }
 
 }
