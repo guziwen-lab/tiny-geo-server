@@ -47,7 +47,8 @@ public class ImportServiceImpl implements ImportService {
     private final DatasetProperties datasetProperties;
     private final FeatureDao featureDao;
 
-    private static final String LAYER_PATTERN = "^Layer:\\s+(.+?)\\s*(?:\\(|$)";
+    private static final Pattern LAYER_PATTERN1 = Pattern.compile("^Layer:\\s+(.+?)\\s*(?:\\(|$)");
+    private static final Pattern LAYER_PATTERN2 = Pattern.compile("^\\d+:\\s*(.+?)\\s*\\(");
 
     @Transactional(rollbackFor = Exception.class)
     @Override
@@ -68,7 +69,7 @@ public class ImportServiceImpl implements ImportService {
         datasetService.save(datasetEntity);
 
         // 异步执行导入
-        importAsyncService.importLayerAsync(datasetEntity, shpPath, null, false);
+        importAsyncService.importLayerAsync(datasetEntity, shpPath, layerName, false);
 
         return datasetEntity.getId();
     }
@@ -159,7 +160,7 @@ public class ImportServiceImpl implements ImportService {
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public List<Long> importGdbBatch(List<BatchImportGdbDTO> dtoList) {
+    public List<Long> importGdbBatchByGrouping(List<BatchImportGdbDTO> dtoList) {
         Map<GdbGroupKey, List<GdbLayerSource>> groups = new LinkedHashMap<>();
 
         for (BatchImportGdbDTO dto : dtoList) {
@@ -207,7 +208,7 @@ public class ImportServiceImpl implements ImportService {
         }
         datasetService.saveBatch(entities);
         for (int i = 0; i < entities.size(); i++) {
-            importAsyncService.importLayersAsync(entities.get(i), entries.get(i).getValue(), null);
+            importAsyncService.importLayersAsync(entities.get(i), entries.get(i).getValue(), null, null);
         }
         return entities.stream().map(DatasetEntity::getId).toList();
     }
@@ -233,7 +234,7 @@ public class ImportServiceImpl implements ImportService {
     }
 
     @Override
-    public Long importGdbBatchUnifiedSrid(List<String> paths, String layerName, Integer srid) {
+    public Long importGdbBatch(List<String> paths, String layerName, Integer srid) {
         List<GdbLayerSource> sources = new ArrayList<>();
         for (String gdbPath : paths) {
             List<String> layerNames = listGdbLayers(gdbPath);
@@ -257,7 +258,33 @@ public class ImportServiceImpl implements ImportService {
         datasetEntity.setCreatedAt(Instant.now());
         datasetService.save(datasetEntity);
 
-        importAsyncService.importLayersAsync(datasetEntity, sources, srid);
+        importAsyncService.importLayersAsync(datasetEntity, sources, srid, null);
+
+        return datasetEntity.getId();
+    }
+
+    @Override
+    public Long importShpBatch(List<String> paths, String layerName, Integer srid, String encoding) {
+        List<GdbLayerSource> sources = new ArrayList<>();
+        for (String path : paths) {
+            GdbLayerSource gdbLayerSource = new GdbLayerSource(path, getFileNameWithoutExtension(path));
+            sources.add(gdbLayerSource);
+        }
+
+        // 创建占位实体，状态为处理中
+        DatasetEntity datasetEntity = new DatasetEntity();
+        datasetEntity.setDatasetName(layerName);
+        datasetEntity.setDatasetType(DatasetType.SHP.name());
+        datasetEntity.setSourceFile(String.join(",", paths));
+        datasetEntity.setLayerName(layerName);
+        datasetEntity.setSchemaName(datasetProperties.getSchema());
+        datasetEntity.setTableName(datasetTableNameGenerator.getTableName());
+        datasetEntity.setStatus(UploadStatus.PROCESSING);
+        datasetEntity.setCreatedAt(Instant.now());
+        datasetService.save(datasetEntity);
+
+        // 异步执行导入
+        importAsyncService.importLayersAsync(datasetEntity, sources, srid, encoding);
 
         return datasetEntity.getId();
     }
@@ -278,13 +305,17 @@ public class ImportServiceImpl implements ImportService {
             Process process = pb.start();
 
             List<String> layers = new ArrayList<>();
-            Pattern pattern = Pattern.compile(LAYER_PATTERN);
 
             try (BufferedReader reader = new BufferedReader(
                     new InputStreamReader(process.getInputStream(), StandardCharsets.UTF_8))) {
                 String line;
                 while ((line = reader.readLine()) != null) {
-                    Matcher matcher = pattern.matcher(line);
+                    Matcher matcher = LAYER_PATTERN1.matcher(line);
+                    if (matcher.find()) {
+                        layers.add(matcher.group(1));
+                        continue;
+                    }
+                    matcher = LAYER_PATTERN2.matcher(line);
                     if (matcher.find()) {
                         layers.add(matcher.group(1));
                     }

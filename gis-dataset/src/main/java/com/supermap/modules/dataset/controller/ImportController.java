@@ -2,6 +2,7 @@ package com.supermap.modules.dataset.controller;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.supermap.common.pojo.R;
+import com.supermap.common.util.CollectionUtils;
 import com.supermap.common.util.StringUtils;
 import com.supermap.modules.dataset.dto.UploadGeoJsonDTO;
 import com.supermap.modules.dataset.dto.UploadWktDTO;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
@@ -57,14 +59,40 @@ public class ImportController {
      * 按实际 SRID（以及不能混存的图层、几何类型）将一批 GDB 归并为数据集。
      * SRID 是坐标处理的最小颗粒度，不同高斯分带不会被写入同一张表。
      */
-    @PostMapping("/gdb/batch")
-    public R<List<Long>> importGdbBatch(@RequestBody @Validated List<BatchImportGdbDTO> dtoList) {
-        List<Long> ids = importService.importGdbBatch(dtoList);
+    @PostMapping("/gdb/batch/grouping")
+    public R<List<Long>> importGdbBatchByGrouping(@RequestBody @Validated List<BatchImportGdbDTO> dtoList) {
+        List<Long> ids = importService.importGdbBatchByGrouping(dtoList);
         return R.ok(ids);
     }
 
-    @PostMapping("/gdb/batch/unified-srid")
-    public R<Long> importGdbBatchUnifiedSrid(String path, String layerName, Integer srid) {
+    @PostMapping("/shp/batch")
+    public R<Long> importShpBatch(String path, String layerName, Integer srid, String encoding) {
+        File dir = new File(path);
+        File[] provinces = dir.listFiles();
+        if (provinces == null)
+            throw new IllegalArgumentException("文件夹为空");
+
+        List<String> paths = new ArrayList<>();
+        for (File province : provinces) {
+            File[] counties = province.listFiles();
+            if (counties == null) continue;
+
+            for (File county : counties) {
+                File[] files = county.listFiles(f -> f.isFile() && f.getName().endsWith(".shp"));
+                if (files == null) continue;
+                paths.addAll(Arrays.stream(files).map(File::getAbsolutePath).toList());
+            }
+        }
+
+        if (CollectionUtils.isEmpty(paths))
+            throw new IllegalArgumentException("文件夹为空");
+
+        Long id = importService.importShpBatch(paths, layerName, srid, encoding);
+        return R.ok(id);
+    }
+
+    @PostMapping("/gdb/batch")
+    public R<Long> importGdbBatch(String path, String layerName, Integer srid) {
         File dir = new File(path);
         File[] files = dir.listFiles(f -> f.isDirectory() && f.getName().endsWith(".gdb"));
 
@@ -76,7 +104,7 @@ public class ImportController {
             paths.add(file.getAbsolutePath());
         }
 
-        Long id = importService.importGdbBatchUnifiedSrid(paths, layerName, srid);
+        Long id = importService.importGdbBatch(paths, layerName, srid);
         return R.ok(id);
     }
 

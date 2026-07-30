@@ -1,12 +1,14 @@
 package com.supermap.modules.dataset.service;
 
 import com.supermap.common.util.CollectionUtils;
+import com.supermap.common.util.StringUtils;
 import com.supermap.config.DatasetProperties;
 import com.supermap.enums.GeomType;
 import com.supermap.modules.dataset.dto.GdbLayerSource;
 import com.supermap.modules.dataset.dto.LayerMeta;
 import com.supermap.modules.dataset.entity.DatasetEntity;
 import com.supermap.service.GeometryService;
+import com.supermap.util.TableNameUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Async;
@@ -53,7 +55,7 @@ public class ImportAsyncService {
             }
 
             // 执行 ogr2ogr 导入
-            execOgr2ogr(sourcePath, tableName, exportLayerName, isAppend, entity.getGeomType(), null);
+            execOgr2ogr(sourcePath, tableName, exportLayerName, isAppend, entity.getGeomType(), null, null);
 
             // 检查几何类型（优先以 PostgreSQL 实际存储的几何类型为准）
             GeomType geomType = geometryService.resolveActualGeomType(
@@ -91,7 +93,7 @@ public class ImportAsyncService {
      * 否则“首个建表”与后续“追加”会产生竞争。
      */
     @Async("importTaskExecutor")
-    public void importLayersAsync(DatasetEntity entity, List<GdbLayerSource> sources, Integer srid) {
+    public void importLayersAsync(DatasetEntity entity, List<GdbLayerSource> sources, Integer srid, String encoding) {
         String tableName = entity.getTableName();
         try {
             if (CollectionUtils.isEmpty(sources)) {
@@ -108,12 +110,12 @@ public class ImportAsyncService {
                 }
                 checkGeomTypeCompatible(GeomType.ofOgr2ogrCode(first.geomType()), meta.geomType());
                 execOgr2ogr(source.path(), tableName, source.layerName(), i > 0,
-                        i == 0 ? null : GeomType.ofOgr2ogrCode(first.geomType()), srid);
+                        i == 0 ? null : GeomType.ofOgr2ogrCode(first.geomType()), srid, encoding);
                 featureCount += meta.featureCount();
             }
 
             GeomType geomType = geometryService.resolveActualGeomType(
-                    datasetProperties.getSchema() + "." + tableName, first.geomType());
+                    TableNameUtils.getTableNameWithSchema(datasetProperties.getSchema(), tableName), first.geomType());
             if (geomType == null) {
                 throw new RuntimeException("几何类型不支持: " + first.geomType());
             }
@@ -122,7 +124,7 @@ public class ImportAsyncService {
         } catch (Exception e) {
             log.error("批量 GDB 导入失败, datasetId={}, table={}", entity.getId(), tableName, e);
             try {
-                geometryService.dropTableIfExists(tableName);
+                geometryService.dropTableIfExists(TableNameUtils.getTableNameWithSchema(datasetProperties.getSchema(), tableName));
             } catch (Exception dropEx) {
                 log.error("清理失败表失败: {}", tableName, dropEx);
             }
@@ -155,7 +157,8 @@ public class ImportAsyncService {
                              String layerName,
                              boolean isAppend,
                              GeomType targetGeomType,
-                             Integer srid) {
+                             Integer srid,
+                             String encoding) {
         List<String> cmd = new ArrayList<>();
         cmd.add("ogr2ogr");
         cmd.add("-f");
@@ -197,10 +200,10 @@ public class ImportAsyncService {
             cmd.add(layerName);
         }
 
-        if (sourcePath.toLowerCase().endsWith(".shp")) {
+        if (StringUtils.isNotBlank(encoding)) {
             cmd.add("--config");
             cmd.add("SHAPE_ENCODING");
-            cmd.add("GBK");
+            cmd.add(encoding);
         }
 
         if (isAppend) {
