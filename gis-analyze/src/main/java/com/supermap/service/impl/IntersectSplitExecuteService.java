@@ -33,59 +33,91 @@ public class IntersectSplitExecuteService extends AbstractExecuteService<Interse
         List<SplitField> splitFieldsB = param.getSplitFieldsB();
 
         Set<String> usedNames = new HashSet<>();
-        List<String> selectItems = new ArrayList<>();
+        List<String> t1SelectItems = new ArrayList<>();
+        List<String> t2SelectItems = new ArrayList<>();
+        List<String> outerSelectItems = new ArrayList<>();
 
+        /*--------------------- t1层查询字段 ---------------------*/
         // 源要素主键用于面积守恒校验及定位异常图斑。
-        selectItems.add("a.id AS source_a_id");
+        t1SelectItems.add("a.id AS source_a_id");
         usedNames.add("source_a_id");
-        selectItems.add("b.id AS source_b_id");
+        t1SelectItems.add("b.id AS source_b_id");
         usedNames.add("source_b_id");
 
         // A表（当前图层）全部属性字段
         for (Column column : current.getColumns()) {
             String alias = getUniqueFieldName(column.name(), usedNames);
-            selectItems.add("a.\"%s\" AS \"%s\"".formatted(column.name(), alias));
+            t1SelectItems.add("a.\"%s\" AS \"%s\"".formatted(column.name(), alias));
         }
 
         // B表（叠加图层）全部属性字段
         for (Column column : next.getColumns()) {
             String alias = getUniqueFieldName(column.name(), usedNames);
-            selectItems.add("b.\"%s\" AS \"%s\"".formatted(column.name(), alias));
+            t1SelectItems.add("b.\"%s\" AS \"%s\"".formatted(column.name(), alias));
         }
 
-        // 面积比例拆分字段
+        // A表图形面积
+        String areaA = "ST_Area(a.geom) AS a_area";
+        t1SelectItems.add(areaA);
+
+        // B表图形面积
+        String areaB = "ST_Area(b.geom) AS b_area";
+        t1SelectItems.add(areaB);
+
+        // 相交图形
+        String intersectionGeom = "ST_Intersection(a.geom, b.geom) AS inter_geom";
+        t1SelectItems.add(intersectionGeom);
+
+        /*--------------------- t2层查询字段 ---------------------*/
+        // t1全部字段
+        String t1All = "t1.*";
+        t2SelectItems.add(t1All);
+        // 相交面积
+        String intersectionArea = "ST_Area(inter_geom) AS inter_area";
+        t2SelectItems.add(intersectionArea);
+
+        /*--------------------- 最外层查询字段 ---------------------*/
+        String id = "row_number() OVER () AS serial_id";
+        outerSelectItems.add(id);
+        String t2All = "t2.*";
+        outerSelectItems.add(t2All);
+
         // ratio = 相交面积 / 原图斑面积，按比例分配属性值
-        String intersectionArea = "ST_Area(ST_Intersection(a.geom, b.geom))";
-        String ratioA = intersectionArea + " / NULLIF(ST_Area(a.geom), 0)";
-        String ratioB = intersectionArea + " / NULLIF(ST_Area(b.geom), 0)";
+        String interArea = "t2.inter_area";
+        String ratioA = interArea + " / NULLIF(t2.a_area, 0)";
+        String ratioB = interArea + " / NULLIF(t2.b_area, 0)";
 
         // A表拆分字段：按A表原图斑面积比例拆分
         for (SplitField field : splitFieldsA) {
             String splitAlias = getUniqueFieldName(field.resultField(), usedNames);
-            selectItems.add("COALESCE(a.\"%s\", 0) * (%s) AS \"%s\""
+            outerSelectItems.add("COALESCE(t2.\"%s\", 0) * (%s) AS \"%s\""
                     .formatted(field.sourceField(), ratioA, splitAlias));
         }
 
         // B表拆分字段：按B表原图斑面积比例拆分
         for (SplitField field : splitFieldsB) {
             String splitAlias = getUniqueFieldName(field.resultField(), usedNames);
-            selectItems.add("COALESCE(b.\"%s\", 0) * (%s) AS \"%s\""
+            outerSelectItems.add("COALESCE(t2.\"%s\", 0) * (%s) AS \"%s\""
                     .formatted(field.sourceField(), ratioB, splitAlias));
         }
 
+        // A表比例字段
         if (param.getRatioFieldA() != null && !param.getRatioFieldA().isBlank()) {
             String ratioAlias = getUniqueFieldName(param.getRatioFieldA(), usedNames);
-            selectItems.add("(%s) AS \"%s\"".formatted(ratioA, ratioAlias));
-        }
-        if (param.getRatioFieldB() != null && !param.getRatioFieldB().isBlank()) {
-            String ratioAlias = getUniqueFieldName(param.getRatioFieldB(), usedNames);
-            selectItems.add("(%s) AS \"%s\"".formatted(ratioB, ratioAlias));
+            outerSelectItems.add("(%s) AS \"%s\"".formatted(ratioA, ratioAlias));
         }
 
-        // 几何字段
-        String geomExpr = GeometryExpression.wrap(
-                "ST_Intersection(a.geom, b.geom)", context.getGeomType(), context.getSrid());
-        selectItems.add(geomExpr + " AS geom");
+        // B表比例字段
+        if (param.getRatioFieldB() != null && !param.getRatioFieldB().isBlank()) {
+            String ratioAlias = getUniqueFieldName(param.getRatioFieldB(), usedNames);
+            outerSelectItems.add("(%s) AS \"%s\"".formatted(ratioB, ratioAlias));
+        }
+
+        // 最终geom
+        String geomExpr = GeometryExpression.wrap("t2.inter_geom",
+                context.getGeomType(),
+                context.getSrid());
+        outerSelectItems.add(geomExpr + " AS geom");
 
         // 构建 CREATE TABLE AS SELECT
         // JOIN 条件：ST_Intersects 走空间索引初筛，ST_Relate('2********') 要求内部相交且交集为二维面，
@@ -97,17 +129,25 @@ public class IntersectSplitExecuteService extends AbstractExecuteService<Interse
 
         return """
                 CREATE TABLE %s AS
-                SELECT row_number() OVER () AS serial_id, t.*
+                SELECT
+                %s
                 FROM (
                 SELECT
+                %s
+                FROM (SELECT
                 %s
                 FROM %s a
                 JOIN %s b
                   ON ST_Intersects(a.geom, b.geom)
-                 AND ST_Relate(a.geom, b.geom, '2********')
-                ) t
-                WHERE NOT ST_IsEmpty(t.geom)
-                """.formatted(resultTable, String.join(",\n", selectItems), currentTable, nextTable);
+                 AND ST_Relate(a.geom, b.geom, '2********')) t1) t2
+                WHERE NOT ST_IsEmpty(ST_CollectionExtract(t2.inter_geom, %s))
+                """.formatted(resultTable,
+                String.join(",\n", outerSelectItems),
+                String.join(",\n", t2SelectItems),
+                String.join(",\n", t1SelectItems),
+                currentTable,
+                nextTable,
+                context.getGeomType().getCollectionExtractType());
     }
 
 }

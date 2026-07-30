@@ -1,0 +1,13 @@
+{
+  "taskName": "jctbtj",
+  "analysisType": "INTERSECT_SPLIT",
+  "taskParam": "{\"splitFieldsA\":[{\"sourceField\":\"jcmj\",\"resultField\":\"jcmj_split\"}],\"splitFieldsB\":[{\"sourceField\":\"tbmj\",\"resultField\":\"tbmj_split\"},{\"sourceField\":\"kcmj\",\"resultField\":\"kcmj_split\"}],\"ratioFieldA\":\"jctb_ratio\",\"ratioFieldB\":\"dltb_ratio\"}",
+  "datasetIds": [
+    {
+      "datasetId": 14
+    },
+    {
+      "datasetId": 3
+    }
+  ]
+}
