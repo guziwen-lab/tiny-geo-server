@@ -15,6 +15,7 @@ import com.supermap.modules.dataset.service.DatasetService;
 import com.supermap.modules.dataset.service.ImportService;
 import com.supermap.util.DatasetTableNameGenerator;
 import com.supermap.util.IdentifierGeneratorUtils;
+import com.supermap.util.ShapeEncodingDetector;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -211,7 +212,6 @@ public class ImportServiceImpl implements ImportService {
             importAsyncService.importLayersAsync(entities.get(i),
                     entries.get(i).getValue(),
                     null,
-                    null,
                     false);
         }
         return entities.stream().map(DatasetEntity::getId).toList();
@@ -265,7 +265,6 @@ public class ImportServiceImpl implements ImportService {
         importAsyncService.importLayersAsync(datasetEntity,
                 sources,
                 srid,
-                null,
                 StringUtils.isNotBlank(tableName));
 
         return datasetEntity.getId();
@@ -279,7 +278,13 @@ public class ImportServiceImpl implements ImportService {
                                String tableName) {
         List<GdbLayerSource> sources = new ArrayList<>();
         for (String path : paths) {
-            GdbLayerSource gdbLayerSource = new GdbLayerSource(path, getFileNameWithoutExtension(path));
+            String ln = getFileNameWithoutExtension(path);
+
+            if (StringUtils.isEmpty(encoding)) {
+                encoding = ShapeEncodingDetector.detect(path, ln);
+            }
+
+            GdbLayerSource gdbLayerSource = new GdbLayerSource(path, ln, encoding);
             sources.add(gdbLayerSource);
         }
 
@@ -296,7 +301,7 @@ public class ImportServiceImpl implements ImportService {
         datasetService.save(datasetEntity);
 
         // 异步执行导入
-        importAsyncService.importLayersAsync(datasetEntity, sources, srid, encoding, StringUtils.isNotBlank(tableName));
+        importAsyncService.importLayersAsync(datasetEntity, sources, srid, StringUtils.isNotBlank(tableName));
 
         return datasetEntity.getId();
     }

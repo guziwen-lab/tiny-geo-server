@@ -97,7 +97,6 @@ public class ImportAsyncService {
     public void importLayersAsync(DatasetEntity entity,
                                   List<GdbLayerSource> sources,
                                   Integer srid,
-                                  String encoding,
                                   boolean isAppend) {
         String tableName = entity.getTableName();
         try {
@@ -114,13 +113,8 @@ public class ImportAsyncService {
                     throw new RuntimeException("批量导入分组内 SRID 不一致: " + first.srid() + " / " + meta.srid());
                 }
                 checkGeomTypeCompatible(GeomType.ofOgr2ogrCode(first.geomType()), meta.geomType());
-
-                if (StringUtils.isEmpty(encoding)) {
-                    encoding = ShapeEncodingDetector.detect(source.path(), source.layerName());
-                }
-
                 execOgr2ogr(source.path(), tableName, source.layerName(), isAppend || i > 0,
-                        i == 0 ? null : GeomType.ofOgr2ogrCode(first.geomType()), srid, encoding);
+                        i == 0 ? null : GeomType.ofOgr2ogrCode(first.geomType()), srid, source.encoding());
                 featureCount += meta.featureCount();
             }
 
