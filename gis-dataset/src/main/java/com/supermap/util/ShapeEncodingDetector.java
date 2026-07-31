@@ -1,6 +1,5 @@
 package com.supermap.util;
 
-import com.supermap.common.util.ChineseUtils;
 import com.supermap.common.util.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 
@@ -13,6 +12,7 @@ import java.util.List;
 import java.util.Set;
 
 /**
+ * 无法区分时默认 UTF-8
  * @author gzw
  */
 @Slf4j
@@ -29,66 +29,41 @@ public final class ShapeEncodingDetector {
             '�'
     );
 
-    private static final String[] encodings = {"UTF-8", "GBK"};
+    private static final int BAD_WEIGHT = 5;
+    private static final int MESSY_WEIGHT = 2;
+
+    private static final String[] ENCODINGS = {"UTF-8", "GBK"};
 
     private ShapeEncodingDetector() {
     }
 
     public static String detect(String sourcePath, String layerName) {
-        List<List<Character>> chars = new ArrayList<>(encodings.length);
-        for (String encoding : encodings) {
-            String original = read(sourcePath, layerName, encoding);
-            List<Character> chineseCharArray = getChineseCharArray(original);
-            chars.add(chineseCharArray);
+        int minPenaltyIndex = 0;
+
+        String text = readShpAttr(sourcePath, layerName, ENCODINGS[minPenaltyIndex]);
+        int minPenalty = getPenalty(text);
+        if (minPenalty == 0) {
+            return ENCODINGS[minPenaltyIndex];
         }
 
-        int i = score(chars);
+        for (int i = 1; i < ENCODINGS.length; i++) {
+            text = readShpAttr(sourcePath, layerName, ENCODINGS[i]);
+            int penalty = getPenalty(text);
 
-        return encodings[i];
-    }
+            if (penalty == 0) {
+                return ENCODINGS[i];
+            }
 
-    private static int score(List<List<Character>> chars) {
-        List<ScoreData> scoreDataList = new ArrayList<>(chars.size());
-        for (List<Character> aChar : chars) {
-            int messyNum = countMessyCharacters(aChar);
-            int badNum = countBadCharacters(aChar);
-
-            ScoreData scoreData = new ScoreData(aChar.size(), messyNum, badNum);
-            scoreDataList.add(scoreData);
-        }
-
-        int maxScoreIndex = 0;
-        int maxScore = scoreDataList.get(0).getScore();
-        for (int i = 1; i < scoreDataList.size(); i++) {
-            int score = scoreDataList.get(i).getScore();
-            if (score > maxScore) {
-                maxScoreIndex = i;
-                maxScore = score;
+            if (penalty < minPenalty) {
+                minPenalty = penalty;
+                minPenaltyIndex = i;
             }
         }
 
-        return maxScoreIndex;
+        return ENCODINGS[minPenaltyIndex];
     }
 
-    private static int countMessyCharacters(List<Character> characters) {
-        return (int) characters.stream().filter(MESSY_CHARS::contains).count();
-    }
-
-    private static int countBadCharacters(List<Character> characters) {
-        return (int) characters.stream().filter(BAD_CHARS::contains).count();
-    }
-
-    private static List<Character> getChineseCharArray(String str) {
-        List<Character> chars = new ArrayList<>();
-        for (char c : str.toCharArray()) {
-            if (ChineseUtils.isChinese(c)) {
-                chars.add(c);
-            }
-        }
-        return chars;
-    }
-
-    private static String read(String sourcePath, String layerName, String encoding) {
+    private static String readShpAttr(String sourcePath, String layerName, String encoding) {
         List<String> cmd = new ArrayList<>();
         cmd.add("ogrinfo");
 
@@ -116,12 +91,12 @@ public final class ShapeEncodingDetector {
             Process process = pb.start();
 
             StringBuilder output = new StringBuilder();
-            StringBuilder pendingJudgment = new StringBuilder();
+            StringBuilder attributeText = new StringBuilder();
             try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream(), StandardCharsets.UTF_8))) {
                 String line;
                 while ((line = reader.readLine()) != null) {
                     if (line.contains("(String) =")) {
-                        pendingJudgment.append(line).append('\n');
+                        attributeText.append(line).append('\n');
                     }
 
                     output.append(line).append("\n");
@@ -134,7 +109,7 @@ public final class ShapeEncodingDetector {
                 throw new RuntimeException("ogrinfo 检查乱码失败(exitCode=" + code + "): " + output);
             }
 
-            return pendingJudgment.toString();
+            return attributeText.toString();
         } catch (IOException e) {
             throw new RuntimeException("执行 ogrinfo 检查乱码失败，请确认已安装 GDAL", e);
         } catch (InterruptedException e) {
@@ -143,12 +118,19 @@ public final class ShapeEncodingDetector {
         }
     }
 
-    private record ScoreData(int charactersNum, int messyNum, int badNum) {
+    private static int getPenalty(String text) {
+        int messy = 0;
+        int bad = 0;
 
-        public int getScore() {
-            return -(5 * badNum + 2 * messyNum);
+        for (char c : text.toCharArray()) {
+            if (BAD_CHARS.contains(c)) {
+                bad++;
+            } else if (MESSY_CHARS.contains(c)) {
+                messy++;
+            }
         }
 
+        return bad * BAD_WEIGHT + messy * MESSY_WEIGHT;
     }
 
 }
