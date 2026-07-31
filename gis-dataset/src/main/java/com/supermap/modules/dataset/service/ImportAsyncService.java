@@ -8,7 +8,6 @@ import com.supermap.modules.dataset.dto.GdbLayerSource;
 import com.supermap.modules.dataset.dto.LayerMeta;
 import com.supermap.modules.dataset.entity.DatasetEntity;
 import com.supermap.service.GeometryService;
-import com.supermap.util.ShapeEncodingDetector;
 import com.supermap.util.TableNameUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
