@@ -254,7 +254,7 @@ public class ImportServiceImpl implements ImportService {
         DatasetEntity datasetEntity = new DatasetEntity();
         datasetEntity.setDatasetName(layerName);
         datasetEntity.setDatasetType(DatasetType.GDB.name());
-        datasetEntity.setSourceFile(String.join(",", paths));
+//        datasetEntity.setSourceFile(String.join(",", paths));
         datasetEntity.setLayerName(layerName);
         datasetEntity.setSchemaName(datasetProperties.getSchema());
         datasetEntity.setTableName(StringUtils.isEmpty(tableName) ? datasetTableNameGenerator.getTableName() : tableName);
@@ -292,7 +292,7 @@ public class ImportServiceImpl implements ImportService {
         DatasetEntity datasetEntity = new DatasetEntity();
         datasetEntity.setDatasetName(layerName);
         datasetEntity.setDatasetType(DatasetType.SHP.name());
-        datasetEntity.setSourceFile(String.join(",", paths));
+//        datasetEntity.setSourceFile(String.join(",", paths));
         datasetEntity.setLayerName(layerName);
         datasetEntity.setSchemaName(datasetProperties.getSchema());
         datasetEntity.setTableName(StringUtils.isEmpty(tableName) ? datasetTableNameGenerator.getTableName() : tableName);
