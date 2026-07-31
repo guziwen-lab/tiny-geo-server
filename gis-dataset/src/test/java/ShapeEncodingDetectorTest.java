@@ -6,9 +6,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 /**
  * @author gzw
  */
-@SpringBootTest(classes = ReadShpTest.class)
+@SpringBootTest(classes = ShapeEncodingDetectorTest.class)
 @Slf4j
-public class ReadShpTest {
+public class ShapeEncodingDetectorTest {
 
     @Test
     public void test() {
