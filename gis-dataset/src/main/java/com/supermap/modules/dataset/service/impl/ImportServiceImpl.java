@@ -278,13 +278,14 @@ public class ImportServiceImpl implements ImportService {
                                String tableName) {
         List<GdbLayerSource> sources = new ArrayList<>();
         for (String path : paths) {
+            String confirmEncoding = null;
             String ln = getFileNameWithoutExtension(path);
 
             if (StringUtils.isEmpty(encoding)) {
-                encoding = ShapeEncodingDetector.detect(path, ln);
+                confirmEncoding = ShapeEncodingDetector.detect(path, ln);
             }
 
-            GdbLayerSource gdbLayerSource = new GdbLayerSource(path, ln, encoding);
+            GdbLayerSource gdbLayerSource = new GdbLayerSource(path, ln, confirmEncoding);
             sources.add(gdbLayerSource);
         }
 

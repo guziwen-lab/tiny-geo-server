@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 /**
  * @author gzw
@@ -70,11 +71,14 @@ public class ImportController {
                                   String layerName,
                                   Integer srid,
                                   String encoding,
-                                  String tableName) {
+                                  String tableName,
+                                  String shpFilePattern) {
         File dir = new File(path);
         File[] provinces = dir.listFiles();
         if (provinces == null)
             throw new IllegalArgumentException("文件夹为空");
+
+        Pattern pattern = Pattern.compile(shpFilePattern);
 
         List<String> paths = new ArrayList<>();
         for (File province : provinces) {
@@ -82,7 +86,7 @@ public class ImportController {
             if (counties == null) continue;
 
             for (File county : counties) {
-                File[] files = county.listFiles(f -> f.isFile() && f.getName().endsWith("ZT.shp"));
+                File[] files = county.listFiles(f -> f.isFile() && pattern.matcher(f.getName()).matches());
                 if (files == null) continue;
                 paths.addAll(Arrays.stream(files).map(File::getAbsolutePath).toList());
             }
