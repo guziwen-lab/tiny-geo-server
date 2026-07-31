@@ -122,7 +122,7 @@ public class ImportAsyncService {
             geometryService.createGistIndex(datasetProperties.getSchema(), tableName);
             importStatusUpdater.markSuccess(entity.getId(), geomType, srid == null ? first.srid() : srid, featureCount);
         } catch (Exception e) {
-            log.error("批量 GDB 导入失败, datasetId={}, table={}", entity.getId(), tableName, e);
+            log.error("批量导入失败, datasetId={}, table={}", entity.getId(), tableName, e);
             try {
                 geometryService.dropTableIfExists(TableNameUtils.getTableNameWithSchema(datasetProperties.getSchema(), tableName));
             } catch (Exception dropEx) {

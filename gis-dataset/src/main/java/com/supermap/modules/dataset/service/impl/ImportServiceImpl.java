@@ -234,7 +234,7 @@ public class ImportServiceImpl implements ImportService {
     }
 
     @Override
-    public Long importGdbBatch(List<String> paths, String layerName, Integer srid) {
+    public Long importGdbBatch(List<String> paths, String layerName, Integer srid, String tableName) {
         List<GdbLayerSource> sources = new ArrayList<>();
         for (String gdbPath : paths) {
             List<String> layerNames = listGdbLayers(gdbPath);
@@ -253,7 +253,7 @@ public class ImportServiceImpl implements ImportService {
         datasetEntity.setSourceFile(String.join(",", paths));
         datasetEntity.setLayerName(layerName);
         datasetEntity.setSchemaName(datasetProperties.getSchema());
-        datasetEntity.setTableName(datasetTableNameGenerator.getTableName());
+        datasetEntity.setTableName(StringUtils.isEmpty(tableName) ? datasetTableNameGenerator.getTableName() : tableName);
         datasetEntity.setStatus(UploadStatus.PROCESSING);
         datasetEntity.setCreatedAt(Instant.now());
         datasetService.save(datasetEntity);
@@ -264,7 +264,11 @@ public class ImportServiceImpl implements ImportService {
     }
 
     @Override
-    public Long importShpBatch(List<String> paths, String layerName, Integer srid, String encoding) {
+    public Long importShpBatch(List<String> paths,
+                               String layerName,
+                               Integer srid,
+                               String encoding,
+                               String tableName) {
         List<GdbLayerSource> sources = new ArrayList<>();
         for (String path : paths) {
             GdbLayerSource gdbLayerSource = new GdbLayerSource(path, getFileNameWithoutExtension(path));
@@ -278,7 +282,7 @@ public class ImportServiceImpl implements ImportService {
         datasetEntity.setSourceFile(String.join(",", paths));
         datasetEntity.setLayerName(layerName);
         datasetEntity.setSchemaName(datasetProperties.getSchema());
-        datasetEntity.setTableName(datasetTableNameGenerator.getTableName());
+        datasetEntity.setTableName(StringUtils.isEmpty(tableName) ? datasetTableNameGenerator.getTableName() : tableName);
         datasetEntity.setStatus(UploadStatus.PROCESSING);
         datasetEntity.setCreatedAt(Instant.now());
         datasetService.save(datasetEntity);

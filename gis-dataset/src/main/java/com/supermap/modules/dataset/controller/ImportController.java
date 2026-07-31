@@ -66,7 +66,11 @@ public class ImportController {
     }
 
     @PostMapping("/shp/batch")
-    public R<Long> importShpBatch(String path, String layerName, Integer srid, String encoding) {
+    public R<Long> importShpBatch(String path,
+                                  String layerName,
+                                  Integer srid,
+                                  String encoding,
+                                  String tableName) {
         File dir = new File(path);
         File[] provinces = dir.listFiles();
         if (provinces == null)
@@ -78,7 +82,7 @@ public class ImportController {
             if (counties == null) continue;
 
             for (File county : counties) {
-                File[] files = county.listFiles(f -> f.isFile() && f.getName().endsWith(".shp"));
+                File[] files = county.listFiles(f -> f.isFile() && f.getName().endsWith("ZT.shp"));
                 if (files == null) continue;
                 paths.addAll(Arrays.stream(files).map(File::getAbsolutePath).toList());
             }
@@ -87,12 +91,12 @@ public class ImportController {
         if (CollectionUtils.isEmpty(paths))
             throw new IllegalArgumentException("文件夹为空");
 
-        Long id = importService.importShpBatch(paths, layerName, srid, encoding);
+        Long id = importService.importShpBatch(paths, layerName, srid, encoding, tableName);
         return R.ok(id);
     }
 
     @PostMapping("/gdb/batch")
-    public R<Long> importGdbBatch(String path, String layerName, Integer srid) {
+    public R<Long> importGdbBatch(String path, String layerName, Integer srid, String tableName) {
         File dir = new File(path);
         File[] files = dir.listFiles(f -> f.isDirectory() && f.getName().endsWith(".gdb"));
 
@@ -104,7 +108,7 @@ public class ImportController {
             paths.add(file.getAbsolutePath());
         }
 
-        Long id = importService.importGdbBatch(paths, layerName, srid);
+        Long id = importService.importGdbBatch(paths, layerName, srid, tableName);
         return R.ok(id);
     }
 

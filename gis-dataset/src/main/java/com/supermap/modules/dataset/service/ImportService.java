@@ -28,8 +28,12 @@ public interface ImportService {
 
     void uploadWkt(UploadWktDTO dto);
 
-    Long importGdbBatch(List<String> paths, String layerName, Integer srid);
+    Long importGdbBatch(List<String> paths, String layerName, Integer srid, String tableName);
 
-    Long importShpBatch(List<String> paths, String layerName, Integer srid, String encoding);
+    Long importShpBatch(List<String> paths,
+                        String layerName,
+                        Integer srid,
+                        String encoding,
+                        String tableName);
 
 }
