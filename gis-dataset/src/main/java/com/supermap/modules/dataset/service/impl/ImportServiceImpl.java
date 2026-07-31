@@ -208,7 +208,11 @@ public class ImportServiceImpl implements ImportService {
         }
         datasetService.saveBatch(entities);
         for (int i = 0; i < entities.size(); i++) {
-            importAsyncService.importLayersAsync(entities.get(i), entries.get(i).getValue(), null, null);
+            importAsyncService.importLayersAsync(entities.get(i),
+                    entries.get(i).getValue(),
+                    null,
+                    null,
+                    false);
         }
         return entities.stream().map(DatasetEntity::getId).toList();
     }
@@ -258,7 +262,11 @@ public class ImportServiceImpl implements ImportService {
         datasetEntity.setCreatedAt(Instant.now());
         datasetService.save(datasetEntity);
 
-        importAsyncService.importLayersAsync(datasetEntity, sources, srid, null);
+        importAsyncService.importLayersAsync(datasetEntity,
+                sources,
+                srid,
+                null,
+                StringUtils.isNotBlank(tableName));
 
         return datasetEntity.getId();
     }
@@ -288,7 +296,7 @@ public class ImportServiceImpl implements ImportService {
         datasetService.save(datasetEntity);
 
         // 异步执行导入
-        importAsyncService.importLayersAsync(datasetEntity, sources, srid, encoding);
+        importAsyncService.importLayersAsync(datasetEntity, sources, srid, encoding, StringUtils.isNotBlank(tableName));
 
         return datasetEntity.getId();
     }

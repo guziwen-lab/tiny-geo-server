@@ -8,6 +8,7 @@ import com.supermap.modules.dataset.dto.GdbLayerSource;
 import com.supermap.modules.dataset.dto.LayerMeta;
 import com.supermap.modules.dataset.entity.DatasetEntity;
 import com.supermap.service.GeometryService;
+import com.supermap.util.ShapeEncodingDetector;
 import com.supermap.util.TableNameUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -93,7 +94,11 @@ public class ImportAsyncService {
      * 否则“首个建表”与后续“追加”会产生竞争。
      */
     @Async("importTaskExecutor")
-    public void importLayersAsync(DatasetEntity entity, List<GdbLayerSource> sources, Integer srid, String encoding) {
+    public void importLayersAsync(DatasetEntity entity,
+                                  List<GdbLayerSource> sources,
+                                  Integer srid,
+                                  String encoding,
+                                  boolean isAppend) {
         String tableName = entity.getTableName();
         try {
             if (CollectionUtils.isEmpty(sources)) {
@@ -109,7 +114,12 @@ public class ImportAsyncService {
                     throw new RuntimeException("批量导入分组内 SRID 不一致: " + first.srid() + " / " + meta.srid());
                 }
                 checkGeomTypeCompatible(GeomType.ofOgr2ogrCode(first.geomType()), meta.geomType());
-                execOgr2ogr(source.path(), tableName, source.layerName(), i > 0,
+
+                if (StringUtils.isEmpty(encoding)) {
+                    encoding = ShapeEncodingDetector.detect(source.path(), source.layerName());
+                }
+
+                execOgr2ogr(source.path(), tableName, source.layerName(), isAppend || i > 0,
                         i == 0 ? null : GeomType.ofOgr2ogrCode(first.geomType()), srid, encoding);
                 featureCount += meta.featureCount();
             }
@@ -124,7 +134,8 @@ public class ImportAsyncService {
         } catch (Exception e) {
             log.error("批量导入失败, datasetId={}, table={}", entity.getId(), tableName, e);
             try {
-                geometryService.dropTableIfExists(TableNameUtils.getTableNameWithSchema(datasetProperties.getSchema(), tableName));
+                // TODO
+//                geometryService.dropTableIfExists(TableNameUtils.getTableNameWithSchema(datasetProperties.getSchema(), tableName));
             } catch (Exception dropEx) {
                 log.error("清理失败表失败: {}", tableName, dropEx);
             }
