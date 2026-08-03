@@ -26,6 +26,9 @@ public class ComposeStepEntity {
 	private Long composeId;
 
 	@Schema(title = "步骤信息")
+	private String description;
+
+	@Schema(title = "附加信息")
 	private String message;
 
 	@Schema(title = "状态")
