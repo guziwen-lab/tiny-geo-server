@@ -39,7 +39,6 @@ import java.util.List;
 public class AttributeCalculateAnalysisTask extends AbstractAnalysisTask<AttributeCalculateParam> {
 
     private final ExecuteSqlMapper executeSqlMapper;
-    private final TempTableNameGenerator tempTableNameGenerator;
     private final GeometryService geometryService;
 
     @Override
@@ -102,20 +101,22 @@ public class AttributeCalculateAnalysisTask extends AbstractAnalysisTask<Attribu
     @Override
     protected AnalysisResult doExecute(AnalysisContext<AttributeCalculateParam> context) {
         LayerInfo input = context.getInputLayers().get(0);
+        String tableName = input.getTableName();
         String schema = context.getSchema();
+        String resultTableName = context.getResultTableName();
+
+        SqlInjectionCheck.checkTableName(tableName, resultTableName);
+
         List<CalculatedField> fields = context.getParam().getFields();
-
-        SqlInjectionCheck.checkTableName(input.getTableName());
-
         List<String> fieldNames = fields.stream().map(CalculatedField::name).toList();
         SqlInjectionCheck.checkColumnName(fieldNames.toArray(new String[0]));
 
-        String tempTableName = tempTableNameGenerator.getTableName();
-        String inputTable = TableNameUtils.getTableNameWithSchema(schema, input.getTableName());
-        String tempTable = TableNameUtils.getTableNameWithSchema(schema, tempTableName);
+        String inputTable = TableNameUtils.getTableNameWithSchema(schema, tableName);
+        String resultTable = TableNameUtils.getTableNameWithSchema(schema, resultTableName);
 
         List<String> selectItems = new ArrayList<>();
         selectItems.add("row_number() OVER () AS id");
+
         for (Column column : input.getColumns()) {
             selectItems.add("\"%s\"".formatted(column.name()));
         }
@@ -129,20 +130,20 @@ public class AttributeCalculateAnalysisTask extends AbstractAnalysisTask<Attribu
                 SELECT
                 %s
                 FROM %s
-                """.formatted(tempTable, String.join(",\n", selectItems), inputTable);
+                """.formatted(resultTable, String.join(",\n", selectItems), inputTable);
 
-        log.debug("[AttributeCalculateAnalysisTask] execute sql: {}", sql);
+        log.debug("[taskName: {}] execute sql: {}", context.getTaskName(), sql);
         executeSqlMapper.executeSql(sql);
 
-        geometryService.addPrimaryKey(schema, tempTableName);
-        geometryService.createGistIndex(schema, tempTableName);
+        geometryService.addPrimaryKey(schema, resultTableName);
+        geometryService.createGistIndex(schema, resultTableName);
 
         context.addStep(new AnalysisStep(1,
                 input.getOriginalTableName(),
                 null,
-                context.getResultTableName()));
+                resultTableName));
 
-        return finalizeResult(context, tempTableName, "Attribute calculate completed");
+        return finalizeResult(context, resultTableName, "Attribute calculate completed");
     }
 
 }

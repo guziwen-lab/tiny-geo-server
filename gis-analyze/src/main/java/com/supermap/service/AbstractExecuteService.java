@@ -45,7 +45,7 @@ public abstract class AbstractExecuteService<T extends AnalysisParam> implements
         String resultTableName = tempTableNameGenerator.getTableName();
 
         String sql = buildExecuteSql(current, next, resultTableName, context);
-        log.debug("[taskId: {}] execute sql: {}", context.getTaskId(), sql);
+        log.debug("[taskName: {}] execute sql: {}", context.getTaskName(), sql);
 
         executeSqlMapper.executeSql(sql);
 

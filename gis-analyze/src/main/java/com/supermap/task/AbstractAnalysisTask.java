@@ -71,6 +71,7 @@ public abstract class AbstractAnalysisTask<T extends AnalysisParam> implements A
      * 执行前处理
      */
     protected void beforeExecute(AnalysisContext<T> context) {
+        context.setTaskName(getTaskName());
         setResultGeomType(context);
         setColumns(context);
         repairGeometry(context);

@@ -51,7 +51,7 @@ public class RepairGeometryAnalysisTask extends AbstractAnalysisTask<RepairGeome
         context.addStep(new AnalysisStep(1,
                 layer.getOriginalTableName(),
                 null,
-                context.getResultTableName()));
+                newTableName));
 
         return finalizeResult(context, newTableName, "Filter completed");
     }

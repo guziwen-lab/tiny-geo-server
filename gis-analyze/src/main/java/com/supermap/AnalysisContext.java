@@ -18,6 +18,11 @@ public class AnalysisContext<T extends AnalysisParam> {
     private Long taskId;
 
     /**
+     * 任务名称
+     */
+    private String taskName;
+
+    /**
      * 输入图层
      */
     private List<LayerInfo> inputLayers;

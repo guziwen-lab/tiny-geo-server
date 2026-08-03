@@ -34,10 +34,7 @@ public class AttributeCalculateParam implements AnalysisParam {
      * @param name       字段名（需符合列名规范）
      * @param expression SQL 表达式（如 CASE WHEN ... END）
      */
-    public record CalculatedField(
-            String name,
-            String expression
-    ) {
+    public record CalculatedField(String name, String expression) {
 
     }
 

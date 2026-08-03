@@ -88,7 +88,7 @@ public class FilterAnalysisTask extends AbstractAnalysisTask<FilterParam> {
                 WHERE %s
                 """.formatted(newTable, inputTable, whereClause);
 
-        log.debug("[FilterAnalysisTask] execute sql: {}", sql);
+        log.debug("[taskName: {}] execute sql: {}", context.getTaskName(), sql);
         executeSqlMapper.executeSql(sql);
 
         geometryService.addPrimaryKey(schema, newTableName);
@@ -97,7 +97,7 @@ public class FilterAnalysisTask extends AbstractAnalysisTask<FilterParam> {
         context.addStep(new AnalysisStep(1,
                 input.getOriginalTableName(),
                 null,
-                context.getResultTableName()));
+                newTableName));
 
         return finalizeResult(context, newTableName, "Filter completed");
     }
