@@ -32,12 +32,12 @@ public class RepairGeometryAnalysisTask extends AbstractAnalysisTask<RepairGeome
         LayerInfo layer = context.getInputLayers().get(0);
         String schema = context.getSchema();
         String tableName = layer.getTableName();
+        String newTableName = context.getResultTableName();
 
-        SqlInjectionCheck.checkTableName(tableName);
+        SqlInjectionCheck.checkTableName(tableName, newTableName);
 
         // 用新表名复制表
         RepairGeometryParam param = context.getParam();
-        String newTableName = context.getResultTableName();
         GeomType geomType = context.getGeomType();
         geometryService.copyTable(tableName,
                 newTableName,

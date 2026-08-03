@@ -10,7 +10,6 @@ import com.supermap.service.GeometryService;
 import com.supermap.task.AbstractAnalysisTask;
 import com.supermap.task.param.FilterParam;
 import com.supermap.util.TableNameUtils;
-import com.supermap.util.TempTableNameGenerator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -34,7 +33,6 @@ import java.util.List;
 public class FilterAnalysisTask extends AbstractAnalysisTask<FilterParam> {
 
     private final ExecuteSqlMapper executeSqlMapper;
-    private final TempTableNameGenerator tempTableNameGenerator;
     private final GeometryService geometryService;
 
     @Override
@@ -73,21 +71,22 @@ public class FilterAnalysisTask extends AbstractAnalysisTask<FilterParam> {
     @Override
     protected AnalysisResult doExecute(AnalysisContext<FilterParam> context) {
         LayerInfo input = context.getInputLayers().get(0);
+        String tableName = input.getTableName();
         String schema = context.getSchema();
-        String whereClause = context.getParam().getWhereClause();
-
-        SqlInjectionCheck.checkTableName(input.getTableName());
-
-
         String newTableName = context.getResultTableName();
-        String inputTable = TableNameUtils.getTableNameWithSchema(schema, input.getTableName());
-        String tempTable = TableNameUtils.getTableNameWithSchema(schema, newTableName);
 
+        SqlInjectionCheck.checkTableName(tableName, newTableName);
+
+        String inputTable = TableNameUtils.getTableNameWithSchema(schema, tableName);
+        String newTable = TableNameUtils.getTableNameWithSchema(schema, newTableName);
+        String whereClause = context.getParam().getWhereClause();
         String sql = """
                 CREATE TABLE %s AS
-                SELECT * FROM %s
+                SELECT row_number() OVER () AS serial_id,
+                 *
+                FROM %s
                 WHERE %s
-                """.formatted(tempTable, inputTable, whereClause);
+                """.formatted(newTable, inputTable, whereClause);
 
         log.debug("[FilterAnalysisTask] execute sql: {}", sql);
         executeSqlMapper.executeSql(sql);

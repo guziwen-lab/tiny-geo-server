@@ -28,6 +28,17 @@ public abstract class AbstractExecuteService<T extends AnalysisParam> implements
     @Autowired
     private GeometryService geometryService;
 
+    /**
+     * 执行
+     * <p>1. 生成结果表名</p>
+     * <p>2. 执行sql</p>
+     * <p>3. 添加主键索引</p>
+     *
+     * @param current 当前数据集
+     * @param next    下一个数据集
+     * @param context 分析上下文
+     * @return 返回执行后的结果图层信息
+     */
     @Override
     public LayerInfo execute(LayerInfo current, LayerInfo next, AnalysisContext<T> context) {
         SqlInjectionCheck.checkTableName(current.getTableName(), next.getTableName());
@@ -53,10 +64,12 @@ public abstract class AbstractExecuteService<T extends AnalysisParam> implements
     }
 
     /**
-     * 执行
+     * 构建执行SQL
      *
      * @param current 当前数据集
      * @param next    下一个数据集
+     * @param resultTableName 结果表名
+     * @param context 分析上下文
      * @return 可执行SQL
      */
     protected abstract String buildExecuteSql(LayerInfo current,
