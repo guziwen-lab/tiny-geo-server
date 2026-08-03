@@ -1,7 +1,8 @@
-{
+[
+  {
   "taskName": "jctbtj",
   "analysisType": "INTERSECT_SPLIT",
-  "taskParam": "{\"splitFieldsA\":[{\"sourceField\":\"jcmj\",\"resultField\":\"jcmj_split\"}],\"splitFieldsB\":[{\"sourceField\":\"tbmj\",\"resultField\":\"tbmj_split\"},{\"sourceField\":\"kcmj\",\"resultField\":\"kcmj_split\"}],\"ratioFieldA\":\"jctb_ratio\",\"ratioFieldB\":\"dltb_ratio\"}",
+  "taskParam": "{ \"splitFieldsA\": [ { \"sourceField\": \"jcmj\", \"resultField\": \"jcmj_split\" } ], \"splitFieldsB\": [ { \"sourceField\": \"tbmj\", \"resultField\": \"tbmj_split\" }, { \"sourceField\": \"kcmj\", \"resultField\": \"kcmj_split\" }, { \"sourceField\": \"tbdlmj\", \"resultField\": \"tbdlmj_split\" } ], \"ratioFieldA\": \"zt_ratio\", \"ratioFieldB\": \"dltb_ratio\" }",
   "datasetIds": [
     {
       "datasetId": 14
@@ -10,4 +11,31 @@
       "datasetId": 3
     }
   ]
-}
+  },
+  {
+    "taskName": "KFQ叠加adcode",
+    "analysisType": "INTERSECT_SPLIT",
+    "taskParam": "{ \"splitFieldsA\": [ { \"sourceField\": \"jcmj\", \"resultField\": \"jcmj_split\" } ], \"ratioFieldA\": \"kfq_ratio\", \"ratioFieldB\": \"xjxzq_ratio\" }",
+    "datasetIds": [
+      {
+        "datasetId": 35
+      },
+      {
+        "datasetId": 26
+      }
+    ]
+  },
+  {
+    "taskName": "JD叠加adcode",
+    "analysisType": "INTERSECT_SPLIT",
+    "taskParam": "{ \"splitFieldsA\": [ { \"sourceField\": \"jcmj\", \"resultField\": \"jcmj_split\" } ], \"ratioFieldA\": \"jd_ratio\", \"ratioFieldB\": \"xjxzq_ratio\" }",
+    "datasetIds": [
+      {
+        "datasetId": 34
+      },
+      {
+        "datasetId": 26
+      }
+    ]
+  }
+]

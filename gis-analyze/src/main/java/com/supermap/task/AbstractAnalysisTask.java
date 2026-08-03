@@ -73,7 +73,7 @@ public abstract class AbstractAnalysisTask<T extends AnalysisParam> implements A
     protected void beforeExecute(AnalysisContext<T> context) {
         setResultGeomType(context);
         setColumns(context);
-        fixGeometry(context);
+        repairGeometry(context);
         unifiedSrid(context);
     }
 
@@ -147,13 +147,15 @@ public abstract class AbstractAnalysisTask<T extends AnalysisParam> implements A
         String resultTableName = context.getResultTableName();
         String schema = context.getSchema();
 
-        // 把最后一个临时表改名为结果表
-        geometryService.renameTable(
-                TableNameUtils.getTableNameWithSchema(schema, lastTempTableName),
-                resultTableName);
+        if (!StringUtils.equals(lastTempTableName, resultTableName)) {
+            // 把最后一个临时表改名为结果表
+            geometryService.renameTable(
+                    TableNameUtils.getTableNameWithSchema(schema, lastTempTableName),
+                    resultTableName);
 
-        // 从临时表列表中移除已改名为结果表的表，避免清理时误操作（实际上临时表已经被改名，不会误操作）
-        context.getTempTableList().remove(lastTempTableName);
+            // 从临时表列表中移除已改名为结果表的表，避免清理时误操作（实际上临时表已经被改名，不会误操作）
+            context.getTempTableList().remove(lastTempTableName);
+        }
 
         long featureCount = geometryService.getFeatureCount(
                 TableNameUtils.getTableNameWithSchema(schema, resultTableName));
@@ -203,14 +205,15 @@ public abstract class AbstractAnalysisTask<T extends AnalysisParam> implements A
     /**
      * 修复几何类型
      */
-    private void fixGeometry(AnalysisContext<T> context) {
+    private void repairGeometry(AnalysisContext<T> context) {
         List<LayerInfo> inputLayers = context.getInputLayers();
         String schema = context.getSchema();
 
         for (LayerInfo layer : inputLayers) {
             GeomType geomType = layer.getGeomType();
             String tableName = layer.getTableName();
-            TableProcessResult result = geometryService.normalizeGeometry(schema, tableName, layer.getColumns(), geomType);
+            Integer srid = layer.getSrid();
+            TableProcessResult result = geometryService.normalizeGeometry(schema, tableName, layer.getColumns(), geomType, srid);
             if (result.changed()) {
                 log.debug("[{}] fix geometry, table={}, newTable={}", getTaskName(), tableName, result.tableName());
                 context.addTempTable(result.tableName());

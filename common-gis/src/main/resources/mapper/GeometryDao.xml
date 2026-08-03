@@ -9,7 +9,21 @@
         <foreach collection="columns" item="col" separator="," close=",">
             ${col}
         </foreach>
-        ST_Multi(ST_CollectionExtract(ST_MakeValid(geom), #{dimension})) AS geom
+        ST_Multi(ST_CollectionExtract(ST_MakeValid(geom), #{dimension}))::geometry(${postgisGeometryType}, ${srid}) AS geom
         FROM ${schema}.${table}
     </update>
+
+    <update id="copyTable">
+        CREATE TABLE ${schema}.${newTableName} AS
+        SELECT row_number() OVER () AS serial_id,
+        <foreach collection="columns" item="col" separator="," close=",">
+            ${col}
+        </foreach>
+        <if test="targetSrid != null">
+            ST_Transform(geom, ${targetSrid})::geometry(${postgisGeometryType}, ${targetSrid}) AS geom
+        </if>
+        <if test="targetSrid == null">geom::geometry(${postgisGeometryType}, ${originSrid})</if>
+        FROM ${schema}.${tableName}
+    </update>
+
 </mapper>

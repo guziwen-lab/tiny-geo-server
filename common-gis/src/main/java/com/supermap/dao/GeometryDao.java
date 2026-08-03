@@ -75,7 +75,9 @@ public interface GeometryDao {
                            @Param("table") String table,
                            @Param("columns") List<String> columns,
                            @Param("tempTableName") String tempTableName,
-                           @Param("dimension") int dimension);
+                           @Param("dimension") int dimension,
+                           @Param("postgisGeometryType") String postgisGeometryType,
+                           @Param("srid") Integer srid);
 
     @Update("""
             ALTER TABLE ${current} RENAME TO ${resultTableName}
@@ -116,5 +118,13 @@ public interface GeometryDao {
     int countNeedNormalize(@Param("schema") String schema,
                            @Param("tableName") String tableName,
                            @Param("geoType") String geoType);
+
+    void copyTable(@Param("tableName") String tableName,
+                   @Param("newTableName") String newTableName,
+                   @Param("schema") String schema,
+                   @Param("columns") List<String> columns,
+                   @Param("originSrid") Integer originSrid,
+                   @Param("postgisGeometryType") String postgisGeometryType,
+                   @Param("targetSrid") Integer targetSrid);
 
 }

@@ -5,6 +5,7 @@ import com.supermap.common.util.StringUtils;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -23,12 +24,12 @@ public class IntersectSplitParam implements AnalysisParam {
     /**
      * 源表A（第一个图层）待按面积比例拆分的字段名列表
      */
-    private List<SplitField> splitFieldsA;
+    private List<SplitField> splitFieldsA = new ArrayList<>();
 
     /**
      * 源表B（第二个图层）待按面积比例拆分的字段名列表
      */
-    private List<SplitField> splitFieldsB;
+    private List<SplitField> splitFieldsB = new ArrayList<>();
 
     /** 结果中保存 A 表面积比例的字段名；为空时不输出。 */
     private String ratioFieldA;

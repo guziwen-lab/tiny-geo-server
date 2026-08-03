@@ -14,6 +14,7 @@ import com.supermap.modules.dataset.service.DatasetService;
 import com.supermap.service.GeometryService;
 import com.supermap.task.param.FilterParam;
 import com.supermap.task.param.IntersectSplitParam;
+import com.supermap.task.param.IntersectSplitParam.SplitField;
 import com.supermap.util.TableNameUtils;
 import com.supermap.enums.AnalysisType;
 import lombok.RequiredArgsConstructor;
@@ -70,8 +71,11 @@ public class OtherAgriculturalLandServiceImpl implements OtherAgriculturalLandSe
 
         // 3. 步骤1：相交+面积拆分
         IntersectSplitParam splitParam = new IntersectSplitParam(
-                List.of("jcmj"),
-                List.of("tbmj", "kcmj", "tbdlmj")
+                List.of(SplitField.withDefaultResult("jcmj")),
+                List.of(SplitField.withDefaultResult("tbmj"), SplitField.withDefaultResult("kcmj"),
+                        SplitField.withDefaultResult("tbdlmj")),
+                "ZT_RATIO",
+                "DLTB_RATIO"
         );
         AnalysisResult step1Result = analysisExecutor.execute(
                 AnalysisType.INTERSECT_SPLIT,

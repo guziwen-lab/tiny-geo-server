@@ -86,4 +86,8 @@ public enum GeomType {
         return getGeometryName().replace(" ", "").toUpperCase();
     }
 
+    public String getPostgisGeometryTypeWithoutSt() {
+        return getPostgisGeometryType().replace("ST_", "");
+    }
+
 }

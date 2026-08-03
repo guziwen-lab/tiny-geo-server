@@ -31,14 +31,22 @@ public class GeometryService {
     public TableProcessResult normalizeGeometry(String schema,
                                                 String tableName,
                                                 List<Column> columns,
-                                                GeomType geomType) {
+                                                GeomType geomType,
+                                                Integer srid) {
         String tempTableName = tempTableNameGenerator.getTableName();
         int i = geometryDao.countNeedNormalize(schema, tableName, geomType.getPostgisGeometryType());
         if (i == 0)
             return new TableProcessResult(tableName, false);
 
         List<String> columnNames = columns.stream().map(Column::name).toList();
-        geometryDao.normalizeGeometry(schema, tableName, columnNames, tempTableName, geomType.getCollectionExtractType());
+
+        geometryDao.normalizeGeometry(schema,
+                tableName,
+                columnNames,
+                tempTableName,
+                geomType.getCollectionExtractType(),
+                geomType.getPostgisGeometryTypeWithoutSt(),
+                srid);
         geometryDao.createGistIndex(schema, tempTableName);
 
         return new TableProcessResult(tempTableName, true);
@@ -88,6 +96,19 @@ public class GeometryService {
             return geomType;
         }
         return GeomType.ofOgr2ogrCode(fallbackGeomType);
+    }
+
+    public void copyTable(String tableName,
+                          String newTableName,
+                          String schema,
+                          List<Column> columns,
+                          Integer originSrid,
+                          GeomType geomType,
+                          Integer srid) {
+        String postgisGeometryType = geomType.getPostgisGeometryTypeWithoutSt();
+
+        List<String> columnNames = columns.stream().map(Column::name).toList();
+        geometryDao.copyTable(tableName, newTableName, schema, columnNames, originSrid, postgisGeometryType, srid);
     }
 
 }

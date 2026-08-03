@@ -12,7 +12,7 @@ public final class GeomTypeResolver {
     private GeomTypeResolver() {
     }
 
-    public static GeomType resolve(AnalysisType analysisType, List<LayerInfo> layerInfos) {
+    /*public static GeomType resolve(AnalysisType analysisType, List<LayerInfo> layerInfos) {
         if (CollectionUtils.isEmpty(layerInfos)) {
             throw new IllegalArgumentException("数据集不能为空");
         }
@@ -39,7 +39,7 @@ public final class GeomTypeResolver {
             // 属性计算：保持输入几何类型
             case ATTRIBUTE_CALCULATE -> layerInfos.get(0).getGeomType();
         };
-    }
+    }*/
 
     /**
      * Overlay 几何类型推导

@@ -78,9 +78,10 @@ public class FilterAnalysisTask extends AbstractAnalysisTask<FilterParam> {
 
         SqlInjectionCheck.checkTableName(input.getTableName());
 
-        String tempTableName = tempTableNameGenerator.getTableName();
+
+        String newTableName = context.getResultTableName();
         String inputTable = TableNameUtils.getTableNameWithSchema(schema, input.getTableName());
-        String tempTable = TableNameUtils.getTableNameWithSchema(schema, tempTableName);
+        String tempTable = TableNameUtils.getTableNameWithSchema(schema, newTableName);
 
         String sql = """
                 CREATE TABLE %s AS
@@ -91,15 +92,15 @@ public class FilterAnalysisTask extends AbstractAnalysisTask<FilterParam> {
         log.debug("[FilterAnalysisTask] execute sql: {}", sql);
         executeSqlMapper.executeSql(sql);
 
-        geometryService.addPrimaryKey(schema, tempTableName);
-        geometryService.createGistIndex(schema, tempTableName);
+        geometryService.addPrimaryKey(schema, newTableName);
+        geometryService.createGistIndex(schema, newTableName);
 
         context.addStep(new AnalysisStep(1,
                 input.getOriginalTableName(),
                 null,
                 context.getResultTableName()));
 
-        return finalizeResult(context, tempTableName, "Filter completed");
+        return finalizeResult(context, newTableName, "Filter completed");
     }
 
 }

@@ -10,6 +10,10 @@ import lombok.Getter;
 @AllArgsConstructor
 public enum AnalysisType {
 
+    /**
+     * 还可以修改srid
+     */
+    REPAIR_GEOMETRY("修复几何类型"),
     OVERLAY("图层叠加"),
     INTERSECT_SPLIT("相交面积拆分"),
     BUFFER("缓冲区分析"),

@@ -12,6 +12,13 @@ import com.supermap.modules.business.enums.Caliber;
 public interface DevelopmentZoneService {
 
     /**
+     * 开发区预处理：KFQ、JD 分别与县级行政区相交，补充省、市属性。
+     * 返回的两个数据集作为后续与 DLTB 叠加的输入。
+     */
+    DevelopmentZonePreprocessResult preprocess(Long kfqDatasetId, Long jdDatasetId, Long xzqDatasetId,
+                                                String provinceCodeNameJsonPath, String cityCodeNameJsonPath);
+
+    /**
      * 1-2. 建设状态输出
      * <p>
      * KFQ数据集直接作为结果（已有JSZT2025等字段），无需分析。
@@ -24,7 +31,7 @@ public interface DevelopmentZoneService {
     /**
      * 3-4. 建设密度分析
      * <p>
-     * 先过滤DLTB为建设用地，再与JD相交拆分面积字段。
+     * 先过滤DLTB为建设用地，再与预处理后的 JD_XZQ 相交拆分面积字段。
      *
      * @param jdDatasetId  JD基层数据集ID
      * @param dltbDatasetId DLTB地类图斑数据集ID
@@ -56,7 +63,7 @@ public interface DevelopmentZoneService {
     /**
      * 9-10. 土地利用现状分析
      * <p>
-     * KFQ ∩ DLTB，拆分面积字段。
+     * 预处理后的 KFQ_XZQ ∩ DLTB，拆分面积字段。
      *
      * @param kfqDatasetId  KFQ开发区层数据集ID
      * @param dltbDatasetId DLTB地类图斑数据集ID

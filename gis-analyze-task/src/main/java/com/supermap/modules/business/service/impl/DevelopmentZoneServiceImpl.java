@@ -8,6 +8,7 @@ import com.supermap.enums.UploadStatus;
 import com.supermap.modules.business.constant.BusinessConstants;
 import com.supermap.modules.business.enums.Caliber;
 import com.supermap.modules.business.service.DevelopmentZoneService;
+import com.supermap.modules.business.service.DevelopmentZonePreprocessResult;
 import com.supermap.support.AnalysisExecutor;
 import com.supermap.support.LayerInfoBuilder;
 import com.supermap.modules.dataset.entity.DatasetEntity;
@@ -17,10 +18,18 @@ import com.supermap.task.param.AttributeCalculateParam;
 import com.supermap.task.param.AttributeCalculateParam.CalculatedField;
 import com.supermap.task.param.FilterParam;
 import com.supermap.task.param.IntersectSplitParam;
+import com.supermap.task.param.IntersectSplitParam.SplitField;
 import com.supermap.util.TableNameUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.IOException;
+import java.nio.file.Path;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 import java.time.Instant;
 import java.util.List;
@@ -42,6 +51,19 @@ public class DevelopmentZoneServiceImpl implements DevelopmentZoneService {
     private final DatasetService datasetService;
     private final DatasetProperties datasetProperties;
     private final GeometryService geometryService;
+    private final ObjectMapper objectMapper;
+
+    @Override
+    public DevelopmentZonePreprocessResult preprocess(Long kfqDatasetId, Long jdDatasetId, Long xzqDatasetId,
+                                                       String provinceCodeNameJsonPath, String cityCodeNameJsonPath) {
+        Map<String, String> provinceNames = loadCodeNames(provinceCodeNameJsonPath, "省级");
+        Map<String, String> cityNames = loadCodeNames(cityCodeNameJsonPath, "市级");
+        DatasetEntity xzqDataset = getDataset(xzqDatasetId);
+
+        Long kfqXzqId = intersectAndEnrich(getDataset(kfqDatasetId), xzqDataset, "KFQ", provinceNames, cityNames);
+        Long jdXzqId = intersectAndEnrich(getDataset(jdDatasetId), xzqDataset, "JD", provinceNames, cityNames);
+        return new DevelopmentZonePreprocessResult(kfqXzqId, jdXzqId);
+    }
 
     // ======================== 1-2. 建设状态 ========================
 
@@ -84,8 +106,11 @@ public class DevelopmentZoneServiceImpl implements DevelopmentZoneService {
         LayerInfo dltbFilteredLayer = LayerInfoBuilder.fromAnalysisResult(step1Result);
 
         IntersectSplitParam splitParam = new IntersectSplitParam(
-                List.of("jcmj"),
-                List.of("tbmj", "kcmj", "tbdlmj")
+                List.of(new SplitField("JCMJ_SPLIT", "JCMJ_SPLIT2")),
+                List.of(SplitField.withDefaultResult("tbmj"), SplitField.withDefaultResult("kcmj"),
+                        SplitField.withDefaultResult("tbdlmj")),
+                "JD_XZQ_RATIO",
+                "DLTB_RATIO"
         );
 
         AnalysisResult finalResult;
@@ -120,8 +145,10 @@ public class DevelopmentZoneServiceImpl implements DevelopmentZoneService {
         LayerInfo jdLayer = LayerInfoBuilder.fromDatasetEntity(jdDataset);
 
         IntersectSplitParam splitParam = new IntersectSplitParam(
-                List.of("jcmj"),
-                List.of()
+                List.of(SplitField.withDefaultResult("jcmj")),
+                List.of(),
+                "KFQ_RATIO",
+                "JD_RATIO"
         );
 
         AnalysisResult finalResult = analysisExecutor.execute(
@@ -176,13 +203,16 @@ public class DevelopmentZoneServiceImpl implements DevelopmentZoneService {
         DatasetEntity dltbDataset = getDataset(dltbDatasetId);
 
 
-        // KFQ ∩ DLTB，拆分面积字段
+        // KFQ_XZQ ∩ DLTB，第二次拆分行政区叠加后的监测面积
         LayerInfo kfqLayer = LayerInfoBuilder.fromDatasetEntity(kfqDataset);
         LayerInfo dltbLayer = LayerInfoBuilder.fromDatasetEntity(dltbDataset);
 
         IntersectSplitParam splitParam = new IntersectSplitParam(
-                List.of("jcmj"),
-                List.of("tbmj", "kcmj", "tbdlmj")
+                List.of(new SplitField("JCMJ_SPLIT", "JCMJ_SPLIT2")),
+                List.of(SplitField.withDefaultResult("tbmj"), SplitField.withDefaultResult("kcmj"),
+                        SplitField.withDefaultResult("tbdlmj")),
+                "KFQ_XZQ_RATIO",
+                "DLTB_RATIO"
         );
 
         AnalysisResult finalResult = analysisExecutor.execute(
@@ -245,6 +275,74 @@ public class DevelopmentZoneServiceImpl implements DevelopmentZoneService {
             throw new IllegalArgumentException("数据集不存在: " + datasetId);
         }
         return dataset;
+    }
+
+    private Long intersectAndEnrich(DatasetEntity source, DatasetEntity xzqDataset, String sourceName,
+                                    Map<String, String> provinceNames, Map<String, String> cityNames) {
+        String schema = datasetProperties.getSchema();
+        IntersectSplitParam splitParam = new IntersectSplitParam(
+                List.of(new SplitField("jcmj", "JCMJ_SPLIT")), List.of(),
+                sourceName + "_RATIO", "XJXZQ_RATIO");
+        AnalysisResult intersectResult = analysisExecutor.execute(AnalysisType.INTERSECT_SPLIT,
+                List.of(LayerInfoBuilder.fromDatasetEntity(source), LayerInfoBuilder.fromDatasetEntity(xzqDataset)),
+                splitParam, schema);
+
+        requireColumn(intersectResult, schema, "xzqdm_1");
+        AttributeCalculateParam enrichParam = new AttributeCalculateParam(List.of(
+                new CalculatedField("SDM", "substring(CAST(\"xzqdm_1\" AS text), 1, 2) || '0000'"),
+                new CalculatedField("SMC", buildNameCaseExpression("xzqdm_1", provinceNames)),
+                new CalculatedField("SHIDM", "substring(CAST(\"xzqdm_1\" AS text), 1, 4) || '00'"),
+                new CalculatedField("SHIMC", buildNameCaseExpression("xzqdm_1", cityNames))
+        ));
+        try {
+            AnalysisResult enrichedResult = analysisExecutor.execute(AnalysisType.ATTRIBUTE_CALCULATE,
+                    List.of(LayerInfoBuilder.fromAnalysisResult(intersectResult)), enrichParam, schema);
+            return saveResultDataset(enrichedResult, sourceName + "_XZQ", schema);
+        } finally {
+            cleanupTable(schema, intersectResult.getResultTableName());
+        }
+    }
+
+    private void requireColumn(AnalysisResult result, String schema, String field) {
+        boolean exists = geometryService.listAttrColumns(schema, result.getResultTableName()).stream()
+                .anyMatch(column -> column.name().equalsIgnoreCase(field));
+        if (!exists) {
+            throw new IllegalArgumentException("县级行政区叠加结果缺少字段 " + field
+                    + "；请确认 KFQ/JD 与县级行政区图层均包含 XZQDM，以生成 XZQDM_1");
+        }
+    }
+
+    private Map<String, String> loadCodeNames(String jsonPath, String label) {
+        try {
+            List<CodeName> items = objectMapper.readValue(Path.of(jsonPath).toFile(), new TypeReference<List<CodeName>>() { });
+            Map<String, String> result = new LinkedHashMap<>();
+            for (CodeName item : items) {
+                if (item.dm() != null && item.mc() != null) {
+                    result.put(item.dm(), item.mc());
+                }
+            }
+            if (result.isEmpty()) {
+                throw new IllegalArgumentException(label + "代码名称对照为空: " + jsonPath);
+            }
+            return result;
+        } catch (IOException e) {
+            throw new IllegalArgumentException("无法读取" + label + "代码名称对照: " + jsonPath, e);
+        }
+    }
+
+    private String buildNameCaseExpression(String codeField, Map<String, String> names) {
+        StringBuilder expression = new StringBuilder("CASE ");
+        expression.append("CAST(\"").append(codeField).append("\" AS text)");
+        names.forEach((code, name) -> expression.append(" WHEN '").append(escapeSql(code))
+                .append("' THEN '").append(escapeSql(name)).append("'"));
+        return expression.append(" ELSE NULL END").toString();
+    }
+
+    private String escapeSql(String value) {
+        return value.replace("'", "''");
+    }
+
+    private record CodeName(String dm, String mc) {
     }
 
     /**

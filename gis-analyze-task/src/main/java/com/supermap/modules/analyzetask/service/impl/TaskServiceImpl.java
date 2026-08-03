@@ -17,6 +17,7 @@ import com.supermap.task.AnalysisTask;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.tika.utils.StringUtils;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 
@@ -59,7 +60,11 @@ public class TaskServiceImpl extends ServiceImpl<TaskDao, TaskEntity> implements
         taskEntity.setAnalysisType(dto.getAnalysisType());
         taskEntity.setTaskParam(dto.getTaskParam());
         taskEntity.setCreatedAt(Instant.now());
-        save(taskEntity);
+        try {
+            save(taskEntity);
+        } catch (DuplicateKeyException e) {
+            throw new IllegalArgumentException("Task name already exists");
+        }
 
         List<TaskDatasetSaveDTO> datasetIds = dto.getDatasetIds();
         List<TaskDatasetEntity> taskDatasetEntities = new ArrayList<>(datasetIds.size());

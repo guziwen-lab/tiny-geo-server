@@ -6,7 +6,12 @@ import com.supermap.modules.business.dto.KfqConstructionDensityDTO;
 import com.supermap.modules.business.dto.KfqConstructionStatusDTO;
 import com.supermap.modules.business.dto.KfqElementNameDTO;
 import com.supermap.modules.business.dto.KfqLandUseDTO;
+import com.supermap.modules.business.dto.KfqPreprocessDTO;
+import com.supermap.modules.business.dto.DatasetQualityCheckDTO;
 import com.supermap.modules.business.dto.QtnydbhAnalyzeDTO;
+import com.supermap.modules.business.service.DevelopmentZonePreprocessResult;
+import com.supermap.modules.business.service.OverlayQualityCheckService;
+import com.supermap.modules.business.vo.DatasetQualityReportVO;
 import com.supermap.modules.business.service.DevelopmentZoneService;
 import com.supermap.modules.business.service.OtherAgriculturalLandService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -34,6 +39,14 @@ public class BusinessController {
 
     private final OtherAgriculturalLandService otherAgriculturalLandService;
     private final DevelopmentZoneService developmentZoneService;
+    private final OverlayQualityCheckService overlayQualityCheckService;
+
+    @Operation(summary = "叠加结果质量校验（比例范围、面积守恒）")
+    @PostMapping("/quality-check")
+    public R<DatasetQualityReportVO> qualityCheck(@RequestBody @Validated DatasetQualityCheckDTO dto) {
+        return R.ok(overlayQualityCheckService.check(dto.getDatasetId(), dto.getRatioFields(), dto.getSourceIdField(),
+                dto.getOriginalField(), dto.getSplitField(), dto.getCountyField(), dto.getTolerance()));
+    }
 
     // ======================== 其他农用地分析 ========================
 
@@ -49,6 +62,13 @@ public class BusinessController {
     }
 
     // ======================== 开发区分析 ========================
+
+    @Operation(summary = "开发区行政区预处理（KFQ/JD 与县级行政区叠加并补全省市属性）")
+    @PostMapping("/kfq/preprocess")
+    public R<DevelopmentZonePreprocessResult> kfqPreprocess(@RequestBody @Validated KfqPreprocessDTO dto) {
+        return R.ok(developmentZoneService.preprocess(dto.getKfqDatasetId(), dto.getJdDatasetId(),
+                dto.getXzqDatasetId(), dto.getProvinceCodeNameJsonPath(), dto.getCityCodeNameJsonPath()));
+    }
 
     @Operation(summary = "开发区建设状态输出")
     @PostMapping("/kfq/construction-status")
