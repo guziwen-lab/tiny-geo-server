@@ -124,17 +124,6 @@ public abstract class AbstractAnalysisTask<T extends AnalysisParam> implements A
 
     /**
      * 完成态处理：将最后一个临时表改名为结果表，构建分析结果
-     * <p>
-     * 子类 doExecute 执行完核心分析逻辑后调用此方法，统一处理：
-     * <ol>
-     *   <li>把最后一个临时表改名为结果表</li>
-     *   <li>从临时表列表中移除已改名的表，避免 cleanUp 时无效 DROP</li>
-     *   <li>统计结果表要素数量</li>
-     *   <li>构建并返回 AnalysisResult</li>
-     * </ol>
-     * <p>
-     * 注意：子类在创建最后一步 AnalysisStep 时，应直接使用结果表名作为 outputTable，
-     * 而非临时表名，以避免“先错后改”。
      *
      * @param context           分析上下文
      * @param lastTempTableName 最后一个临时表名（将被改名为结果表）
