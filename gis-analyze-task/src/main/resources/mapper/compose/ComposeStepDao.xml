@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
-<mapper namespace="com.supermap.modules.compose.dao.ComposeTaskDao">
+<mapper namespace="com.supermap.modules.compose.dao.ComposeStepDao">
 
-    <resultMap type="com.supermap.modules.compose.entity.ComposeTaskEntity" id="composeTaskMap">
+    <resultMap type="com.supermap.modules.compose.entity.ComposeStepEntity" id="composeTaskMap">
         <result property="id" column="id"/>
         <result property="composeId" column="compose_id"/>
-        <result property="taskId" column="task_id"/>
+        <result property="message" column="message"/>
         <result property="sort" column="sort"/>
     </resultMap>
 

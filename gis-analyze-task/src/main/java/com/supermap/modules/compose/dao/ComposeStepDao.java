@@ -1,6 +1,6 @@
 package com.supermap.modules.compose.dao;
 
-import com.supermap.modules.compose.entity.ComposeTaskEntity;
+import com.supermap.modules.compose.entity.ComposeStepEntity;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Mapper;
 
@@ -10,6 +10,6 @@ import org.apache.ibatis.annotations.Mapper;
  * @author gzw
  */
 @Mapper
-public interface ComposeTaskDao extends BaseMapper<ComposeTaskEntity> {
+public interface ComposeStepDao extends BaseMapper<ComposeStepEntity> {
 	
 }

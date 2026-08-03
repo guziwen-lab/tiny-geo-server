@@ -1,6 +1,6 @@
 package com.supermap.modules.compose.vo;
 
-import com.supermap.modules.compose.entity.ComposeTaskEntity;
+import com.supermap.modules.compose.entity.ComposeStepEntity;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -13,6 +13,6 @@ import lombok.EqualsAndHashCode;
 @EqualsAndHashCode(callSuper = true)
 @Schema(title = "组合任务任务关联表")
 @Data
-public class ComposeTaskVO extends ComposeTaskEntity {
+public class ComposeStepVO extends ComposeStepEntity {
 
 }

@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.annotation.TableName;
 
 import java.time.Instant;
 
+import com.supermap.enums.TaskStatus;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
@@ -26,8 +27,8 @@ public class ComposeEntity {
     @Schema(title = "任务名称")
     private String name;
 
-    @Schema(title = "状态")
-    private String status;
+	@Schema(title = "状态")
+	private TaskStatus status;
 
     @Schema(title = "结果表schema")
     private String schemaName;
