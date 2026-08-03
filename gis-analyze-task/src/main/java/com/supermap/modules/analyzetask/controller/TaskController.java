@@ -32,7 +32,7 @@ public class TaskController {
     @Operation(summary = "创建任务")
     @PostMapping("/create")
     public R<Long> create(@RequestBody @Validated TaskSaveDTO dto) {
-        Long id = taskService.create(dto);
+        Long id = taskService.create(dto).getId();
         return R.ok(id);
     }
 

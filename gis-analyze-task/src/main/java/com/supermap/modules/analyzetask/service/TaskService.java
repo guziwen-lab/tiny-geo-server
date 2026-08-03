@@ -14,7 +14,7 @@ import com.supermap.modules.analyzetask.dto.TaskSaveDTO;
  */
 public interface TaskService extends IService<TaskEntity> {
 
-    Long create(TaskSaveDTO dto);
+    TaskEntity create(TaskSaveDTO dto);
 
     void start(Long taskId, StartTaskDTO dto);
 

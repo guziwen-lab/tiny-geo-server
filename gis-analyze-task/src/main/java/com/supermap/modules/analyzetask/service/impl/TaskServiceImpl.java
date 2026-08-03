@@ -53,7 +53,7 @@ public class TaskServiceImpl extends ServiceImpl<TaskDao, TaskEntity> implements
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public Long create(TaskSaveDTO dto) {
+    public TaskEntity create(TaskSaveDTO dto) {
         TaskEntity taskEntity = new TaskEntity();
         taskEntity.setTaskName(dto.getTaskName());
         taskEntity.setStatus(TaskStatus.NOT_PROCESSED);
@@ -66,6 +66,13 @@ public class TaskServiceImpl extends ServiceImpl<TaskDao, TaskEntity> implements
             throw new IllegalArgumentException("Task name already exists");
         }
 
+        List<TaskDatasetEntity> taskDatasetEntities = getTaskDatasetEntities(dto, taskEntity);
+        taskDatasetService.saveBatch(taskDatasetEntities);
+
+        return taskEntity;
+    }
+
+    private static List<TaskDatasetEntity> getTaskDatasetEntities(TaskSaveDTO dto, TaskEntity taskEntity) {
         List<TaskDatasetSaveDTO> datasetIds = dto.getDatasetIds();
         List<TaskDatasetEntity> taskDatasetEntities = new ArrayList<>(datasetIds.size());
         for (int i = 0; i < datasetIds.size(); i++) {
@@ -75,9 +82,7 @@ public class TaskServiceImpl extends ServiceImpl<TaskDao, TaskEntity> implements
             taskDatasetEntity.setSort(i);
             taskDatasetEntities.add(taskDatasetEntity);
         }
-        taskDatasetService.saveBatch(taskDatasetEntities);
-
-        return taskEntity.getId();
+        return taskDatasetEntities;
     }
 
     @Override
@@ -96,31 +101,39 @@ public class TaskServiceImpl extends ServiceImpl<TaskDao, TaskEntity> implements
             }
         }
 
-        // 构建图层信息
-        List<LayerInfo> layerInfos = buildLayerInfo(datasets);
-
         // 标记任务为处理中
         taskEntity.setStatus(TaskStatus.PROCESSING);
         taskEntity.setSchemaName(schemaName);
-
         taskEntity.setMessage("");
         updateById(taskEntity);
 
+        AnalysisContext<AnalysisParam> context = buildContext(taskEntity, datasets, dto);
+
+        // 异步执行分析任务
+        taskAsyncService.executeAsync(taskEntity, taskEntity.getAnalysisType(), context);
+    }
+
+    private AnalysisContext<AnalysisParam> buildContext(TaskEntity taskEntity,
+                                                        List<DatasetEntity> datasets,
+                                                        StartTaskDTO dto) {
+        // 构建图层信息
+        List<LayerInfo> layerInfos = buildLayerInfo(datasets);
+
         // 构建分析上下文
         AnalysisContext<AnalysisParam> context = new AnalysisContext<>();
-        context.setTaskId(taskId);
+        context.setTaskId(taskEntity.getId());
         context.setInputLayers(layerInfos);
         context.setResultLayerName(StringUtils.isEmpty(dto.getResultLayerName()) ?
                 taskEntity.getTaskName() : dto.getResultLayerName());
         context.setSchema(datasetProperties.getSchema());
         context.setResultTableName(StringUtils.isEmpty(dto.getResultTableName()) ?
-                "analyze_" + taskId : dto.getResultTableName());
+                "analyze_" + taskEntity.getId() : dto.getResultTableName());
 
+        // 构建分析任务参数
         AnalysisTask<?> analysisTask = analysisEngine.getTask(taskEntity.getAnalysisType());
         context.setParam(analysisTask.buildParam(taskEntity.getTaskParam()));
 
-        // 异步执行分析任务
-        taskAsyncService.executeAsync(taskEntity, taskEntity.getAnalysisType(), context);
+        return context;
     }
 
     /**
