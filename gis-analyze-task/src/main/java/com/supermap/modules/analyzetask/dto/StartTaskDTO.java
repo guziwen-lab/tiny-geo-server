@@ -10,4 +10,6 @@ public class StartTaskDTO {
 
     private String resultLayerName;
 
+    private String resultTableName;
+
 }

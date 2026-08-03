@@ -113,7 +113,8 @@ public class TaskServiceImpl extends ServiceImpl<TaskDao, TaskEntity> implements
         context.setResultLayerName(StringUtils.isEmpty(dto.getResultLayerName()) ?
                 taskEntity.getTaskName() : dto.getResultLayerName());
         context.setSchema(datasetProperties.getSchema());
-        context.setResultTableName("analyze_" + taskId);
+        context.setResultTableName(StringUtils.isEmpty(dto.getResultTableName()) ?
+                "analyze_" + taskId : dto.getResultTableName());
 
         AnalysisTask<?> analysisTask = analysisEngine.getTask(taskEntity.getAnalysisType());
         context.setParam(analysisTask.buildParam(taskEntity.getTaskParam()));
