@@ -24,14 +24,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * 自然资源监测业务分析控制器
- * <p>
- * 提供其他农用地分析和国家级开发区分析的REST接口。
- * 所有接口返回结果数据集ID，可通过已有的导出API（/dataset/export）导出为GDB/Shapefile。
- *
+ * 2026第二季度自然资源监测业务分析
  * @author gzw
  */
-@Tag(name = "自然资源监测业务分析")
+@Tag(name = "2026第二季度自然资源监测业务分析")
 @RestController
 @RequestMapping("/business")
 @RequiredArgsConstructor
