@@ -109,7 +109,7 @@ public interface GeometryDao {
             WHERE geom IS NOT NULL
               AND (
                 NOT ST_IsValid(geom)
-                    OR GeometryType(geom) <> #{geoType})
+                    OR st_geometrytype(geom) <> #{geoType})
             """)
     int countNeedNormalize(@Param("schema") String schema,
                            @Param("tableName") String tableName,
