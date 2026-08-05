@@ -222,7 +222,11 @@ public abstract class AbstractAnalysisTask<T extends AnalysisParam> implements A
         Integer targetSrid = decideTargetSrid(layers);
         for (LayerInfo layer : layers) {
             if (!Objects.equals(layer.getSrid(), targetSrid)) {
-                String tempTableName = geometryService.transformTable(schema, layer.getTableName(), targetSrid);
+                String tempTableName = geometryService.transformTable(schema,
+                        layer.getColumns(),
+                        layer.getGeomType(),
+                        layer.getTableName(),
+                        targetSrid);
                 log.debug("[{}] unifiedSrid, table={}, newTable={}", getTaskName(), layer.getTableName(), tempTableName);
                 context.addTempTable(tempTableName);
 

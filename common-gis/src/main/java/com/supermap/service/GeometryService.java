@@ -21,9 +21,16 @@ public class GeometryService {
 
     private final TempTableNameGenerator tempTableNameGenerator;
 
-    public String transformTable(String schema, String sourceTable, int targetSrid) {
+    public String transformTable(String schema,
+                                 List<Column> columns,
+                                 GeomType geomType,
+                                 String sourceTable,
+                                 int targetSrid) {
         String tempTableName = tempTableNameGenerator.getTableName();
-        geometryDao.transformTable(schema, sourceTable, targetSrid, tempTableName);
+        String postgisGeometryType = geomType.getPostgisGeometryTypeWithoutSt();
+        List<String> columnNames = columns.stream().map(Column::name).toList();
+
+        geometryDao.transformTable(schema, columnNames, postgisGeometryType, sourceTable, targetSrid, tempTableName);
         geometryDao.createGistIndex(schema, tempTableName);
         return tempTableName;
     }

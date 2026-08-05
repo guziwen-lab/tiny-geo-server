@@ -26,4 +26,14 @@
         FROM ${schema}.${tableName}
     </update>
 
+    <update id="transformTable">
+        CREATE TABLE ${schema}.${resultTableName} AS
+        SELECT
+        <foreach collection="columns" item="col" separator="," close=",">
+            ${col}
+        </foreach>
+        ST_Transform(geom, #{targetSrid})::geometry(${postgisGeometryType}, ${targetSrid}) AS geom
+        FROM ${schema}.${sourceTable}
+    </update>
+
 </mapper>

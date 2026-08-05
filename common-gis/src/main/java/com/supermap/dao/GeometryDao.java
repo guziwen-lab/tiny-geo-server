@@ -13,16 +13,12 @@ import java.util.List;
 @Mapper
 public interface GeometryDao {
 
-    @Update("""
-                CREATE TABLE ${schema}.${tempTableName} AS
-                SELECT *,
-                       ST_Transform(geom, #{targetSrid}) AS geom
-                FROM ${schema}.${sourceTable}
-            """)
     void transformTable(@Param("schema") String schema,
+                        @Param("columns") List<String> columns,
+                        @Param("postgisGeometryType") String postgisGeometryType,
                         @Param("sourceTable") String sourceTable,
                         @Param("targetSrid") int targetSrid,
-                        @Param("tempTableName") String tempTableName);
+                        @Param("resultTableName") String resultTableName);
 
     @Select("""
             SELECT ST_SRID(geom)
