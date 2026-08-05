@@ -11,11 +11,11 @@ import lombok.Getter;
 public enum AnalysisType {
 
     OVERLAY("图层叠加"),
-    INTERSECT_SPLIT("相交面积拆分"),
     BUFFER("缓冲区分析"),
     DISSOLVE("消减"),
     SPATIAL_JOIN("空间连接"),
 
+    INTERSECT_SPLIT("相交面积拆分"),
     /**
      * 还可以修改srid
      */
