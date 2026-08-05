@@ -72,9 +72,17 @@ public abstract class AbstractAnalysisTask<T extends AnalysisParam> implements A
      */
     protected void beforeExecute(AnalysisContext<T> context) {
         context.setTaskName(getTaskName());
+
+        log.debug("[{}] beforeExecute -> setResultGeomType start", getTaskName());
         setResultGeomType(context);
+
+        log.debug("[{}] beforeExecute -> setColumns start", getTaskName());
         setColumns(context);
+
+        log.debug("[{}] beforeExecute -> repairGeometry start", getTaskName());
         repairGeometry(context);
+
+        log.debug("[{}] beforeExecute -> unifiedSrid start", getTaskName());
         unifiedSrid(context);
     }
 
