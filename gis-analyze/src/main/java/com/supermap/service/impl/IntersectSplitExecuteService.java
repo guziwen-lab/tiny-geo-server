@@ -39,10 +39,10 @@ public class IntersectSplitExecuteService extends AbstractExecuteService<Interse
 
         /*--------------------- t1层查询字段 ---------------------*/
         // 源要素主键用于面积守恒校验及定位异常图斑。
-        t1SelectItems.add("a.id AS source_a_id");
-        usedNames.add("source_a_id");
-        t1SelectItems.add("b.id AS source_b_id");
-        usedNames.add("source_b_id");
+        String sourceAId = getUniqueFieldName("source_a_id", usedNames);
+        t1SelectItems.add("a.\"id\" AS %s".formatted(sourceAId));
+        String sourceBId = getUniqueFieldName("source_b_id", usedNames);
+        t1SelectItems.add("b.\"id\" AS %s".formatted(sourceBId));
 
         // A表（当前图层）全部属性字段
         for (Column column : current.getColumns()) {
@@ -57,15 +57,17 @@ public class IntersectSplitExecuteService extends AbstractExecuteService<Interse
         }
 
         // A表图形面积
-        String areaA = "ST_Area(a.geom) AS a_area";
+        String areaA = "ST_Area(a.geom) AS %s".formatted(getUniqueFieldName("a_area", usedNames));
         t1SelectItems.add(areaA);
 
         // B表图形面积
-        String areaB = "ST_Area(b.geom) AS b_area";
+        String areaB = "ST_Area(b.geom) AS %s".formatted(getUniqueFieldName("b_area", usedNames));
         t1SelectItems.add(areaB);
 
         // 相交图形
-        String intersectionGeom = "ST_Intersection(a.geom, b.geom) AS inter_geom";
+        String interGeom = getUniqueFieldName("inter_geom", usedNames);
+        String intersectionGeom = "ST_Intersection(a.geom, b.geom) AS %s"
+                .formatted(interGeom);
         t1SelectItems.add(intersectionGeom);
 
         /*--------------------- t2层查询字段 ---------------------*/
@@ -73,21 +75,29 @@ public class IntersectSplitExecuteService extends AbstractExecuteService<Interse
         String t1All = "t1.*";
         t2SelectItems.add(t1All);
         // 相交面积
-        String intersectionArea = "ST_Area(inter_geom) AS inter_area";
+        String interArea = getUniqueFieldName("inter_area", usedNames);
+        String intersectionArea = "ST_Area(%s) AS %s".formatted(interGeom, interArea);
         t2SelectItems.add(intersectionArea);
+        getUniqueFieldName("inter_area", usedNames);
 
         /*--------------------- 最外层查询字段 ---------------------*/
         String id = "row_number() OVER () AS serial_id";
         outerSelectItems.add(id);
-        String t2All = "t2.*";
+        String t2All = "t2.*";  // TODO 只保留需要的字段
         outerSelectItems.add(t2All);
 
         // ratio = 相交面积 / 原图斑面积，按比例分配属性值
-        String interArea = "t2.inter_area";
-        String ratioA = interArea + " / NULLIF(t2.a_area, 0)";
-        String ratioB = interArea + " / NULLIF(t2.b_area, 0)";
+        String t2InterArea = "t2.%s".formatted(interArea);
+        String ratioA = t2InterArea + " / NULLIF(t2.a_area, 0)";
+        String ratioB = t2InterArea + " / NULLIF(t2.b_area, 0)";
 
         // A表拆分字段：按A表原图斑面积比例拆分
+        /*
+            COALESCE(t2."jcmj", 0) * (t2.inter_area / NULLIF(t2.a_area, 0)) AS "jcmj_split",
+            COALESCE(t2."tbmj", 0) * (t2.inter_area / NULLIF(t2.b_area, 0)) AS "tbmj_split",
+            COALESCE(t2."kcmj", 0) * (t2.inter_area / NULLIF(t2.b_area, 0)) AS "kcmj_split",
+         */
+        // TODO A表和B表有相同的需要拆分的属性字段如何处理？
         for (SplitField field : splitFieldsA) {
             String splitAlias = getUniqueFieldName(field.resultField(), usedNames);
             outerSelectItems.add("COALESCE(t2.\"%s\", 0) * (%s) AS \"%s\""
@@ -114,9 +124,7 @@ public class IntersectSplitExecuteService extends AbstractExecuteService<Interse
         }
 
         // 最终geom
-        String geomExpr = GeometryExpression.wrap("t2.inter_geom",
-                context.getGeomType(),
-                context.getSrid());
+        String geomExpr = GeometryExpression.wrap("t2.inter_geom", context.getGeomType(), context.getSrid());
         outerSelectItems.add(geomExpr + " AS geom");
 
         // 构建 CREATE TABLE AS SELECT

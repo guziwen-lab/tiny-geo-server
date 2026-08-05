@@ -128,6 +128,7 @@ public class TaskServiceImpl extends ServiceImpl<TaskDao, TaskEntity> implements
         context.setSchema(datasetProperties.getSchema());
         context.setResultTableName(StringUtils.isEmpty(dto.getResultTableName()) ?
                 "analyze_" + taskEntity.getId() : dto.getResultTableName());
+        context.setPkCol("serial_id");  // TODO 后续考虑配置到配置文件
 
         // 构建分析任务参数
         AnalysisTask<?> analysisTask = analysisEngine.getTask(taskEntity.getAnalysisType());

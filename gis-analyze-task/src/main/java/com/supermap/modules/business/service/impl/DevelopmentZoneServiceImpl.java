@@ -304,7 +304,7 @@ public class DevelopmentZoneServiceImpl implements DevelopmentZoneService {
     }
 
     private void requireColumn(AnalysisResult result, String schema, String field) {
-        boolean exists = geometryService.listAttrColumns(schema, result.getResultTableName()).stream()
+        boolean exists = geometryService.listAttrColumns(schema, result.getResultTableName(),"serial_id").stream()
                 .anyMatch(column -> column.name().equalsIgnoreCase(field));
         if (!exists) {
             throw new IllegalArgumentException("县级行政区叠加结果缺少字段 " + field

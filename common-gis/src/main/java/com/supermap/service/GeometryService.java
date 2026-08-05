@@ -6,6 +6,7 @@ import com.supermap.type.Column;
 import com.supermap.type.TableProcessResult;
 import com.supermap.util.TempTableNameGenerator;
 import lombok.AllArgsConstructor;
+import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -84,13 +85,13 @@ public class GeometryService {
     /**
      * 为结果表添加自增主键（id 列需已通过 row_number() 生成）
      */
-    public void addPrimaryKey(String schema, String table) {
-        geometryDao.alterIdNotNull(schema, table);
-        geometryDao.addPrimaryKey(schema, table);
+    public void addPrimaryKey(String schema, String table, String pkCol) {
+        geometryDao.alterIdNotNull(schema, table, pkCol);
+        geometryDao.addPrimaryKey(schema, table, pkCol);
     }
 
-    public List<Column> listAttrColumns(String schema, String tableName) {
-        return geometryDao.listAttrColumns(schema, tableName);
+    public List<Column> listAttrColumns(String schema, String tableName, String pkCol) {
+        return geometryDao.listAttrColumns(schema, tableName, pkCol);
     }
 
     /**

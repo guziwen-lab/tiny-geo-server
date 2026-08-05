@@ -58,14 +58,14 @@ public interface GeometryDao {
     void dropTableIfExists(@Param("table") String table);
 
     @Update("""
-            ALTER TABLE ${schema}.${table} ALTER COLUMN serial_id SET NOT NULL
+            ALTER TABLE ${schema}.${table} ALTER COLUMN ${pkCol} SET NOT NULL
             """)
-    void alterIdNotNull(@Param("schema") String schema, @Param("table") String table);
+    void alterIdNotNull(@Param("schema") String schema, @Param("table") String table, @Param("pkCol") String pkCol);
 
     @Update("""
-            ALTER TABLE ${schema}.${table} ADD PRIMARY KEY (serial_id)
+            ALTER TABLE ${schema}.${table} ADD PRIMARY KEY (${pkCol})
             """)
-    void addPrimaryKey(@Param("schema") String schema, @Param("table") String table);
+    void addPrimaryKey(@Param("schema") String schema, @Param("table") String table, @Param("pkCol") String pkCol);
 
     void normalizeGeometry(@Param("schema") String schema,
                            @Param("table") String table,
@@ -86,22 +86,13 @@ public interface GeometryDao {
             FROM information_schema.columns c
             WHERE c.table_name = #{table}
               AND c.column_name <> 'geom'
-              AND c.column_name <> 'serial_id'
+              AND c.column_name <> #{pkCol}
               AND c.table_schema = #{schema}
-              /*AND NOT EXISTS (
-                  SELECT 1
-                  FROM information_schema.key_column_usage kcu
-                  JOIN information_schema.table_constraints tc
-                    ON kcu.constraint_name = tc.constraint_name
-                   AND kcu.table_schema = tc.table_schema
-                  WHERE tc.constraint_type = 'PRIMARY KEY'
-                    AND tc.table_name = c.table_name
-                    AND tc.table_schema = c.table_schema
-                    AND kcu.column_name = c.column_name
-              )*/
             ORDER BY c.ordinal_position
             """)
-    List<Column> listAttrColumns(@Param("schema") String schema, @Param("table") String table);
+    List<Column> listAttrColumns(@Param("schema") String schema,
+                                 @Param("table") String table,
+                                 @Param("pkCol") String pkCol);
 
     @Select("""
             SELECT COUNT(*)

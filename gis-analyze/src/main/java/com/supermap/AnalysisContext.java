@@ -63,6 +63,11 @@ public class AnalysisContext<T extends AnalysisParam> {
     private GeomType geomType;
 
     /**
+     * 最终表的主键列名
+     */
+    private String pkCol = "serial_id";
+
+    /**
      * 记录一个分析步骤
      */
     public void addStep(AnalysisStep step) {

@@ -91,7 +91,7 @@ public class FilterAnalysisTask extends AbstractAnalysisTask<FilterParam> {
         log.debug("[taskName: {}] execute sql: {}", context.getTaskName(), sql);
         executeSqlMapper.executeSql(sql);
 
-        geometryService.addPrimaryKey(schema, newTableName);
+        geometryService.addPrimaryKey(schema, newTableName, "serial_id");
         geometryService.createGistIndex(schema, newTableName);
 
         context.addStep(new AnalysisStep(1,

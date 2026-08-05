@@ -135,7 +135,7 @@ public class AttributeCalculateAnalysisTask extends AbstractAnalysisTask<Attribu
         log.debug("[taskName: {}] execute sql: {}", context.getTaskName(), sql);
         executeSqlMapper.executeSql(sql);
 
-        geometryService.addPrimaryKey(schema, resultTableName);
+        geometryService.addPrimaryKey(schema, resultTableName, "serial_id");
         geometryService.createGistIndex(schema, resultTableName);
 
         context.addStep(new AnalysisStep(1,

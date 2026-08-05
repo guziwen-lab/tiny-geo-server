@@ -187,7 +187,7 @@ public abstract class AbstractAnalysisTask<T extends AnalysisParam> implements A
 
         for (LayerInfo inputLayer : inputLayers) {
             String tableName = inputLayer.getTableName();
-            List<Column> columns = geometryService.listAttrColumns(schema, tableName);
+            List<Column> columns = geometryService.listAttrColumns(schema, tableName, context.getPkCol());
             inputLayer.setColumns(columns);
         }
     }

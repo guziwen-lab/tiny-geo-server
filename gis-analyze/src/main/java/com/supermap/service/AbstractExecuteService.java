@@ -50,14 +50,14 @@ public abstract class AbstractExecuteService<T extends AnalysisParam> implements
         executeSqlMapper.executeSql(sql);
 
         // 为结果表添加主键
-        geometryService.addPrimaryKey(context.getSchema(), resultTableName);
+        geometryService.addPrimaryKey(context.getSchema(), resultTableName, context.getPkCol());
 
         LayerInfo resultLayerInfo = new LayerInfo();
         resultLayerInfo.setSrid(context.getSrid());
         resultLayerInfo.setGeomType(context.getGeomType());
         resultLayerInfo.setOriginalTableName(resultTableName);
         resultLayerInfo.setTableName(resultTableName);
-        List<Column> columns = geometryService.listAttrColumns(context.getSchema(), resultTableName);
+        List<Column> columns = geometryService.listAttrColumns(context.getSchema(), resultTableName, context.getPkCol());
         resultLayerInfo.setColumns(columns);
 
         return resultLayerInfo;
