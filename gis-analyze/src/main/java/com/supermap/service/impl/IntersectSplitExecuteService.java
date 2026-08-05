@@ -46,7 +46,9 @@ public class IntersectSplitExecuteService extends AbstractExecuteService<Interse
         List<String> t2SelectItems = new ArrayList<>();
         List<String> outerSelectItems = new ArrayList<>();
         List<String> whereItems = new ArrayList<>();
-        Set<String> originalAttrs = new HashSet<>();    // 需要保留的原表属性字段
+
+        // 需要保留的原表属性字段
+        Set<String> originalAttrs = new HashSet<>();
 
         /*--------------------- t1层查询字段 ---------------------*/
         // 源要素主键用于面积守恒校验及定位异常图斑。用不到。。。
@@ -200,7 +202,7 @@ public class IntersectSplitExecuteService extends AbstractExecuteService<Interse
                 String.join(",\n", t1SelectItems),
                 currentTable,
                 nextTable,
-                String.join(" AND\n", whereItems));
+                String.join("AND\n", whereItems));
     }
 
 }
