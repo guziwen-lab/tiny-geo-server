@@ -37,5 +37,31 @@
         "datasetId": 26
       }
     ]
+  },
+  {
+    "taskName": "KFQ叠加XZQ叠加DLTB",
+    "analysisType": "INTERSECT_SPLIT",
+    "taskParam": "{\"splitFieldsA\": [{\"sourceField\": \"tbmj\", \"resultField\": \"tbmj_split\"}, {\"sourceField\": \"kcmj\", \"resultField\": \"kcmj_split\"}, {\"sourceField\": \"tbdlmj\", \"resultField\": \"tbdlmj_split\"}], \"splitFieldsB\": [{\"sourceField\": \"jcmj_split\", \"resultField\": \"jcmj_split2\"}], \"ratioFieldA\": \"dltb_ratio\", \"ratioFieldB\": \"kfq_xzq_ratio\"}",
+    "datasetIds": [
+      {
+        "datasetId": 44
+      },
+      {
+        "datasetId": 37
+      }
+    ]
+  },
+  {
+    "taskName": "JD叠加XZQ叠加DLTB",
+    "analysisType": "INTERSECT_SPLIT",
+    "taskParam": "{\"splitFieldsA\": [{\"sourceField\": \"tbmj\", \"resultField\": \"tbmj_split\"}, {\"sourceField\": \"kcmj\", \"resultField\": \"kcmj_split\"}, {\"sourceField\": \"tbdlmj\", \"resultField\": \"tbdlmj_split\"}], \"splitFieldsB\": [{\"sourceField\": \"jcmj_split\", \"resultField\": \"jcmj_split2\"}], \"ratioFieldA\": \"dltb_ratio\", \"ratioFieldB\": \"jd_xzq_ratio\"}",
+    "datasetIds": [
+      {
+        "datasetId": 44
+      },
+      {
+        "datasetId": 38
+      }
+    ]
   }
 ]

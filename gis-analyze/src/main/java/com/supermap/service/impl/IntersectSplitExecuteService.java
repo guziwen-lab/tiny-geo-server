@@ -2,6 +2,7 @@ package com.supermap.service.impl;
 
 import com.supermap.AnalysisContext;
 import com.supermap.LayerInfo;
+import com.supermap.common.util.CollectionUtils;
 import com.supermap.service.AbstractExecuteService;
 import com.supermap.service.GeometryExpression;
 import com.supermap.task.param.IntersectSplitParam;
@@ -11,6 +12,7 @@ import com.supermap.util.TableNameUtils;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.function.Function;
 
 /**
  * 相交面积拆分执行服务
@@ -31,29 +33,50 @@ public class IntersectSplitExecuteService extends AbstractExecuteService<Interse
         IntersectSplitParam param = context.getParam();
         List<SplitField> splitFieldsA = param.getSplitFieldsA();
         List<SplitField> splitFieldsB = param.getSplitFieldsB();
+        Map<String, SplitField> splitFieldsAMap = CollectionUtils
+                .toMap(splitFieldsA, SplitField::getSourceField, Function.identity());
+        Map<String, SplitField> splitFieldsBMap = CollectionUtils
+                .toMap(splitFieldsB, SplitField::getSourceField, Function.identity());
 
         Set<String> usedNames = new HashSet<>();
         List<String> t1SelectItems = new ArrayList<>();
         List<String> t2SelectItems = new ArrayList<>();
         List<String> outerSelectItems = new ArrayList<>();
+        Set<String> originalAttrs = new HashSet<>();    // 需要保留的原表属性字段
 
         /*--------------------- t1层查询字段 ---------------------*/
         // 源要素主键用于面积守恒校验及定位异常图斑。
         String sourceAId = getUniqueFieldName("source_a_id", usedNames);
+        originalAttrs.add(sourceAId);
         t1SelectItems.add("a.\"id\" AS %s".formatted(sourceAId));
         String sourceBId = getUniqueFieldName("source_b_id", usedNames);
+        originalAttrs.add(sourceBId);
         t1SelectItems.add("b.\"id\" AS %s".formatted(sourceBId));
 
         // A表（当前图层）全部属性字段
         for (Column column : current.getColumns()) {
             String alias = getUniqueFieldName(column.name(), usedNames);
+            originalAttrs.add(alias);
             t1SelectItems.add("a.\"%s\" AS \"%s\"".formatted(column.name(), alias));
+
+            // 如果A表的字段和B表的字段冲突了，B表的该字段会被改名，后续计算拆分时需要用新字段名。实际上应该只有B表才会被改名，此处兜底冗余一下。
+            if (splitFieldsAMap.containsKey(column.name())) {
+                SplitField splitField = splitFieldsAMap.get(column.name());
+                splitField.setSourceField(alias);
+            }
         }
 
         // B表（叠加图层）全部属性字段
         for (Column column : next.getColumns()) {
             String alias = getUniqueFieldName(column.name(), usedNames);
+            originalAttrs.add(alias);
             t1SelectItems.add("b.\"%s\" AS \"%s\"".formatted(column.name(), alias));
+
+            // 如果B表的字段和A表的字段冲突了，B表的该字段会被改名，后续计算拆分时需要用新字段名
+            if (splitFieldsBMap.containsKey(column.name())) {
+                SplitField splitField = splitFieldsBMap.get(column.name());
+                splitField.setSourceField(alias);
+            }
         }
 
         // A表图形面积
@@ -81,10 +104,13 @@ public class IntersectSplitExecuteService extends AbstractExecuteService<Interse
         getUniqueFieldName("inter_area", usedNames);
 
         /*--------------------- 最外层查询字段 ---------------------*/
-        String id = "row_number() OVER () AS serial_id";
+        String id = "row_number() OVER () AS %s".formatted(context.getPkCol());
         outerSelectItems.add(id);
-        String t2All = "t2.*";  // TODO 只保留需要的字段
-        outerSelectItems.add(t2All);
+
+        // 需要保留的原表属性字段
+        for (String originalAttr : originalAttrs) {
+            outerSelectItems.add("t2.%s".formatted(originalAttr));
+        }
 
         // ratio = 相交面积 / 原图斑面积，按比例分配属性值
         String t2InterArea = "t2.%s".formatted(interArea);
@@ -97,18 +123,17 @@ public class IntersectSplitExecuteService extends AbstractExecuteService<Interse
             COALESCE(t2."tbmj", 0) * (t2.inter_area / NULLIF(t2.b_area, 0)) AS "tbmj_split",
             COALESCE(t2."kcmj", 0) * (t2.inter_area / NULLIF(t2.b_area, 0)) AS "kcmj_split",
          */
-        // TODO A表和B表有相同的需要拆分的属性字段如何处理？
         for (SplitField field : splitFieldsA) {
-            String splitAlias = getUniqueFieldName(field.resultField(), usedNames);
+            String splitAlias = getUniqueFieldName(field.getResultField(), usedNames);
             outerSelectItems.add("COALESCE(t2.\"%s\", 0) * (%s) AS \"%s\""
-                    .formatted(field.sourceField(), ratioA, splitAlias));
+                    .formatted(field.getSourceField(), ratioA, splitAlias));
         }
 
         // B表拆分字段：按B表原图斑面积比例拆分
         for (SplitField field : splitFieldsB) {
-            String splitAlias = getUniqueFieldName(field.resultField(), usedNames);
+            String splitAlias = getUniqueFieldName(field.getResultField(), usedNames);
             outerSelectItems.add("COALESCE(t2.\"%s\", 0) * (%s) AS \"%s\""
-                    .formatted(field.sourceField(), ratioB, splitAlias));
+                    .formatted(field.getSourceField(), ratioB, splitAlias));
         }
 
         // A表比例字段
@@ -124,7 +149,7 @@ public class IntersectSplitExecuteService extends AbstractExecuteService<Interse
         }
 
         // 最终geom
-        String geomExpr = GeometryExpression.wrap("t2.inter_geom", context.getGeomType(), context.getSrid());
+        String geomExpr = GeometryExpression.wrap("t2.%s".formatted(interGeom), context.getGeomType(), context.getSrid());
         outerSelectItems.add(geomExpr + " AS geom");
 
         // 构建 CREATE TABLE AS SELECT
@@ -148,13 +173,14 @@ public class IntersectSplitExecuteService extends AbstractExecuteService<Interse
                 JOIN %s b
                   ON ST_Intersects(a.geom, b.geom)
                  AND ST_Relate(a.geom, b.geom, '2********')) t1) t2
-                WHERE NOT ST_IsEmpty(ST_CollectionExtract(t2.inter_geom, %s))
+                WHERE NOT ST_IsEmpty(ST_CollectionExtract(t2.%s, %s))
                 """.formatted(resultTable,
                 String.join(",\n", outerSelectItems),
                 String.join(",\n", t2SelectItems),
                 String.join(",\n", t1SelectItems),
                 currentTable,
                 nextTable,
+                interGeom,
                 context.getGeomType().getCollectionExtractType());
     }
 

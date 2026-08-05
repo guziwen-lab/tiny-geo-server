@@ -2,6 +2,7 @@ package com.supermap.task.param;
 
 import com.supermap.AnalysisParam;
 import com.supermap.common.util.StringUtils;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -47,10 +48,19 @@ public class IntersectSplitParam implements AnalysisParam {
         this.ratioFieldB = ratioFieldB;
     }
 
-    /** 一个源字段及其在结果表中的拆分字段名。 */
-    public record SplitField(String sourceField, String resultField) {
+    /**
+     * 一个源字段及其在结果表中的拆分字段名。
+     */
+    @AllArgsConstructor
+    @NoArgsConstructor
+    @Data
+    public static class SplitField {
 
-        public String resultField() {
+        private String sourceField;
+
+        private String resultField;
+
+        public String getResultField() {
             return StringUtils.isEmpty(resultField) ? sourceField + "_split" : resultField;
         }
 

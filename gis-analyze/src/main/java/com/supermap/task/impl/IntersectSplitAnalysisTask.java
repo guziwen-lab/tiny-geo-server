@@ -25,12 +25,6 @@ import java.util.*;
  * 对两个面图层执行相交分析，并按相交面积比例拆分指定属性字段。
  * 适用于自然资源监测中 ZT∩DLTB、KFQ_XZQ∩DLTB 等场景。
  * <p>
- * subType 参数格式：{@code A表字段|B表字段}，多个字段用逗号分隔。
- * 例如 {@code jcmj|tbmj,kcmj,tbdlmj} 表示：
- * <ul>
- *   <li>拆分A表（第一个图层）的 jcmj 字段 → jcmj_split</li>
- *   <li>拆分B表（第二个图层）的 tbmj、kcmj、tbdlmj 字段 → tbmj_split、kcmj_split、tbdlmj_split</li>
- * </ul>
  *
  * @author gzw
  */
@@ -123,20 +117,6 @@ public class IntersectSplitAnalysisTask extends AbstractAnalysisTask<IntersectSp
     }
 
     /**
-     * 解析逗号分隔的字段列表
-     */
-    private List<SplitField> parseFields(String s) {
-        if (StringUtils.isEmpty(s)) {
-            return Collections.emptyList();
-        }
-        return Arrays.stream(s.split(","))
-                .map(String::trim)
-                .filter(f -> !f.isEmpty())
-                .map(SplitField::withDefaultResult)
-                .toList();
-    }
-
-    /**
      * 校验拆分字段名合法性及存在性
      *
      * @param splitFields 待拆分字段列表
@@ -152,13 +132,13 @@ public class IntersectSplitAnalysisTask extends AbstractAnalysisTask<IntersectSp
             availableNames.add(column.name().toLowerCase());
         }
 
-        SqlInjectionCheck.checkColumnName(splitFields.stream().map(SplitField::sourceField).toArray(String[]::new));
-        SqlInjectionCheck.checkColumnName(splitFields.stream().map(SplitField::resultField).toArray(String[]::new));
+        SqlInjectionCheck.checkColumnName(splitFields.stream().map(SplitField::getSourceField).toArray(String[]::new));
+        SqlInjectionCheck.checkColumnName(splitFields.stream().map(SplitField::getResultField).toArray(String[]::new));
 
         for (SplitField field : splitFields) {
-            if (!availableNames.contains(field.sourceField().toLowerCase())) {
+            if (!availableNames.contains(field.getSourceField().toLowerCase())) {
                 throw new IllegalArgumentException(
-                        "拆分字段 " + field.sourceField() + " 在" + side + "图层中不存在");
+                        "拆分字段 " + field.getSourceField() + " 在" + side + "图层中不存在");
             }
         }
     }
