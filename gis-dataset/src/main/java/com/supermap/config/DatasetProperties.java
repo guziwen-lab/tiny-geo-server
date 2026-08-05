@@ -18,4 +18,6 @@ public class DatasetProperties {
 
     private String schema = "public";
 
+    private String pkColumnName = "id";
+
 }

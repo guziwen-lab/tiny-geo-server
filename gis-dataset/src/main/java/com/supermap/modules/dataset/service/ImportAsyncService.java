@@ -127,8 +127,7 @@ public class ImportAsyncService {
         } catch (Exception e) {
             log.error("批量导入失败, datasetId={}, table={}", entity.getId(), tableName, e);
             try {
-                // TODO
-//                geometryService.dropTableIfExists(TableNameUtils.getTableNameWithSchema(datasetProperties.getSchema(), tableName));
+                geometryService.dropTableIfExists(TableNameUtils.getTableNameWithSchema(datasetProperties.getSchema(), tableName));
             } catch (Exception dropEx) {
                 log.error("清理失败表失败: {}", tableName, dropEx);
             }
@@ -193,7 +192,7 @@ public class ImportAsyncService {
             cmd.add("GEOMETRY_NAME=geom");
             // 统一源要素主键列名，供叠加结果追溯及面积守恒校验使用。
             cmd.add("-lco");
-            cmd.add("FID=id");
+            cmd.add("FID=" + datasetProperties.getPkColumnName());
             cmd.add("-lco");
             cmd.add("SPATIAL_INDEX=NONE");
             cmd.add("-lco");
