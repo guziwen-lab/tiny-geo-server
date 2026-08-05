@@ -101,7 +101,6 @@ public class IntersectSplitExecuteService extends AbstractExecuteService<Interse
         String interArea = getUniqueFieldName("inter_area", usedNames);
         String intersectionArea = "ST_Area(%s) AS %s".formatted(interGeom, interArea);
         t2SelectItems.add(intersectionArea);
-        getUniqueFieldName("inter_area", usedNames);
 
         /*--------------------- 最外层查询字段 ---------------------*/
         String id = "row_number() OVER () AS %s".formatted(context.getPkCol());
