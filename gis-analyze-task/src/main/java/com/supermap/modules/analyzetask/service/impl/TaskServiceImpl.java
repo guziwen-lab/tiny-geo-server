@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.supermap.*;
 import com.supermap.config.DatasetProperties;
+import com.supermap.config.TaskConfigurationProperties;
 import com.supermap.enums.TaskStatus;
 import com.supermap.modules.analyzetask.dto.StartTaskDTO;
 import com.supermap.modules.analyzetask.dto.TaskDatasetSaveDTO;
@@ -43,6 +44,8 @@ public class TaskServiceImpl extends ServiceImpl<TaskDao, TaskEntity> implements
     private final TaskAsyncService taskAsyncService;
 
     private final DatasetProperties datasetProperties;
+
+    private final TaskConfigurationProperties taskConfigurationProperties;
 
     @Override
     public Page<TaskEntity> queryPage(TaskDTO dto) {
@@ -128,7 +131,7 @@ public class TaskServiceImpl extends ServiceImpl<TaskDao, TaskEntity> implements
         context.setSchema(datasetProperties.getSchema());
         context.setResultTableName(StringUtils.isEmpty(dto.getResultTableName()) ?
                 "analyze_" + taskEntity.getId() : dto.getResultTableName());
-        context.setPkCol("serial_id");  // TODO 后续考虑配置到配置文件
+        context.setPkCol(taskConfigurationProperties.getPkColumnName());
 
         // 构建分析任务参数
         AnalysisTask<?> analysisTask = analysisEngine.getTask(taskEntity.getAnalysisType());
