@@ -27,6 +27,9 @@ import java.util.function.Function;
 @Service
 public class IntersectSplitExecuteService extends AbstractExecuteService<IntersectSplitParam> {
 
+    private static final String DEFAULT_AREA_THRESHOLD = "1";
+    private static final String DEFAULT_RATIO_THRESHOLD = "0.0001";
+
     @Override
     protected String buildExecuteSql(LayerInfo current, LayerInfo next, String resultTableName,
                                      AnalysisContext<IntersectSplitParam> context) {
@@ -42,16 +45,17 @@ public class IntersectSplitExecuteService extends AbstractExecuteService<Interse
         List<String> t1SelectItems = new ArrayList<>();
         List<String> t2SelectItems = new ArrayList<>();
         List<String> outerSelectItems = new ArrayList<>();
+        List<String> whereItems = new ArrayList<>();
         Set<String> originalAttrs = new HashSet<>();    // 需要保留的原表属性字段
 
         /*--------------------- t1层查询字段 ---------------------*/
-        // 源要素主键用于面积守恒校验及定位异常图斑。
-        String sourceAId = getUniqueFieldName("source_a_id", usedNames);
+        // 源要素主键用于面积守恒校验及定位异常图斑。用不到。。。
+        /*String sourceAId = getUniqueFieldName("source_a_id", usedNames);
         originalAttrs.add(sourceAId);
         t1SelectItems.add("a.\"id\" AS %s".formatted(sourceAId));
         String sourceBId = getUniqueFieldName("source_b_id", usedNames);
         originalAttrs.add(sourceBId);
-        t1SelectItems.add("b.\"id\" AS %s".formatted(sourceBId));
+        t1SelectItems.add("b.\"id\" AS %s".formatted(sourceBId));*/
 
         // A表（当前图层）全部属性字段
         for (Column column : current.getColumns()) {
@@ -80,12 +84,12 @@ public class IntersectSplitExecuteService extends AbstractExecuteService<Interse
         }
 
         // A表图形面积
-        String areaA = "ST_Area(a.geom) AS %s".formatted(getUniqueFieldName("a_area", usedNames));
-        t1SelectItems.add(areaA);
+        String areaA = getUniqueFieldName("a_area", usedNames);
+        t1SelectItems.add("ST_Area(a.geom) AS %s".formatted(areaA));
 
         // B表图形面积
-        String areaB = "ST_Area(b.geom) AS %s".formatted(getUniqueFieldName("b_area", usedNames));
-        t1SelectItems.add(areaB);
+        String areaB = getUniqueFieldName("b_area", usedNames);
+        t1SelectItems.add("ST_Area(b.geom) AS %s".formatted(areaB));
 
         // 相交图形
         String interGeom = getUniqueFieldName("inter_geom", usedNames);
@@ -113,8 +117,8 @@ public class IntersectSplitExecuteService extends AbstractExecuteService<Interse
 
         // ratio = 相交面积 / 原图斑面积，按比例分配属性值
         String t2InterArea = "t2.%s".formatted(interArea);
-        String ratioA = t2InterArea + " / NULLIF(t2.a_area, 0)";
-        String ratioB = t2InterArea + " / NULLIF(t2.b_area, 0)";
+        String ratioA = t2InterArea + " / NULLIF(t2.%s, 0)".formatted(areaA);
+        String ratioB = t2InterArea + " / NULLIF(t2.%s, 0)".formatted(areaB);
 
         // A表拆分字段：按A表原图斑面积比例拆分
         /*
@@ -151,6 +155,22 @@ public class IntersectSplitExecuteService extends AbstractExecuteService<Interse
         String geomExpr = GeometryExpression.wrap("t2.%s".formatted(interGeom), context.getGeomType(), context.getSrid());
         outerSelectItems.add(geomExpr + " AS geom");
 
+        /*--------------------- where ---------------------*/
+        // 空面过滤
+        String notEmpty = "NOT ST_IsEmpty(ST_CollectionExtract(t2.%s, %s))".formatted(interGeom,
+                context.getGeomType().getCollectionExtractType());
+        whereItems.add(notEmpty);
+
+        // 面积阈值
+//        String threshold = "%s >= %s".formatted(interArea, DEFAULT_AREA_THRESHOLD);
+//        whereItems.add(threshold);
+
+        // 相交比例阈值
+        String ratioThreshold = "((t2.%s / NULLIF(t2.%s, 0)) >= %s or (t2.%s / NULLIF(t2.%s, 0)) >= %s)"
+                .formatted(interArea, areaA, DEFAULT_RATIO_THRESHOLD,
+                        interArea, areaB, DEFAULT_RATIO_THRESHOLD);
+        whereItems.add(ratioThreshold);
+
         // 构建 CREATE TABLE AS SELECT
         // JOIN 条件：ST_Intersects 走空间索引初筛，ST_Relate('2********') 要求内部相交且交集为二维面，
         // 排除仅共享边界（共边/共点）导致的空面结果；
@@ -172,15 +192,15 @@ public class IntersectSplitExecuteService extends AbstractExecuteService<Interse
                 JOIN %s b
                   ON ST_Intersects(a.geom, b.geom)
                  AND ST_Relate(a.geom, b.geom, '2********')) t1) t2
-                WHERE NOT ST_IsEmpty(ST_CollectionExtract(t2.%s, %s))
+                WHERE
+                %s
                 """.formatted(resultTable,
                 String.join(",\n", outerSelectItems),
                 String.join(",\n", t2SelectItems),
                 String.join(",\n", t1SelectItems),
                 currentTable,
                 nextTable,
-                interGeom,
-                context.getGeomType().getCollectionExtractType());
+                String.join(" AND\n", whereItems));
     }
 
 }
