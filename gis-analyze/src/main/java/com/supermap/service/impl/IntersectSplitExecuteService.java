@@ -3,6 +3,7 @@ package com.supermap.service.impl;
 import com.supermap.AnalysisContext;
 import com.supermap.LayerInfo;
 import com.supermap.common.util.CollectionUtils;
+import com.supermap.common.util.StringUtils;
 import com.supermap.service.AbstractExecuteService;
 import com.supermap.service.GeometryExpression;
 import com.supermap.task.param.IntersectSplitParam;
@@ -26,9 +27,6 @@ import java.util.function.Function;
  */
 @Service
 public class IntersectSplitExecuteService extends AbstractExecuteService<IntersectSplitParam> {
-
-    private static final String DEFAULT_AREA_THRESHOLD = "1";
-    private static final String DEFAULT_RATIO_THRESHOLD = "0.0001";
 
     @Override
     protected String buildExecuteSql(LayerInfo current, LayerInfo next, String resultTableName,
@@ -164,14 +162,20 @@ public class IntersectSplitExecuteService extends AbstractExecuteService<Interse
         whereItems.add(notEmpty);
 
         // 面积阈值
-//        String threshold = "%s >= %s".formatted(interArea, DEFAULT_AREA_THRESHOLD);
-//        whereItems.add(threshold);
+        String intersectAreaThreshold = param.getIntersectAreaThreshold();
+        if (StringUtils.isNotBlank(intersectAreaThreshold)) {
+            String threshold = "%s >= %s".formatted(interArea, intersectAreaThreshold);
+            whereItems.add(threshold);
+        }
 
         // 相交比例阈值
-        String ratioThreshold = "((t2.%s / NULLIF(t2.%s, 0)) >= %s or (t2.%s / NULLIF(t2.%s, 0)) >= %s)"
-                .formatted(interArea, areaA, DEFAULT_RATIO_THRESHOLD,
-                        interArea, areaB, DEFAULT_RATIO_THRESHOLD);
-        whereItems.add(ratioThreshold);
+        String intersectRatioThreshold = param.getIntersectRatioThreshold();
+        if (StringUtils.isNotBlank(intersectRatioThreshold)) {
+            String ratioThreshold = "((t2.%s / NULLIF(t2.%s, 0)) >= %s or (t2.%s / NULLIF(t2.%s, 0)) >= %s)"
+                    .formatted(interArea, areaA, intersectRatioThreshold,
+                            interArea, areaB, intersectRatioThreshold);
+            whereItems.add(ratioThreshold);
+        }
 
         // 构建 CREATE TABLE AS SELECT
         // JOIN 条件：ST_Intersects 走空间索引初筛，ST_Relate('2********') 要求内部相交且交集为二维面，

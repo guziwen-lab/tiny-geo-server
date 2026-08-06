@@ -32,11 +32,25 @@ public class IntersectSplitParam implements AnalysisParam {
      */
     private List<SplitField> splitFieldsB = new ArrayList<>();
 
-    /** 结果中保存 A 表面积比例的字段名；为空时不输出。 */
+    /**
+     * 结果中保存 A 表面积比例的字段名；为空时不输出。
+     */
     private String ratioFieldA;
 
-    /** 结果中保存 B 表面积比例的字段名；为空时不输出。 */
+    /**
+     * 结果中保存 B 表面积比例的字段名；为空时不输出。
+     */
     private String ratioFieldB;
+
+    /**
+     * 相交面积阈值，整数
+     */
+    private String intersectAreaThreshold;
+
+    /**
+     * 相交比例阈值，小数，范围[0,1]
+     */
+    private String intersectRatioThreshold;
 
     public IntersectSplitParam(List<SplitField> splitFieldsA,
                                List<SplitField> splitFieldsB,
