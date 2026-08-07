@@ -68,7 +68,7 @@ public class ComposeServiceImpl extends ServiceImpl<ComposeDao, ComposeEntity> i
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public <T extends AnalysisParam> ComposeVO<T> createByCompose(ComposeTaskDTO<T> dto) {
+    public <T extends AnalysisParam> ComposeVO<T> create(ComposeTaskDTO<T> dto) {
         // 验证数据集
         List<DatasetEntity> datasetEntities = datasetService.listByIds(dto.getDatasetIds().stream()
                 .map(TaskDatasetSaveDTO::getDatasetId).toList());

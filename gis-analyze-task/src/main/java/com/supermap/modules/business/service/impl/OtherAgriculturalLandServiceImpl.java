@@ -59,7 +59,7 @@ public class OtherAgriculturalLandServiceImpl implements OtherAgriculturalLandSe
         composeTaskDTO.setAnalysisType(AnalysisType.FILTER);
         composeTaskDTO.setTaskParam(filterParam);
         composeTaskDTO.addDataset(List.of(datasetId));
-        ComposeVO<FilterParam> composeVO = composeService.createByCompose(composeTaskDTO);
+        ComposeVO<FilterParam> composeVO = composeService.create(composeTaskDTO);
 
         // 执行分析任务
         TaskEntity taskEntity = composeVO.getTaskEntity();
@@ -85,7 +85,7 @@ public class OtherAgriculturalLandServiceImpl implements OtherAgriculturalLandSe
         composeTaskDTO.setAnalysisType(AnalysisType.INTERSECT_SPLIT);
         composeTaskDTO.setTaskParam(splitParam);
         composeTaskDTO.addDataset(List.of(ztDatasetId, dltbDatasetId));
-        ComposeVO<IntersectSplitParam> composeVO = composeService.createByCompose(composeTaskDTO);
+        ComposeVO<IntersectSplitParam> composeVO = composeService.create(composeTaskDTO);
 
         // 执行分析任务
         TaskEntity taskEntity = composeVO.getTaskEntity();
