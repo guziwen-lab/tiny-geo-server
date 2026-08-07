@@ -38,12 +38,6 @@ public class TaskEntity {
     @Schema(title = "状态")
     private TaskStatus status;
 
-    @Schema(title = "结果表schema")
-    private String schemaName;
-
-    @Schema(title = "结果表名")
-    private String resultTableName;
-
     @Schema(title = "结果数据集id")
     private Long resultDatasetId;
 
@@ -53,14 +47,14 @@ public class TaskEntity {
     @Schema(title = "附加信息")
     private String message;
 
-    @Schema(title = "特征数量")
-    private Long featureCount;
-
     @Schema(title = "耗时")
     private Long cost;
 
     @Schema(title = "创建时间")
     private Instant createdAt;
+
+    @Schema(title = "开始时间")
+    private Instant startedAt;
 
     @Schema(title = "完成时间")
     private Instant finishedAt;

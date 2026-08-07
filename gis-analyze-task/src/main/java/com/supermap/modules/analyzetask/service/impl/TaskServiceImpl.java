@@ -6,14 +6,14 @@ import com.supermap.*;
 import com.supermap.config.DatasetProperties;
 import com.supermap.config.TaskConfigurationProperties;
 import com.supermap.enums.TaskStatus;
-import com.supermap.modules.analyzetask.dto.StartTaskDTO;
-import com.supermap.modules.analyzetask.dto.TaskDatasetSaveDTO;
+import com.supermap.modules.analyzetask.dto.*;
+import com.supermap.support.AnalysisContextBuilder;
 import com.supermap.support.LayerInfoBuilder;
 import com.supermap.modules.dataset.entity.DatasetEntity;
 import com.supermap.modules.analyzetask.entity.TaskDatasetEntity;
 
 import com.supermap.modules.analyzetask.service.TaskDatasetService;
-import com.supermap.modules.analyzetask.service.TaskAsyncService;
+import com.supermap.support.AsyncAnalysisExecutor;
 import com.supermap.task.AnalysisTask;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,8 +25,6 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.supermap.modules.analyzetask.dao.TaskDao;
 import com.supermap.modules.analyzetask.entity.TaskEntity;
 import com.supermap.modules.analyzetask.service.TaskService;
-import com.supermap.modules.analyzetask.dto.TaskDTO;
-import com.supermap.modules.analyzetask.dto.TaskSaveDTO;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
@@ -41,11 +39,13 @@ public class TaskServiceImpl extends ServiceImpl<TaskDao, TaskEntity> implements
 
     private final TaskDatasetService taskDatasetService;
 
-    private final TaskAsyncService taskAsyncService;
+    private final AsyncAnalysisExecutor asyncAnalysisExecutor;
 
     private final DatasetProperties datasetProperties;
 
     private final TaskConfigurationProperties taskConfigurationProperties;
+
+    private final AnalysisContextBuilder analysisContextBuilder;
 
     @Override
     public Page<TaskEntity> queryPage(TaskDTO dto) {
@@ -69,14 +69,13 @@ public class TaskServiceImpl extends ServiceImpl<TaskDao, TaskEntity> implements
             throw new IllegalArgumentException("Task name already exists");
         }
 
-        List<TaskDatasetEntity> taskDatasetEntities = getTaskDatasetEntities(dto, taskEntity);
+        List<TaskDatasetEntity> taskDatasetEntities = getTaskDatasetEntities(dto.getDatasetIds(), taskEntity);
         taskDatasetService.saveBatch(taskDatasetEntities);
 
         return taskEntity;
     }
 
-    private static List<TaskDatasetEntity> getTaskDatasetEntities(TaskSaveDTO dto, TaskEntity taskEntity) {
-        List<TaskDatasetSaveDTO> datasetIds = dto.getDatasetIds();
+    public static List<TaskDatasetEntity> getTaskDatasetEntities(List<TaskDatasetSaveDTO> datasetIds, TaskEntity taskEntity) {
         List<TaskDatasetEntity> taskDatasetEntities = new ArrayList<>(datasetIds.size());
         for (int i = 0; i < datasetIds.size(); i++) {
             TaskDatasetEntity taskDatasetEntity = new TaskDatasetEntity();
@@ -106,38 +105,32 @@ public class TaskServiceImpl extends ServiceImpl<TaskDao, TaskEntity> implements
 
         // 标记任务为处理中
         taskEntity.setStatus(TaskStatus.PROCESSING);
-        taskEntity.setSchemaName(schemaName);
         taskEntity.setMessage("");
+        taskEntity.setStartedAt(Instant.now());
         updateById(taskEntity);
 
-        AnalysisContext<AnalysisParam> context = buildContext(taskEntity, datasets, dto);
+        AnalysisContext<? extends AnalysisParam> context = buildContext(taskEntity, datasets, dto);
 
         // 异步执行分析任务
-        taskAsyncService.executeAsync(taskEntity, taskEntity.getAnalysisType(), context);
+        asyncAnalysisExecutor.executeAsync(taskEntity, taskEntity.getAnalysisType(), context);
     }
 
-    private AnalysisContext<AnalysisParam> buildContext(TaskEntity taskEntity,
+    private AnalysisContext<? extends AnalysisParam> buildContext(TaskEntity taskEntity,
                                                         List<DatasetEntity> datasets,
                                                         StartTaskDTO dto) {
         // 构建图层信息
-        List<LayerInfo> layerInfos = buildLayerInfo(datasets);
-
-        // 构建分析上下文
-        AnalysisContext<AnalysisParam> context = new AnalysisContext<>();
-        context.setTaskId(taskEntity.getId());
-        context.setInputLayers(layerInfos);
-        context.setResultLayerName(StringUtils.isEmpty(dto.getResultLayerName()) ?
-                taskEntity.getTaskName() : dto.getResultLayerName());
-        context.setSchema(datasetProperties.getSchema());
-        context.setResultTableName(StringUtils.isEmpty(dto.getResultTableName()) ?
-                "analyze_" + taskEntity.getId() : dto.getResultTableName());
-        context.setPkCol(taskConfigurationProperties.getPkColumnName());
+        List<LayerInfo> layerInfos = datasets.stream()
+                .map(LayerInfoBuilder::fromDatasetEntity).toList();
 
         // 构建分析任务参数
         AnalysisTask<?> analysisTask = analysisEngine.getTask(taskEntity.getAnalysisType());
-        context.setParam(analysisTask.buildParam(taskEntity.getTaskParam()));
 
-        return context;
+        // 构建分析上下文
+        return analysisContextBuilder.buildAnalysisContext(layerInfos,
+                analysisTask.buildParam(taskEntity.getTaskParam()),
+                datasetProperties.getSchema(),
+                StringUtils.isEmpty(dto.getResultTableName()) ?
+                        "analyze_" + taskEntity.getId() : dto.getResultTableName());
     }
 
     /**

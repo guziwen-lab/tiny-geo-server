@@ -161,9 +161,6 @@ public abstract class AbstractAnalysisTask<T extends AnalysisParam> implements A
         return AnalysisResult.builder()
                 .taskId(context.getTaskId())
                 .resultTableName(resultTableName)
-                .resultLayerName(StringUtils.isEmpty(context.getResultLayerName())
-                        ? resultTableName
-                        : context.getResultLayerName())
                 .featureCount(featureCount)
                 .srid(context.getSrid())
                 .geomType(context.getGeomType())

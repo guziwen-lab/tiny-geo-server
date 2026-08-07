@@ -28,11 +28,6 @@ public class AnalysisContext<T extends AnalysisParam> {
     private List<LayerInfo> inputLayers;
 
     /**
-     * 结果图层名称
-     */
-    private String resultLayerName;
-
-    /**
      * schema
      */
     private String schema;

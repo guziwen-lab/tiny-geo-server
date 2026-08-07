@@ -10,8 +10,6 @@ import lombok.EqualsAndHashCode;
 @Data
 public class StartTaskDTO extends TaskSaveDTO {
 
-    private String resultLayerName;
-
     private String resultTableName;
 
 }

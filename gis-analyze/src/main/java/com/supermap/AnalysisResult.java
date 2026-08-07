@@ -31,11 +31,6 @@ public class AnalysisResult {
     private String resultTableName;
 
     /**
-     * 输出图层名称
-     */
-    private String resultLayerName;
-
-    /**
      * 要素数量
      */
     private long featureCount;

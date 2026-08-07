@@ -31,34 +31,36 @@ public class TaskStatusUpdateService {
     private final TaskStepService taskStepService;
 
     @Transactional(rollbackFor = Exception.class)
-    public void markSuccess(TaskEntity task, AnalysisResult result, AnalysisContext<AnalysisParam> context) {
+    public <T extends AnalysisParam> void markSuccess(Long taskId, AnalysisResult result, AnalysisContext<T> context) {
         // 保存步骤
-        saveSteps(task, context.getSteps());
+        saveSteps(taskId, context.getSteps());
 
         // 结果记录到数据集
-        DatasetEntity resultDatasetEntity = saveResultToDataset(result, context);
+        DatasetEntity resultDatasetEntity = saveResultToDataset(result, context.getSchema());
 
-        TaskEntity update = taskDao.selectById(task.getId());
-        update.setGeomType(context.getGeomType());
-        update.setStatus(TaskStatus.SUCCESS);
-        update.setResultTableName(result.getResultTableName());
-        update.setFeatureCount(result.getFeatureCount());
-        update.setCost(result.getCost());
-        update.setFinishedAt(Instant.now());
-        update.setResultDatasetId(resultDatasetEntity.getId());
-        taskDao.updateById(update);
+        Instant now = Instant.now();
+        TaskEntity taskEntity = taskDao.selectById(taskId);
+        taskEntity.setGeomType(context.getGeomType());
+        taskEntity.setStatus(TaskStatus.SUCCESS);
+        taskEntity.setCost(now.getEpochSecond() - taskEntity.getStartedAt().getEpochSecond());
+        taskEntity.setFinishedAt(now);
+        taskEntity.setResultDatasetId(resultDatasetEntity.getId());
+        taskDao.updateById(taskEntity);
     }
 
     @Transactional(rollbackFor = Exception.class)
     public void markFailed(Long taskId, String message) {
-        TaskEntity task = taskDao.selectById(taskId);
-        task.setStatus(TaskStatus.FAILED);
-        task.setFinishedAt(Instant.now());
-        task.setMessage(message);
-        taskDao.updateById(task);
+        Instant now = Instant.now();
+
+        TaskEntity taskEntity = taskDao.selectById(taskId);
+        taskEntity.setStatus(TaskStatus.FAILED);
+        taskEntity.setFinishedAt(now);
+        taskEntity.setCost(now.getEpochSecond() - taskEntity.getStartedAt().getEpochSecond());
+        taskEntity.setMessage(message);
+        taskDao.updateById(taskEntity);
     }
 
-    private void saveSteps(TaskEntity task, List<AnalysisStep> steps) {
+    private void saveSteps(Long taskId, List<AnalysisStep> steps) {
         if (CollectionUtils.isEmpty(steps)) {
             return;
         }
@@ -67,7 +69,7 @@ public class TaskStatusUpdateService {
         for (AnalysisStep step : steps) {
             // 保存步骤
             TaskStepEntity stepEntity = new TaskStepEntity();
-            stepEntity.setTaskId(task.getId());
+            stepEntity.setTaskId(taskId);
             stepEntity.setStepNo(step.getStepNo());
             stepEntity.setInputTable(step.getInputTable());
             stepEntity.setOverlayTable(step.getOverlayTable());
@@ -78,10 +80,9 @@ public class TaskStatusUpdateService {
         taskStepService.saveBatch(stepEntities);
     }
 
-    private DatasetEntity saveResultToDataset(AnalysisResult result, AnalysisContext<AnalysisParam> context) {
+    private DatasetEntity saveResultToDataset(AnalysisResult result, String schema) {
         DatasetEntity datasetEntity = new DatasetEntity();
         datasetEntity.setDatasetName(result.getResultTableName());
-        datasetEntity.setLayerName(result.getResultLayerName());
         datasetEntity.setSchemaName(result.getSchemaName());
         datasetEntity.setTableName(result.getResultTableName());
         datasetEntity.setGeomType(result.getGeomType());
@@ -89,7 +90,7 @@ public class TaskStatusUpdateService {
         datasetEntity.setFeatureCount(result.getFeatureCount());
         datasetEntity.setCreatedAt(Instant.now());
         datasetEntity.setStatus(UploadStatus.SUCCESS);
-        datasetEntity.setSchemaName(context.getSchema());
+        datasetEntity.setSchemaName(schema);
         datasetService.save(datasetEntity);
 
         return datasetEntity;
