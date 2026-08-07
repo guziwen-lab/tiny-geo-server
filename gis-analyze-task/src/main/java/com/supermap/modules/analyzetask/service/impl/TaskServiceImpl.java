@@ -128,7 +128,6 @@ public class TaskServiceImpl extends ServiceImpl<TaskDao, TaskEntity> implements
         // 构建分析上下文
         return analysisContextBuilder.buildAnalysisContext(layerInfos,
                 analysisTask.buildParam(taskEntity.getTaskParam()),
-                datasetProperties.getSchema(),
                 StringUtils.isEmpty(dto.getResultTableName()) ?
                         "analyze_" + taskEntity.getId() : dto.getResultTableName());
     }

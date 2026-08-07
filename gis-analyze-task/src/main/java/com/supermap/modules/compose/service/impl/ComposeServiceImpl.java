@@ -69,6 +69,12 @@ public class ComposeServiceImpl extends ServiceImpl<ComposeDao, ComposeEntity> i
     @Transactional(rollbackFor = Exception.class)
     @Override
     public <T extends AnalysisParam> ComposeVO<T> createByCompose(ComposeTaskDTO<T> dto) {
+        // 验证数据集
+        List<DatasetEntity> datasetEntities = datasetService.listByIds(dto.getDatasetIds().stream()
+                .map(TaskDatasetSaveDTO::getDatasetId).toList());
+        if (datasetEntities.size() != dto.getDatasetIds().size())
+            throw new IllegalArgumentException("Dataset not found");
+
         // 保存任务
         TaskEntity taskEntity = new TaskEntity();
         taskEntity.setTaskName(dto.getTaskName());
@@ -77,12 +83,6 @@ public class ComposeServiceImpl extends ServiceImpl<ComposeDao, ComposeEntity> i
         taskEntity.setStatus(TaskStatus.PROCESSING);
         taskEntity.setCreatedAt(Instant.now());
         taskService.save(taskEntity);
-
-        // 验证数据集
-        List<DatasetEntity> datasetEntities = datasetService.listByIds(dto.getDatasetIds().stream()
-                .map(TaskDatasetSaveDTO::getDatasetId).toList());
-        if (datasetEntities.size() != dto.getDatasetIds().size())
-            throw new IllegalArgumentException("Dataset not found");
 
         // 保存任务数据集关系
         List<TaskDatasetEntity> taskDatasetEntities = TaskServiceImpl.getTaskDatasetEntities(dto.getDatasetIds(), taskEntity);
@@ -97,7 +97,6 @@ public class ComposeServiceImpl extends ServiceImpl<ComposeDao, ComposeEntity> i
         AnalysisContext<T> context = analysisExecutor.buildAnalysisContext(
                 layerInfos,
                 dto.getTaskParam(),
-                datasetProperties.getSchema(),
                 "analyze_" + taskEntity.getId());
 
         ComposeVO<T> composeVO = new ComposeVO<>();
