@@ -7,7 +7,6 @@ import com.supermap.AnalysisParam;
 import com.supermap.LayerInfo;
 import com.supermap.common.util.BeanUtils;
 import com.supermap.common.util.JSON;
-import com.supermap.config.DatasetProperties;
 import com.supermap.enums.TaskStatus;
 import com.supermap.modules.analyzetask.dto.ComposeTaskDTO;
 import com.supermap.modules.analyzetask.dto.TaskDatasetSaveDTO;
@@ -43,7 +42,6 @@ public class ComposeServiceImpl extends ServiceImpl<ComposeDao, ComposeEntity> i
     private final DatasetService datasetService;
     private final TaskDatasetService taskDatasetService;
     private final AnalysisContextBuilder analysisExecutor;
-    private final DatasetProperties datasetProperties;
 
     @Override
     public Page<ComposeEntity> queryPage(ComposeDTO dto) {
