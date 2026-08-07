@@ -94,6 +94,26 @@ public class IntersectSplitAnalysisTask extends AbstractAnalysisTask<IntersectSp
                                 + geomType.getGeometryName() + ", 图层: " + layer.getTableName());
             }
         }
+
+        // 阈值校验
+        IntersectSplitParam param = context.getParam();
+        String intersectAreaThreshold = param.getIntersectAreaThreshold();
+        if (intersectAreaThreshold != null) {
+            try {
+                Integer.parseInt(intersectAreaThreshold);
+            } catch (NumberFormatException e) {
+                throw new IllegalArgumentException("相交面积阈值必须为整数");
+            }
+        }
+
+        String intersectRatioThreshold = param.getIntersectRatioThreshold();
+        if (intersectRatioThreshold != null) {
+            try {
+                Double.parseDouble(intersectRatioThreshold);
+            } catch (NumberFormatException e) {
+                throw new IllegalArgumentException("相交比例阈值必须为数字");
+            }
+        }
     }
 
     /**
