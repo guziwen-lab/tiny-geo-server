@@ -11,7 +11,7 @@ import com.supermap.enums.TaskStatus;
 import com.supermap.modules.analyzetask.dto.*;
 import com.supermap.support.analysis.AnalysisContextBuilder;
 import com.supermap.support.analysis.LayerInfoBuilder;
-import com.supermap.modules.dataset.entity.DatasetEntity;
+import com.supermap.dataset.modules.dataset.entity.DatasetEntity;
 import com.supermap.modules.analyzetask.entity.TaskDatasetEntity;
 
 import com.supermap.modules.analyzetask.service.TaskDatasetService;

@@ -1,0 +1,29 @@
+package com.supermap.dataset.modules.dataset.service;
+
+import com.baomidou.mybatisplus.extension.service.IService;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.supermap.dataset.modules.dataset.entity.ExportTaskEntity;
+import com.supermap.dataset.modules.dataset.dto.ExportTaskDTO;
+import com.supermap.dataset.modules.dataset.dto.ExportTaskSaveDTO;
+
+import java.util.List;
+
+/**
+ * 导出geo数据
+ *
+ * @author gzw
+ */
+public interface ExportTaskService extends IService<ExportTaskEntity> {
+
+    Page<ExportTaskEntity> queryPage(ExportTaskDTO dto);
+
+    Long saveDTO(ExportTaskSaveDTO dto);
+
+    void updateDTOById(ExportTaskSaveDTO dto);
+
+    Long exportShp(Long datasetId);
+
+    Long exportGdb(List<Long> datasetIds);
+
+}
+

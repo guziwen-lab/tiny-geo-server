@@ -2,7 +2,7 @@ package com.supermap.support.analysis;
 
 import com.supermap.analyze.AnalysisResult;
 import com.supermap.analyze.LayerInfo;
-import com.supermap.modules.dataset.entity.DatasetEntity;
+import com.supermap.dataset.modules.dataset.entity.DatasetEntity;
 
 /**
  * LayerInfo 构建工具

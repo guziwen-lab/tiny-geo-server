@@ -5,7 +5,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.supermap.modules.analyzetask.entity.TaskDatasetEntity;
 import com.supermap.modules.analyzetask.dto.TaskDatasetDTO;
 import com.supermap.modules.analyzetask.dto.TaskDatasetSaveDTO;
-import com.supermap.modules.dataset.entity.DatasetEntity;
+import com.supermap.dataset.modules.dataset.entity.DatasetEntity;
 
 import java.util.List;
 

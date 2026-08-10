@@ -3,7 +3,7 @@ package com.supermap.modules.analyzetask.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.supermap.core.common.util.BeanUtils;
-import com.supermap.modules.dataset.entity.DatasetEntity;
+import com.supermap.dataset.modules.dataset.entity.DatasetEntity;
 import org.springframework.stereotype.Service;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 

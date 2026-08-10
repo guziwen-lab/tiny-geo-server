@@ -1,0 +1,45 @@
+package com.supermap.dataset.modules.dataset.service.impl;
+
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.supermap.core.common.util.BeanUtils;
+import com.supermap.dataset.enums.UploadStatus;
+import org.springframework.stereotype.Service;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+
+import com.supermap.dataset.modules.dataset.dao.DatasetDao;
+import com.supermap.dataset.modules.dataset.entity.DatasetEntity;
+import com.supermap.dataset.modules.dataset.service.DatasetService;
+import com.supermap.dataset.modules.dataset.dto.DatasetDTO;
+import com.supermap.dataset.modules.dataset.dto.DatasetSaveDTO;
+
+@Service("datasetService")
+public class DatasetServiceImpl extends ServiceImpl<DatasetDao, DatasetEntity> implements DatasetService {
+
+    @Override
+    public Page<DatasetEntity> queryPage(DatasetDTO dto) {
+        LambdaQueryWrapper<DatasetEntity> wrapper = new LambdaQueryWrapper<>();
+        return page(dto.page(), wrapper);
+    }
+
+    @Override
+    public Long saveDTO(DatasetSaveDTO dto) {
+        DatasetEntity datasetEntity = new DatasetEntity();
+        BeanUtils.copyProperties(dto, datasetEntity);
+        save(datasetEntity);
+        return datasetEntity.getId();
+    }
+
+    @Override
+    public void updateDTOById(DatasetSaveDTO dto) {
+        DatasetEntity datasetEntity = new DatasetEntity();
+        BeanUtils.copyProperties(dto, datasetEntity);
+        updateById(datasetEntity);
+    }
+
+    @Override
+    public boolean updateStatusBySuccess(Long id, UploadStatus uploadStatus) {
+        return baseMapper.updateStatusBySuccess(id, uploadStatus) > 0;
+    }
+
+}

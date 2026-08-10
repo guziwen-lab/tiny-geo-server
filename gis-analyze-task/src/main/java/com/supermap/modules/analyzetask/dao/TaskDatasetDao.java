@@ -2,7 +2,7 @@ package com.supermap.modules.analyzetask.dao;
 
 import com.supermap.modules.analyzetask.entity.TaskDatasetEntity;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.supermap.modules.dataset.entity.DatasetEntity;
+import com.supermap.dataset.modules.dataset.entity.DatasetEntity;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
