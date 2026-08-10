@@ -1,4 +1,4 @@
-package com.supermap.modules.platform.dto;
+package com.supermap.platform.modules.platform.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;

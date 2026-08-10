@@ -1,4 +1,4 @@
-package com.supermap.modules.platform.vo;
+package com.supermap.platform.modules.platform.vo;
 
 import com.supermap.modules.dataset.entity.FeatureEntity;
 import io.swagger.v3.oas.annotations.media.Schema;

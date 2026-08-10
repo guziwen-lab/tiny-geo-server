@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
-<mapper namespace="com.supermap.modules.platform.dao.SearchFeatureDao">
+<mapper namespace="com.supermap.platform.modules.platform.dao.SearchFeatureDao">
     <select id="queryNormalBbox" resultType="string">
         SELECT jsonb_build_object(
                        'type', 'FeatureCollection',
@@ -52,7 +52,7 @@
             )
     </select>
 
-    <select id="queryPage" resultType="com.supermap.modules.platform.vo.FeatureVO">
+    <select id="queryPage" resultType="com.supermap.platform.modules.platform.vo.FeatureVO">
         SELECT id,
                name,
                properties,
@@ -74,7 +74,7 @@
         order by created_at desc
     </select>
 
-    <select id="getVOById" resultType="com.supermap.modules.platform.vo.FeatureVO">
+    <select id="getVOById" resultType="com.supermap.platform.modules.platform.vo.FeatureVO">
         SELECT id,
                name,
                jsonb_build_object(

@@ -1,8 +1,8 @@
-package com.supermap.modules.platform.controller;
+package com.supermap.platform.modules.platform.controller;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.supermap.modules.platform.dto.BboxQueryDTO;
-import com.supermap.modules.platform.vo.FeatureVO;
+import com.supermap.platform.modules.platform.dto.BboxQueryDTO;
+import com.supermap.platform.modules.platform.vo.FeatureVO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.AllArgsConstructor;
@@ -10,8 +10,8 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import com.supermap.core.common.pojo.R;
-import com.supermap.modules.platform.dto.FeatureDTO;
-import com.supermap.modules.platform.service.FeatureService;
+import com.supermap.platform.modules.platform.dto.FeatureDTO;
+import com.supermap.platform.modules.platform.service.FeatureService;
 
 /**
  * geo feature

@@ -1,4 +1,4 @@
-package com.supermap.modules.platform.dto;
+package com.supermap.platform.modules.platform.dto;
 
 import com.supermap.db.dto.SearchDTO;
 import io.swagger.v3.oas.annotations.media.Schema;

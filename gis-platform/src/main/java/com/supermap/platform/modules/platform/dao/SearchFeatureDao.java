@@ -1,9 +1,9 @@
-package com.supermap.modules.platform.dao;
+package com.supermap.platform.modules.platform.dao;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.supermap.modules.platform.dto.BboxQueryDTO;
-import com.supermap.modules.platform.dto.FeatureDTO;
-import com.supermap.modules.platform.vo.FeatureVO;
+import com.supermap.platform.modules.platform.dto.BboxQueryDTO;
+import com.supermap.platform.modules.platform.dto.FeatureDTO;
+import com.supermap.platform.modules.platform.vo.FeatureVO;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 

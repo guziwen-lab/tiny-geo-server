@@ -1,5 +1,6 @@
 package com.supermap;
 
+import com.supermap.platform.GisPlatformApplication;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
