@@ -2,6 +2,7 @@ package com.supermap.modules.analyzetask.dto;
 
 import com.supermap.AnalysisParam;
 import com.supermap.enums.AnalysisType;
+import com.supermap.modules.compose.entity.ComposeEntity;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotEmpty;
 import lombok.Data;
@@ -14,6 +15,8 @@ import java.util.List;
  */
 @Data
 public class ComposeTaskDTO<T extends AnalysisParam> {
+
+    private ComposeEntity composeEntity;
 
     private String taskName;
 

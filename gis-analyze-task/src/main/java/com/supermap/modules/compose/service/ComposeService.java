@@ -22,7 +22,9 @@ public interface ComposeService extends IService<ComposeEntity> {
 
     void updateDTOById(ComposeSaveDTO dto);
 
-    <T extends AnalysisParam> ComposeVO<T> create(ComposeTaskDTO<T> dto);
+    <T extends AnalysisParam> ComposeVO<T> createTask(ComposeTaskDTO<T> dto, Integer sort);
+
+    ComposeEntity createCompose(ComposeSaveDTO dto);
 
 }
 

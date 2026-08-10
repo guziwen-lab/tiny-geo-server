@@ -4,16 +4,15 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.supermap.*;
 import com.supermap.config.DatasetProperties;
-import com.supermap.config.TaskConfigurationProperties;
 import com.supermap.enums.TaskStatus;
 import com.supermap.modules.analyzetask.dto.*;
-import com.supermap.support.AnalysisContextBuilder;
-import com.supermap.support.LayerInfoBuilder;
+import com.supermap.support.analysis.AnalysisContextBuilder;
+import com.supermap.support.analysis.LayerInfoBuilder;
 import com.supermap.modules.dataset.entity.DatasetEntity;
 import com.supermap.modules.analyzetask.entity.TaskDatasetEntity;
 
 import com.supermap.modules.analyzetask.service.TaskDatasetService;
-import com.supermap.support.AsyncAnalysisExecutor;
+import com.supermap.support.analysis.AsyncAnalysisExecutor;
 import com.supermap.task.AnalysisTask;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -42,8 +41,6 @@ public class TaskServiceImpl extends ServiceImpl<TaskDao, TaskEntity> implements
     private final AsyncAnalysisExecutor asyncAnalysisExecutor;
 
     private final DatasetProperties datasetProperties;
-
-    private final TaskConfigurationProperties taskConfigurationProperties;
 
     private final AnalysisContextBuilder analysisContextBuilder;
 
@@ -93,9 +90,9 @@ public class TaskServiceImpl extends ServiceImpl<TaskDao, TaskEntity> implements
         if (taskEntity == null)
             throw new IllegalArgumentException("Task not found or Task is already processing/success");
 
-        List<DatasetEntity> datasets = getDatasetEntityByTaskId(taskId);
+        List<DatasetEntity> datasets = taskDatasetService.getDatasetEntityByTaskId(taskId);
 
-        // 校验数据集是否在config.schema中
+        // 校验数据集是否存在
         String schemaName = datasetProperties.getSchema();
         for (DatasetEntity dataset : datasets) {
             if (!dataset.getSchemaName().equals(schemaName)) {
@@ -130,26 +127,6 @@ public class TaskServiceImpl extends ServiceImpl<TaskDao, TaskEntity> implements
                 analysisTask.buildParam(taskEntity.getTaskParam()),
                 StringUtils.isEmpty(dto.getResultTableName()) ?
                         "analyze_" + taskEntity.getId() : dto.getResultTableName());
-    }
-
-    /**
-     * 构建数据集信息
-     *
-     * @param datasets 数据集列表
-     * @return 图层信息列表
-     */
-    private List<LayerInfo> buildLayerInfo(List<DatasetEntity> datasets) {
-        return datasets.stream().map(LayerInfoBuilder::fromDatasetEntity).toList();
-    }
-
-    /**
-     * 根据任务id获取数据集
-     *
-     * @param taskId 任务id
-     * @return 数据集列表
-     */
-    private List<DatasetEntity> getDatasetEntityByTaskId(Long taskId) {
-        return taskDatasetService.getDatasetEntityByTaskId(taskId);
     }
 
 }

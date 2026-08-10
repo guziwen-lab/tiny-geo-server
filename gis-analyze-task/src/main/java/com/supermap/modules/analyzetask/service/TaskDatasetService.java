@@ -22,6 +22,12 @@ public interface TaskDatasetService extends IService<TaskDatasetEntity> {
 
     void updateDTOById(TaskDatasetSaveDTO dto);
 
+    /**
+     * 根据任务id获取数据集
+     *
+     * @param taskId 任务id
+     * @return 数据集列表
+     */
     List<DatasetEntity> getDatasetEntityByTaskId(Long taskId);
 
 }

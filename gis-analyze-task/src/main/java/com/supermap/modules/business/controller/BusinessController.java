@@ -3,6 +3,7 @@ package com.supermap.modules.business.controller;
 import com.supermap.common.pojo.R;
 import com.supermap.modules.business.dto.QtnydbhAnalyzeDTO;
 import com.supermap.modules.business.service.OtherAgriculturalLandService;
+import com.supermap.modules.compose.entity.ComposeEntity;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -33,12 +34,12 @@ public class BusinessController {
     @Operation(summary = "其他农用地分析（非同口径/同口径）")
     @PostMapping("/qtnydbh/analyze")
     public R<Long> qtnydbhAnalyze(@RequestBody @Validated QtnydbhAnalyzeDTO dto) {
-        Long datasetId = otherAgriculturalLandService.analyze(
+        ComposeEntity composeEntity = otherAgriculturalLandService.analyze(
                 dto.getZtDatasetId(),
                 dto.getDltbDatasetId(),
                 dto.getCaliber()
         );
-        return R.ok(datasetId);
+        return R.ok(composeEntity.getId());
     }
 
 }

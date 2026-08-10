@@ -1,4 +1,4 @@
-package com.supermap.support;
+package com.supermap.support.analysis;
 
 import com.supermap.*;
 import com.supermap.enums.AnalysisType;

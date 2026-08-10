@@ -4,7 +4,6 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 
-import com.supermap.enums.TaskStatus;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
@@ -25,14 +24,14 @@ public class ComposeStepEntity {
 	@Schema(title = "组合任务id")
 	private Long composeId;
 
+	@Schema(title = "任务id")
+	private Long taskId;
+
 	@Schema(title = "步骤信息")
 	private String description;
 
 	@Schema(title = "附加信息")
 	private String message;
-
-	@Schema(title = "状态")
-	private TaskStatus status;
 
 	@Schema(title = "排序")
 	private Integer sort;

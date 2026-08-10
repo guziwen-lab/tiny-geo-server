@@ -26,8 +26,8 @@ public class ComposeSaveDTO {
 	@Schema(title = "状态")
 	private String status;
 
-	@Schema(title = "结果表schema")
-	private String schemaName;
+	@Schema(title = "结果数据集id")
+	private String resultDatasetId;
 
 	@Schema(title = "附加信息")
 	private String message;

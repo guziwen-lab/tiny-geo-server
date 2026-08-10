@@ -15,11 +15,13 @@ import com.supermap.modules.analyzetask.entity.TaskEntity;
 import com.supermap.modules.analyzetask.service.TaskDatasetService;
 import com.supermap.modules.analyzetask.service.TaskService;
 import com.supermap.modules.analyzetask.service.impl.TaskServiceImpl;
+import com.supermap.modules.compose.entity.ComposeStepEntity;
+import com.supermap.modules.compose.service.ComposeStepService;
 import com.supermap.modules.compose.vo.ComposeVO;
 import com.supermap.modules.dataset.entity.DatasetEntity;
 import com.supermap.modules.dataset.service.DatasetService;
-import com.supermap.support.AnalysisContextBuilder;
-import com.supermap.support.LayerInfoBuilder;
+import com.supermap.support.analysis.AnalysisContextBuilder;
+import com.supermap.support.analysis.LayerInfoBuilder;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -42,6 +44,7 @@ public class ComposeServiceImpl extends ServiceImpl<ComposeDao, ComposeEntity> i
     private final DatasetService datasetService;
     private final TaskDatasetService taskDatasetService;
     private final AnalysisContextBuilder analysisExecutor;
+    private final ComposeStepService composeStepService;
 
     @Override
     public Page<ComposeEntity> queryPage(ComposeDTO dto) {
@@ -66,7 +69,10 @@ public class ComposeServiceImpl extends ServiceImpl<ComposeDao, ComposeEntity> i
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public <T extends AnalysisParam> ComposeVO<T> create(ComposeTaskDTO<T> dto) {
+    public <T extends AnalysisParam> ComposeVO<T> createTask(ComposeTaskDTO<T> dto, Integer sort) {
+        if (sort < 1)
+            throw new IllegalArgumentException("Sort must be greater than 0");
+
         // 验证数据集
         List<DatasetEntity> datasetEntities = datasetService.listByIds(dto.getDatasetIds().stream()
                 .map(TaskDatasetSaveDTO::getDatasetId).toList());
@@ -86,6 +92,20 @@ public class ComposeServiceImpl extends ServiceImpl<ComposeDao, ComposeEntity> i
         List<TaskDatasetEntity> taskDatasetEntities = TaskServiceImpl.getTaskDatasetEntities(dto.getDatasetIds(), taskEntity);
         taskDatasetService.saveBatch(taskDatasetEntities);
 
+        // 保存组合任务
+        ComposeEntity composeEntity = dto.getComposeEntity();
+        if (sort == 1) {
+            composeEntity.setStartedAt(Instant.now());
+            composeEntity.setStatus(TaskStatus.PROCESSING);
+            updateById(composeEntity);
+        }
+        ComposeStepEntity composeStepEntity = new ComposeStepEntity();
+        composeStepEntity.setDescription(dto.getTaskName());
+        composeStepEntity.setTaskId(taskEntity.getId());
+        composeStepEntity.setComposeId(composeEntity.getId());
+        composeStepEntity.setSort(sort);
+        composeStepService.save(composeStepEntity);
+
         // 构建图层
         List<LayerInfo> layerInfos = datasetEntities.stream()
                 .map(LayerInfoBuilder::fromDatasetEntity)
@@ -101,6 +121,17 @@ public class ComposeServiceImpl extends ServiceImpl<ComposeDao, ComposeEntity> i
         composeVO.setTaskEntity(taskEntity);
         composeVO.setAnalysisContext(context);
         return composeVO;
+    }
+
+    @Override
+    public ComposeEntity createCompose(ComposeSaveDTO dto) {
+        ComposeEntity composeEntity = new ComposeEntity();
+        composeEntity.setName(dto.getName());
+        composeEntity.setStatus(TaskStatus.NOT_PROCESSED);
+        composeEntity.setCreatedAt(Instant.now());
+        save(composeEntity);
+
+        return composeEntity;
     }
 
 }

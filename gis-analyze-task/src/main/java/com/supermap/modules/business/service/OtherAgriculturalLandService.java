@@ -1,6 +1,7 @@
 package com.supermap.modules.business.service;
 
 import com.supermap.modules.business.enums.Caliber;
+import com.supermap.modules.compose.entity.ComposeEntity;
 
 /**
  * 其他农用地分析服务
@@ -19,8 +20,8 @@ public interface OtherAgriculturalLandService {
      * @param ztDatasetId  ZT监测图层数据集ID
      * @param dltbDatasetId DLTB地类图斑数据集ID
      * @param caliber       口径（非同口径/同口径）
-     * @return 结果数据集ID
+     * @return ComposeEntity id
      */
-    Long analyze(Long ztDatasetId, Long dltbDatasetId, Caliber caliber);
+    ComposeEntity analyze(Long ztDatasetId, Long dltbDatasetId, Caliber caliber);
 
 }

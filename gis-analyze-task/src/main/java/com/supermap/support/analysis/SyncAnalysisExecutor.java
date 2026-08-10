@@ -1,4 +1,4 @@
-package com.supermap.support;
+package com.supermap.support.analysis;
 
 import com.supermap.AnalysisContext;
 import com.supermap.AnalysisEngine;
@@ -28,8 +28,8 @@ public class SyncAnalysisExecutor {
 
             taskStatusUpdateService.markSuccess(task.getId(), result, context);
         } catch (Exception e) {
-            log.error("任务执行失败, taskId={}", task.getId(), e);
             taskStatusUpdateService.markFailed(task.getId(), e.getMessage());
+            throw new RuntimeException("任务执行失败, taskId=" + task.getId(), e);
         }
     }
 

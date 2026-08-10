@@ -7,9 +7,12 @@ import com.supermap.modules.analyzetask.service.TaskService;
 import com.supermap.modules.business.constant.BusinessConstants;
 import com.supermap.modules.business.enums.Caliber;
 import com.supermap.modules.business.service.OtherAgriculturalLandService;
+import com.supermap.modules.compose.dto.ComposeSaveDTO;
+import com.supermap.modules.compose.entity.ComposeEntity;
 import com.supermap.modules.compose.service.ComposeService;
 import com.supermap.modules.compose.vo.ComposeVO;
-import com.supermap.support.SyncAnalysisExecutor;
+import com.supermap.support.compose.AsyncComposeExecutor;
+import com.supermap.support.analysis.SyncAnalysisExecutor;
 import com.supermap.task.param.FilterParam;
 import com.supermap.task.param.IntersectSplitParam;
 import com.supermap.task.param.IntersectSplitParam.SplitField;
@@ -42,15 +45,23 @@ public class OtherAgriculturalLandServiceImpl implements OtherAgriculturalLandSe
     private final ComposeService composeService;
     private final TaskService taskService;
     private final SyncAnalysisExecutor syncAnalysisExecutor;
+    private final AsyncComposeExecutor asyncComposeExecutor;
 
     @Override
-    public Long analyze(Long ztDatasetId, Long dltbDatasetId, Caliber caliber) {
-        TaskEntity taskEntity = step1IntersectSplit(ztDatasetId, dltbDatasetId);
-        TaskEntity result = step2AttrFilter(taskEntity.getResultDatasetId(), caliber);
-        return result.getResultDatasetId();
+    public ComposeEntity analyze(Long ztDatasetId, Long dltbDatasetId, Caliber caliber) {
+        ComposeSaveDTO dto = new ComposeSaveDTO();
+        dto.setName("其他农用地分析");
+        ComposeEntity composeEntity = composeService.createCompose(dto);
+
+        asyncComposeExecutor.executeAsync(composeEntity, c -> {
+            TaskEntity taskEntity = step1IntersectSplit(ztDatasetId, dltbDatasetId, c);
+            return step2AttrFilter(taskEntity.getResultDatasetId(), caliber, c);
+        });
+
+        return composeEntity;
     }
 
-    private TaskEntity step2AttrFilter(Long datasetId, Caliber caliber) {
+    private TaskEntity step2AttrFilter(Long datasetId, Caliber caliber, ComposeEntity composeEntity) {
         String whereClause = buildWhereClause(caliber);
         FilterParam filterParam = new FilterParam(whereClause);
 
@@ -59,7 +70,8 @@ public class OtherAgriculturalLandServiceImpl implements OtherAgriculturalLandSe
         composeTaskDTO.setAnalysisType(AnalysisType.FILTER);
         composeTaskDTO.setTaskParam(filterParam);
         composeTaskDTO.addDataset(List.of(datasetId));
-        ComposeVO<FilterParam> composeVO = composeService.create(composeTaskDTO);
+        composeTaskDTO.setComposeEntity(composeEntity);
+        ComposeVO<FilterParam> composeVO = composeService.createTask(composeTaskDTO, 2);
 
         // 执行分析任务
         TaskEntity taskEntity = composeVO.getTaskEntity();
@@ -69,7 +81,7 @@ public class OtherAgriculturalLandServiceImpl implements OtherAgriculturalLandSe
         return taskService.getById(taskEntity.getId());
     }
 
-    private TaskEntity step1IntersectSplit(Long ztDatasetId, Long dltbDatasetId) {
+    private TaskEntity step1IntersectSplit(Long ztDatasetId, Long dltbDatasetId, ComposeEntity composeEntity) {
         // 构建分析任务参数
         IntersectSplitParam splitParam = new IntersectSplitParam(
                 List.of(SplitField.withDefaultResult("jcmj")),
@@ -85,7 +97,8 @@ public class OtherAgriculturalLandServiceImpl implements OtherAgriculturalLandSe
         composeTaskDTO.setAnalysisType(AnalysisType.INTERSECT_SPLIT);
         composeTaskDTO.setTaskParam(splitParam);
         composeTaskDTO.addDataset(List.of(ztDatasetId, dltbDatasetId));
-        ComposeVO<IntersectSplitParam> composeVO = composeService.create(composeTaskDTO);
+        composeTaskDTO.setComposeEntity(composeEntity);
+        ComposeVO<IntersectSplitParam> composeVO = composeService.createTask(composeTaskDTO, 1);
 
         // 执行分析任务
         TaskEntity taskEntity = composeVO.getTaskEntity();
