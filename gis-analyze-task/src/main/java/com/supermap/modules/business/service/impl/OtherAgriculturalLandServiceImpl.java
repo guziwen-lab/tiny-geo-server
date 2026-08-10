@@ -53,9 +53,9 @@ public class OtherAgriculturalLandServiceImpl implements OtherAgriculturalLandSe
         dto.setName("其他农用地分析");
         ComposeEntity composeEntity = composeService.createCompose(dto);
 
-        asyncComposeExecutor.executeAsync(composeEntity, c -> {
-            TaskEntity taskEntity = step1IntersectSplit(ztDatasetId, dltbDatasetId, c);
-            return step2AttrFilter(taskEntity.getResultDatasetId(), caliber, c);
+        asyncComposeExecutor.executeAsync(composeEntity, () -> {
+            TaskEntity taskEntity = step1IntersectSplit(ztDatasetId, dltbDatasetId, composeEntity);
+            return step2AttrFilter(taskEntity.getResultDatasetId(), caliber, composeEntity);
         });
 
         return composeEntity;

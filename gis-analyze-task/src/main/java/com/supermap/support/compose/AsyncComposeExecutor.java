@@ -18,7 +18,7 @@ public class AsyncComposeExecutor {
     @Async("composeExecutor")
     public void executeAsync(ComposeEntity composeEntity, ComposeCallback composeCallback) {
         try {
-            TaskEntity taskEntity = composeCallback.accept(composeEntity);
+            TaskEntity taskEntity = composeCallback.accept();
             composeStatusUpdateService.markSuccess(composeEntity, taskEntity);
         } catch (Exception e) {
             log.error("组合任务执行失败, composeId={}", composeEntity.getId(), e);
