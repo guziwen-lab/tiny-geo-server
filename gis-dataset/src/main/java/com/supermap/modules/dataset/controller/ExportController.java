@@ -10,9 +10,9 @@ import lombok.AllArgsConstructor;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import com.supermap.common.valid.group.Add;
-import com.supermap.common.valid.group.Update;
-import com.supermap.common.pojo.R;
+import com.supermap.core.common.valid.group.Add;
+import com.supermap.core.common.valid.group.Update;
+import com.supermap.core.common.pojo.R;
 import com.supermap.modules.dataset.dto.ExportTaskDTO;
 import com.supermap.modules.dataset.dto.ExportTaskSaveDTO;
 import com.supermap.modules.dataset.entity.ExportTaskEntity;

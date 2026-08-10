@@ -1,8 +1,8 @@
 package com.supermap.modules.sys.dto;
 
-import com.supermap.common.valid.group.Add;
-import com.supermap.common.valid.group.Update;
-import com.supermap.common.valid.group.UpdateSort;
+import com.supermap.core.common.valid.group.Add;
+import com.supermap.core.common.valid.group.Update;
+import com.supermap.core.common.valid.group.UpdateSort;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;

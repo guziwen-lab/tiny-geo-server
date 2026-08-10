@@ -1,9 +1,9 @@
 package com.supermap.task.impl;
 
 import com.supermap.*;
-import com.supermap.common.util.CollectionUtils;
-import com.supermap.common.util.JSON;
-import com.supermap.common.util.StringUtils;
+import com.supermap.core.common.util.CollectionUtils;
+import com.supermap.core.common.util.JSON;
+import com.supermap.core.common.util.StringUtils;
 import com.supermap.dao.ExecuteSqlMapper;
 import com.supermap.enums.AnalysisType;
 import com.supermap.enums.GeomType;
@@ -14,7 +14,6 @@ import com.supermap.task.param.AttributeCalculateParam;
 import com.supermap.task.param.AttributeCalculateParam.CalculatedField;
 import com.supermap.type.Column;
 import com.supermap.util.TableNameUtils;
-import com.supermap.util.TempTableNameGenerator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;

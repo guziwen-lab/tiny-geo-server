@@ -2,8 +2,8 @@ package com.supermap.service.impl;
 
 import com.supermap.AnalysisContext;
 import com.supermap.LayerInfo;
-import com.supermap.common.util.CollectionUtils;
-import com.supermap.common.util.StringUtils;
+import com.supermap.core.common.util.CollectionUtils;
+import com.supermap.core.common.util.StringUtils;
 import com.supermap.service.AbstractExecuteService;
 import com.supermap.service.GeometryExpression;
 import com.supermap.task.param.IntersectSplitParam;

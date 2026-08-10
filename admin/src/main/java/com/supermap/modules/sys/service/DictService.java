@@ -2,7 +2,7 @@ package com.supermap.modules.sys.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.supermap.dto.SearchDTO;
+import com.supermap.db.dto.SearchDTO;
 import com.supermap.modules.sys.entity.DictEntity;
 import com.supermap.modules.sys.dto.DictDTO;
 import com.supermap.modules.sys.dto.DictSaveDTO;

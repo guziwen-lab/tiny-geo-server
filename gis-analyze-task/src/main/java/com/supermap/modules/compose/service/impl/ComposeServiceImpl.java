@@ -5,7 +5,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.supermap.AnalysisContext;
 import com.supermap.AnalysisParam;
 import com.supermap.LayerInfo;
-import com.supermap.common.util.JSON;
+import com.supermap.core.common.util.JSON;
 import com.supermap.enums.TaskStatus;
 import com.supermap.modules.analyzetask.dto.ComposeTaskDTO;
 import com.supermap.modules.analyzetask.dto.TaskDatasetSaveDTO;

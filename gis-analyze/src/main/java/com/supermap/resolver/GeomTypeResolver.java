@@ -1,8 +1,6 @@
 package com.supermap.resolver;
 
 import com.supermap.LayerInfo;
-import com.supermap.common.util.CollectionUtils;
-import com.supermap.enums.AnalysisType;
 import com.supermap.enums.GeomType;
 
 import java.util.List;

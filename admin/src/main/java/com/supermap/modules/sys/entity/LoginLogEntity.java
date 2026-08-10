@@ -7,7 +7,7 @@ import com.baomidou.mybatisplus.annotation.TableName;
 
 import java.sql.Timestamp;
 
-import com.supermap.type.InetTypeHandler;
+import com.supermap.db.type.InetTypeHandler;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 

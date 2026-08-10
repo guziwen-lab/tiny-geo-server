@@ -6,7 +6,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
-import com.supermap.common.pojo.R;
+import com.supermap.core.common.pojo.R;
 import com.supermap.modules.compose.dto.ComposeDTO;
 import com.supermap.modules.compose.entity.ComposeEntity;
 import com.supermap.modules.compose.service.ComposeService;

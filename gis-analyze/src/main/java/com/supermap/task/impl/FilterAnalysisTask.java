@@ -1,7 +1,7 @@
 package com.supermap.task.impl;
 
 import com.supermap.*;
-import com.supermap.common.util.StringUtils;
+import com.supermap.core.common.util.StringUtils;
 import com.supermap.dao.ExecuteSqlMapper;
 import com.supermap.enums.AnalysisType;
 import com.supermap.enums.GeomType;

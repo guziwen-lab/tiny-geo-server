@@ -1,7 +1,7 @@
 package com.supermap.modules.log;
 
-import com.supermap.common.util.JSON;
-import com.supermap.common.util.StringUtils;
+import com.supermap.core.common.util.JSON;
+import com.supermap.core.common.util.StringUtils;
 import com.supermap.modules.log.entity.AccessEntity;
 import com.supermap.modules.log.service.AccessService;
 import com.supermap.shiro.LoginUser;

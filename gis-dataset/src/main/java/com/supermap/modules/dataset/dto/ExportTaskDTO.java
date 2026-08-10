@@ -2,7 +2,7 @@ package com.supermap.modules.dataset.dto;
 
 import java.time.Instant;
 
-import com.supermap.pojo.PageParam;
+import com.supermap.db.pojo.PageParam;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.EqualsAndHashCode;

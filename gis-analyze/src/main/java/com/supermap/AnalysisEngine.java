@@ -1,6 +1,6 @@
 package com.supermap;
 
-import com.supermap.common.util.CollectionUtils;
+import com.supermap.core.common.util.CollectionUtils;
 import com.supermap.enums.AnalysisType;
 import com.supermap.task.AnalysisTask;
 import org.springframework.stereotype.Service;

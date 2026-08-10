@@ -1,9 +1,9 @@
 package com.supermap.modules.dataset.controller;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.supermap.common.pojo.R;
-import com.supermap.common.util.CollectionUtils;
-import com.supermap.common.util.StringUtils;
+import com.supermap.core.common.pojo.R;
+import com.supermap.core.common.util.CollectionUtils;
+import com.supermap.core.common.util.StringUtils;
 import com.supermap.modules.dataset.dto.UploadGeoJsonDTO;
 import com.supermap.modules.dataset.dto.UploadWktDTO;
 import com.supermap.modules.dataset.service.ImportService;

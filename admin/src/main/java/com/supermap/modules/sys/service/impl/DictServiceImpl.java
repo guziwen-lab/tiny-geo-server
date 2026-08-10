@@ -2,8 +2,8 @@ package com.supermap.modules.sys.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.supermap.common.util.BeanUtils;
-import com.supermap.common.util.StringUtils;
+import com.supermap.core.common.util.BeanUtils;
+import com.supermap.core.common.util.StringUtils;
 import com.supermap.modules.sys.entity.DictItemEntity;
 import com.supermap.modules.sys.service.DictItemService;
 import jakarta.annotation.Resource;
@@ -13,7 +13,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.supermap.modules.sys.dao.DictDao;
 import com.supermap.modules.sys.entity.DictEntity;
 import com.supermap.modules.sys.service.DictService;
-import com.supermap.dto.SearchDTO;
+import com.supermap.db.dto.SearchDTO;
 import com.supermap.modules.sys.dto.DictDTO;
 import com.supermap.modules.sys.dto.DictSaveDTO;
 

@@ -1,6 +1,6 @@
 package com.supermap.util;
 
-import com.supermap.common.util.StringUtils;
+import com.supermap.core.common.util.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.BufferedReader;

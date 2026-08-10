@@ -1,7 +1,7 @@
 package com.supermap.task.impl;
 
 import com.supermap.*;
-import com.supermap.common.util.CollectionUtils;
+import com.supermap.core.common.util.CollectionUtils;
 import com.supermap.resolver.GeomTypeResolver;
 import com.supermap.service.*;
 import com.supermap.enums.AnalysisType;

@@ -1,9 +1,9 @@
 package com.supermap.modules.dataset.service.impl;
 
 import com.supermap.gdal.GdalTool;
-import com.supermap.common.util.FileNameUtils;
-import com.supermap.common.util.JSON;
-import com.supermap.common.util.StringUtils;
+import com.supermap.core.common.util.FileNameUtils;
+import com.supermap.core.common.util.JSON;
+import com.supermap.core.common.util.StringUtils;
 import com.supermap.gdal.config.GdalProperties;
 import com.supermap.enums.DatasetType;
 import com.supermap.enums.UploadStatus;
@@ -15,7 +15,7 @@ import com.supermap.modules.dataset.service.ImportAsyncService;
 import com.supermap.modules.dataset.service.DatasetService;
 import com.supermap.modules.dataset.service.ImportService;
 import com.supermap.util.DatasetTableNameGenerator;
-import com.supermap.util.IdentifierGeneratorUtils;
+import com.supermap.db.util.IdentifierGeneratorUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

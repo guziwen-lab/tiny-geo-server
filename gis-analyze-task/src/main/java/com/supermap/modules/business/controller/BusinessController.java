@@ -1,6 +1,6 @@
 package com.supermap.modules.business.controller;
 
-import com.supermap.common.pojo.R;
+import com.supermap.core.common.pojo.R;
 import com.supermap.modules.business.dto.QtnydbhAnalyzeDTO;
 import com.supermap.modules.business.service.OtherAgriculturalLandService;
 import com.supermap.modules.compose.entity.ComposeEntity;

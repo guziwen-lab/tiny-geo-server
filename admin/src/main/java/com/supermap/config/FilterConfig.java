@@ -1,7 +1,7 @@
 package com.supermap.config;
 
-import com.supermap.common.filter.TraceIdFilter;
-import com.supermap.xss.XssFilter;
+import com.supermap.core.common.filter.TraceIdFilter;
+import com.supermap.db.xss.XssFilter;
 import jakarta.servlet.DispatcherType;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;

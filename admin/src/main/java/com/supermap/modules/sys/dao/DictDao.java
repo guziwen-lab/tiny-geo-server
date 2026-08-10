@@ -1,7 +1,7 @@
 package com.supermap.modules.sys.dao;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.supermap.dto.SearchDTO;
+import com.supermap.db.dto.SearchDTO;
 import com.supermap.modules.sys.entity.DictEntity;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Mapper;

@@ -2,7 +2,7 @@ package com.supermap.modules.sys.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.supermap.common.util.CollectionUtils;
+import com.supermap.core.common.util.CollectionUtils;
 import com.supermap.modules.sys.dao.UserRoleRelationDao;
 import com.supermap.modules.sys.entity.UserRoleRelationEntity;
 import com.supermap.modules.sys.service.UserRoleRelationService;

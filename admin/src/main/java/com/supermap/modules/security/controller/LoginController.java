@@ -1,8 +1,8 @@
 package com.supermap.modules.security.controller;
 
-import com.supermap.common.enumeration.BizCodeEnum;
-import com.supermap.common.pojo.R;
-import com.supermap.common.util.StringUtils;
+import com.supermap.core.common.enumeration.BizCodeEnum;
+import com.supermap.core.common.pojo.R;
+import com.supermap.core.common.util.StringUtils;
 import com.supermap.modules.security.service.CaptchaService;
 import com.supermap.modules.security.service.LoginService;
 import com.supermap.modules.security.vo.RouteVO;

@@ -4,7 +4,7 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
-import com.supermap.type.JsonbTypeHandler;
+import com.supermap.db.type.JsonbTypeHandler;
 import com.supermap.type.MultiPolygonTypeHandler;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;

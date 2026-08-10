@@ -2,9 +2,9 @@ package com.supermap.modules.dataset.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.supermap.common.util.BeanUtils;
-import com.supermap.common.util.CollectionUtils;
-import com.supermap.common.util.FileUtils;
+import com.supermap.core.common.util.BeanUtils;
+import com.supermap.core.common.util.CollectionUtils;
+import com.supermap.core.common.util.FileUtils;
 import com.supermap.enums.DatasetType;
 import com.supermap.enums.UploadStatus;
 import com.supermap.modules.dataset.entity.DatasetEntity;

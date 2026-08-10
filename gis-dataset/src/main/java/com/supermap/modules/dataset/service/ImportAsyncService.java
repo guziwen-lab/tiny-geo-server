@@ -1,8 +1,8 @@
 package com.supermap.modules.dataset.service;
 
 import com.supermap.gdal.GdalTool;
-import com.supermap.common.util.CollectionUtils;
-import com.supermap.common.util.FileNameUtils;
+import com.supermap.core.common.util.CollectionUtils;
+import com.supermap.core.common.util.FileNameUtils;
 import com.supermap.gdal.config.GdalProperties;
 import com.supermap.enums.GeomType;
 import com.supermap.modules.dataset.dto.GdbLayerSource;

@@ -1,7 +1,7 @@
 package com.supermap.modules.sys.dto;
 
 import java.sql.Timestamp;
-import com.supermap.pojo.PageParam;
+import com.supermap.db.pojo.PageParam;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.EqualsAndHashCode;

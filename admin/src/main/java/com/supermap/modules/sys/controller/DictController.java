@@ -4,7 +4,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.supermap.dto.SearchDTO;
+import com.supermap.db.dto.SearchDTO;
 import com.supermap.modules.sys.entity.DictItemEntity;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -12,9 +12,9 @@ import lombok.AllArgsConstructor;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import com.supermap.common.valid.group.Add;
-import com.supermap.common.valid.group.Update;
-import com.supermap.common.pojo.R;
+import com.supermap.core.common.valid.group.Add;
+import com.supermap.core.common.valid.group.Update;
+import com.supermap.core.common.pojo.R;
 import com.supermap.modules.sys.dto.DictDTO;
 import com.supermap.modules.sys.dto.DictSaveDTO;
 import com.supermap.modules.sys.entity.DictEntity;

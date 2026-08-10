@@ -1,6 +1,6 @@
 package com.supermap.modules.platform.dto;
 
-import com.supermap.dto.SearchDTO;
+import com.supermap.db.dto.SearchDTO;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.EqualsAndHashCode;

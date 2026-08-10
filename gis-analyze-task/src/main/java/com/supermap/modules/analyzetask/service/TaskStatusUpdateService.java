@@ -4,7 +4,7 @@ import com.supermap.AnalysisContext;
 import com.supermap.AnalysisParam;
 import com.supermap.AnalysisResult;
 import com.supermap.AnalysisStep;
-import com.supermap.common.util.CollectionUtils;
+import com.supermap.core.common.util.CollectionUtils;
 import com.supermap.enums.TaskStatus;
 import com.supermap.enums.UploadStatus;
 import com.supermap.modules.analyzetask.dao.TaskDao;

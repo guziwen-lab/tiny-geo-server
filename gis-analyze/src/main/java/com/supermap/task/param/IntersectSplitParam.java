@@ -1,7 +1,7 @@
 package com.supermap.task.param;
 
 import com.supermap.AnalysisParam;
-import com.supermap.common.util.StringUtils;
+import com.supermap.core.common.util.StringUtils;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

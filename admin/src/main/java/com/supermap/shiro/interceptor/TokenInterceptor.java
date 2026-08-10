@@ -1,9 +1,9 @@
 package com.supermap.shiro.interceptor;
 
-import com.supermap.common.enumeration.BizCodeEnum;
-import com.supermap.common.pojo.R;
-import com.supermap.common.util.ServletUtils;
-import com.supermap.common.util.StringUtils;
+import com.supermap.core.common.enumeration.BizCodeEnum;
+import com.supermap.core.common.pojo.R;
+import com.supermap.core.common.util.ServletUtils;
+import com.supermap.core.common.util.StringUtils;
 import com.supermap.shiro.token.RedisToken;
 import jakarta.servlet.DispatcherType;
 import jakarta.servlet.http.Cookie;

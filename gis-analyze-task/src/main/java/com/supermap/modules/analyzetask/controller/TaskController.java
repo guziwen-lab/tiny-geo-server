@@ -10,7 +10,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import com.supermap.common.pojo.R;
+import com.supermap.core.common.pojo.R;
 import com.supermap.modules.analyzetask.dto.TaskDTO;
 import com.supermap.modules.analyzetask.dto.TaskSaveDTO;
 import com.supermap.modules.analyzetask.entity.TaskEntity;

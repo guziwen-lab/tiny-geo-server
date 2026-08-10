@@ -1,10 +1,10 @@
 package com.supermap.modules.sys.controller;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.supermap.common.pojo.R;
-import com.supermap.common.valid.group.Add;
-import com.supermap.common.valid.group.Update;
-import com.supermap.dto.SearchDTO;
+import com.supermap.core.common.pojo.R;
+import com.supermap.core.common.valid.group.Add;
+import com.supermap.core.common.valid.group.Update;
+import com.supermap.db.dto.SearchDTO;
 import com.supermap.modules.sys.dto.UserSaveDTO;
 import com.supermap.modules.sys.service.UserService;
 import com.supermap.modules.sys.vo.UserVO;

@@ -3,7 +3,7 @@ package com.supermap.modules.sys.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.supermap.common.util.*;
+import com.supermap.core.common.util.*;
 import com.supermap.modules.sys.dao.FileDao;
 import com.supermap.modules.sys.dto.FileDTO;
 import com.supermap.modules.sys.dto.FileDownloadDTO;
