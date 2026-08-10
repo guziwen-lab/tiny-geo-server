@@ -40,9 +40,15 @@ springdoc:
     - group: 'security'
       packages-to-scan:
         - com.supermap.modules.security
-    - group: 'gis-analyze-task'
+    - group: 'analyzetask'
       packages-to-scan:
         - com.supermap.modules.analyzetask
+    - group: 'business'
+      packages-to-scan:
+        - com.supermap.modules.business
+    - group: 'compose'
+      packages-to-scan:
+        - com.supermap.modules.compose
     - group: 'gis-dataset'
       packages-to-scan:
         - com.supermap.modules.dataset

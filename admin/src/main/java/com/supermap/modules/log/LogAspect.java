@@ -1,6 +1,7 @@
 package com.supermap.modules.log;
 
 import com.supermap.common.util.JSON;
+import com.supermap.common.util.StringUtils;
 import com.supermap.modules.log.entity.AccessEntity;
 import com.supermap.modules.log.service.AccessService;
 import com.supermap.shiro.LoginUser;
@@ -8,7 +9,6 @@ import com.supermap.shiro.LoginUserContextHandler;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
@@ -65,7 +65,7 @@ public class LogAspect {
 
         Object[] args = filterArgs(proceedingJoinPoint.getArgs());
         String params = JSON.toJSONString(args);
-        params = limit(params);
+        params = StringUtils.limit(params, MAX_LENGTH);
 
         // 打印参数
         if (log.isDebugEnabled()) {
@@ -90,7 +90,7 @@ public class LogAspect {
                     }
                 }
             }
-            resultStr = limit(resultStr);
+            resultStr = StringUtils.limit(resultStr, MAX_LENGTH);
 
             long cost = System.currentTimeMillis() - begin;
             log.debug("执行结束 ---------------- 返回值: {}, 耗时：{}", resultStr, cost);
@@ -112,13 +112,6 @@ public class LogAspect {
                                 !(arg instanceof HttpServletResponse) &&
                                 !(arg instanceof MultipartFile))
                 .toArray();
-    }
-
-    private String limit(String value) {
-        if (value == null) return null;
-        return value.length() > MAX_LENGTH
-                ? value.substring(0, MAX_LENGTH) + "..."
-                : value;
     }
 
     private void persistLog(String label, String className, String methodName, String params, String resultStr,

@@ -13,4 +13,12 @@ public class StringUtils extends StrUtil {
         }
         return value;
     }
+
+    public static String limit(String value, int maxLength) {
+        if (value == null) return null;
+        return value.length() > maxLength
+                ? value.substring(0, maxLength) + "..."
+                : value;
+    }
+
 }
