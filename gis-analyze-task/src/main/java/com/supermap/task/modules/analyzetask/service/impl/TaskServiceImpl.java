@@ -1,0 +1,138 @@
+package com.supermap.task.modules.analyzetask.service.impl;
+
+import com.supermap.analyze.AnalysisContext;
+import com.supermap.analyze.AnalysisEngine;
+import com.supermap.analyze.AnalysisParam;
+import com.supermap.analyze.LayerInfo;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.supermap.gdal.config.GdalProperties;
+import com.supermap.task.enums.TaskStatus;
+import com.supermap.task.modules.analyzetask.dto.StartTaskDTO;
+import com.supermap.task.modules.analyzetask.dto.TaskDTO;
+import com.supermap.task.modules.analyzetask.dto.TaskDatasetSaveDTO;
+import com.supermap.task.modules.analyzetask.dto.TaskSaveDTO;
+import com.supermap.task.support.analysis.AnalysisContextBuilder;
+import com.supermap.task.support.analysis.LayerInfoBuilder;
+import com.supermap.dataset.modules.dataset.entity.DatasetEntity;
+import com.supermap.task.modules.analyzetask.entity.TaskDatasetEntity;
+
+import com.supermap.task.modules.analyzetask.service.TaskDatasetService;
+import com.supermap.task.support.analysis.AsyncAnalysisExecutor;
+import com.supermap.analyze.task.AnalysisTask;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.tika.utils.StringUtils;
+import org.springframework.dao.DuplicateKeyException;
+import org.springframework.stereotype.Service;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+
+import com.supermap.task.modules.analyzetask.dao.TaskDao;
+import com.supermap.task.modules.analyzetask.entity.TaskEntity;
+import com.supermap.task.modules.analyzetask.service.TaskService;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.Instant;
+import java.util.*;
+
+@Slf4j
+@Service("taskService")
+@RequiredArgsConstructor
+public class TaskServiceImpl extends ServiceImpl<TaskDao, TaskEntity> implements TaskService {
+
+    private final AnalysisEngine analysisEngine;
+
+    private final TaskDatasetService taskDatasetService;
+
+    private final AsyncAnalysisExecutor asyncAnalysisExecutor;
+
+    private final GdalProperties gdalProperties;
+
+    private final AnalysisContextBuilder analysisContextBuilder;
+
+    @Override
+    public Page<TaskEntity> queryPage(TaskDTO dto) {
+        LambdaQueryWrapper<TaskEntity> wrapper = new LambdaQueryWrapper<>();
+        wrapper.orderByDesc(TaskEntity::getCreatedAt);
+        return page(dto.page(), wrapper);
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public TaskEntity create(TaskSaveDTO dto) {
+        TaskEntity taskEntity = new TaskEntity();
+        taskEntity.setTaskName(dto.getTaskName());
+        taskEntity.setStatus(TaskStatus.NOT_PROCESSED);
+        taskEntity.setAnalysisType(dto.getAnalysisType());
+        taskEntity.setTaskParam(dto.getTaskParam());
+        taskEntity.setCreatedAt(Instant.now());
+        try {
+            save(taskEntity);
+        } catch (DuplicateKeyException e) {
+            throw new IllegalArgumentException("Task name already exists");
+        }
+
+        List<TaskDatasetEntity> taskDatasetEntities = getTaskDatasetEntities(dto.getDatasetIds(), taskEntity);
+        taskDatasetService.saveBatch(taskDatasetEntities);
+
+        return taskEntity;
+    }
+
+    public static List<TaskDatasetEntity> getTaskDatasetEntities(List<TaskDatasetSaveDTO> datasetIds, TaskEntity taskEntity) {
+        List<TaskDatasetEntity> taskDatasetEntities = new ArrayList<>(datasetIds.size());
+        for (int i = 0; i < datasetIds.size(); i++) {
+            TaskDatasetEntity taskDatasetEntity = new TaskDatasetEntity();
+            taskDatasetEntity.setDatasetId(datasetIds.get(i).getDatasetId());
+            taskDatasetEntity.setTaskId(taskEntity.getId());
+            taskDatasetEntity.setSort(i);
+            taskDatasetEntities.add(taskDatasetEntity);
+        }
+        return taskDatasetEntities;
+    }
+
+    @Override
+    public void start(Long taskId, StartTaskDTO dto) {
+        TaskEntity taskEntity = baseMapper.getStartableById(taskId);
+        if (taskEntity == null)
+            throw new IllegalArgumentException("Task not found or Task is already processing/success");
+
+        List<DatasetEntity> datasets = taskDatasetService.getDatasetEntityByTaskId(taskId);
+
+        // 校验数据集是否存在
+        String schemaName = gdalProperties.getSchema();
+        for (DatasetEntity dataset : datasets) {
+            if (!dataset.getSchemaName().equals(schemaName)) {
+                throw new IllegalArgumentException("Datasets must be in the config schema");
+            }
+        }
+
+        // 标记任务为处理中
+        taskEntity.setStatus(TaskStatus.PROCESSING);
+        taskEntity.setMessage("");
+        taskEntity.setStartedAt(Instant.now());
+        updateById(taskEntity);
+
+        AnalysisContext<? extends AnalysisParam> context = buildContext(taskEntity, datasets, dto);
+
+        // 异步执行分析任务
+        asyncAnalysisExecutor.executeAsync(taskEntity, taskEntity.getAnalysisType(), context);
+    }
+
+    private AnalysisContext<? extends AnalysisParam> buildContext(TaskEntity taskEntity,
+                                                        List<DatasetEntity> datasets,
+                                                        StartTaskDTO dto) {
+        // 构建图层信息
+        List<LayerInfo> layerInfos = datasets.stream()
+                .map(LayerInfoBuilder::fromDatasetEntity).toList();
+
+        // 构建分析任务参数
+        AnalysisTask<?> analysisTask = analysisEngine.getTask(taskEntity.getAnalysisType());
+
+        // 构建分析上下文
+        return analysisContextBuilder.buildAnalysisContext(layerInfos,
+                analysisTask.buildParam(taskEntity.getTaskParam()),
+                StringUtils.isEmpty(dto.getResultTableName()) ?
+                        "analyze_" + taskEntity.getId() : dto.getResultTableName());
+    }
+
+}

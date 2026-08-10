@@ -1,0 +1,22 @@
+package com.supermap.task.modules.compose.vo;
+
+import com.supermap.analyze.AnalysisContext;
+import com.supermap.analyze.AnalysisParam;
+import com.supermap.task.modules.analyzetask.entity.TaskEntity;
+import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.Data;
+
+/**
+ * 组合任务表
+ *
+ * @author gzw
+ */
+@Schema(title = "组合任务表")
+@Data
+public class ComposeVO<T extends AnalysisParam> {
+
+    private TaskEntity taskEntity;
+
+    private AnalysisContext<T> analysisContext;
+
+}
