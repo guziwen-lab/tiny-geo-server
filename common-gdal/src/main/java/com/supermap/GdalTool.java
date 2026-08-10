@@ -1,8 +1,12 @@
 package com.supermap;
 
+import com.supermap.enums.DatasetType;
+import com.supermap.enums.GeomType;
 import com.supermap.info.LayerMeta;
 import com.supermap.info.parser.GdalInfoParser;
 import com.supermap.info.parser.GdalLayerInfoParser;
+import com.supermap.options.GdalExportOptions;
+import com.supermap.options.GdalImportOptions;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.stereotype.Component;
@@ -21,6 +25,10 @@ public class GdalTool {
     private final CommandExecutor executor;
 
     private final GdalProperties gdalProperties;
+
+    private final GdalImportOptions gdalImportOptions;
+
+    private final GdalExportOptions gdalExportOptions;
 
     public List<String> listGdbLayers(String gdbPath) {
         List<String> command = new ArrayList<>();
@@ -43,6 +51,30 @@ public class GdalTool {
         CommandResult execute = executor.execute(command);
         String stdout = execute.stdout();
         return GdalInfoParser.parse(stdout);
+    }
+
+    public void importLayer(String sourcePath,
+                            String tableName,
+                            String layerName,
+                            boolean isAppend,
+                            GeomType targetGeomType,
+                            Integer srid,
+                            String encoding) {
+        gdalImportOptions.execImport(sourcePath, tableName, layerName, isAppend, targetGeomType, srid, encoding);
+    }
+
+    public void exportGdb(String tableName,
+                          String targetPath,
+                          GeomType geomType,
+                          boolean append) {
+        gdalExportOptions.execExport(tableName, targetPath, DatasetType.GDB, geomType, append);
+    }
+
+    public void exportShp(String tableName,
+                          String targetPath,
+                          GeomType geomType,
+                          boolean append) {
+        gdalExportOptions.execExport(tableName, targetPath, DatasetType.SHP, geomType, append);
     }
 
 }

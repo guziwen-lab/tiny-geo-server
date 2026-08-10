@@ -22,4 +22,10 @@ public class GdalProperties {
 
     private String ogr2Ogr = "ogr2ogr";
 
+    private String pgConnect;
+
+    private String schema = "public";
+
+    private String pkColumnName = "id";
+
 }

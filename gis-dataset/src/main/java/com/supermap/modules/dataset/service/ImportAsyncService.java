@@ -3,7 +3,6 @@ package com.supermap.modules.dataset.service;
 import com.supermap.GdalTool;
 import com.supermap.common.util.CollectionUtils;
 import com.supermap.common.util.FileNameUtils;
-import com.supermap.common.util.StringUtils;
 import com.supermap.config.DatasetProperties;
 import com.supermap.enums.GeomType;
 import com.supermap.modules.dataset.dto.GdbLayerSource;
@@ -17,14 +16,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Component
@@ -57,7 +51,7 @@ public class ImportAsyncService {
             }
 
             // 执行 ogr2ogr 导入
-            execOgr2ogr(sourcePath, tableName, exportLayerName, isAppend, entity.getGeomType(), null, null);
+            gdalTool.importLayer(sourcePath, tableName, exportLayerName, isAppend, entity.getGeomType(), null, null);
 
             // 检查几何类型（优先以 PostgreSQL 实际存储的几何类型为准）
             GeomType geomType = geometryService.resolveActualGeomType(
@@ -151,7 +145,7 @@ public class ImportAsyncService {
                     throw new RuntimeException("批量导入分组内 SRID 不一致: " + first.srid() + " / " + meta.srid());
                 }
                 checkGeomTypeCompatible(GeomType.ofOgr2ogrCode(first.geomType()), meta.geomType());
-                execOgr2ogr(source.getPath(), tableName, source.getLayerName(), isAppend || i > 0,
+                gdalTool.importLayer(source.getPath(), tableName, source.getLayerName(), isAppend || i > 0,
                         i == 0 ? null : GeomType.ofOgr2ogrCode(first.geomType()), srid, source.getEncoding());
                 featureCount += meta.featureCount();
             }
@@ -188,104 +182,6 @@ public class ImportAsyncService {
         if (!sameFamily || (!tableGeomType.isMulti() && sourceGeomType.isMulti())) {
             throw new RuntimeException("几何类型不匹配: 原类型=" + tableGeomType.getGeometryName()
                     + ", 新类型=" + sourceGeomTypeName);
-        }
-    }
-
-    /**
-     * 执行 ogr2ogr 将数据导入 PostgreSQL
-     */
-    private void execOgr2ogr(String sourcePath,
-                             String tableName,
-                             String layerName,
-                             boolean isAppend,
-                             GeomType targetGeomType,
-                             Integer srid,
-                             String encoding) {
-        List<String> cmd = new ArrayList<>();
-        cmd.add("ogr2ogr");
-        cmd.add("-f");
-        cmd.add("PostgreSQL");
-        if (isAppend) {
-            cmd.add("-append");
-            cmd.add("-addfields");
-        } else {
-            cmd.add("-overwrite");
-        }
-        cmd.add(datasetProperties.getPgConnect());
-        cmd.add(sourcePath);
-
-        if (srid != null) {
-            cmd.add("-t_srs");
-            cmd.add("EPSG:" + srid);
-        }
-
-        cmd.add("-nln");
-
-        if (isAppend) {
-            cmd.add(datasetProperties.getSchema() + "." + tableName);
-        } else {
-            cmd.add(tableName);
-
-            // -lco 为图层创建选项，仅在新建表时生效，追加模式下无需传递
-            cmd.add("-lco");
-            cmd.add("GEOMETRY_NAME=geom");
-            // 统一源要素主键列名，供叠加结果追溯及面积守恒校验使用。
-            cmd.add("-lco");
-            cmd.add("FID=" + datasetProperties.getPkColumnName());
-            cmd.add("-lco");
-            cmd.add("SPATIAL_INDEX=NONE");
-            cmd.add("-lco");
-            cmd.add("SCHEMA=" + datasetProperties.getSchema());
-        }
-
-        if (layerName != null) {
-            cmd.add(layerName);
-        }
-
-        if (StringUtils.isNotBlank(encoding)) {
-            cmd.add("--config");
-            cmd.add("SHAPE_ENCODING");
-            cmd.add(encoding);
-        }
-
-        if (isAppend) {
-            // 追加时以目标表的几何类型为准：目标为 Multi 类型则提升源数据，
-            // 目标为非 Multi 类型则不提升（预校验已保证源数据不含 Multi 类型）
-            if (targetGeomType != null && targetGeomType.isMulti()) {
-                cmd.add("-nlt");
-                cmd.add("PROMOTE_TO_MULTI");
-            }
-        } else if (sourcePath.toLowerCase().endsWith(".shp")) {
-            // Shapefile 的 Polygon 图层可能实际包含 MultiPolygon，
-            // 强制提升为 Multi 类型避免 PostgreSQL COPY 阶段几何类型不匹配
-            cmd.add("-nlt");
-            cmd.add("PROMOTE_TO_MULTI");
-        }
-
-        log.info("执行导入命令: {}", String.join(" ", cmd));
-
-        try {
-            ProcessBuilder pb = new ProcessBuilder(cmd);
-            pb.redirectErrorStream(true);
-            Process process = pb.start();
-
-            String output;
-            try (BufferedReader reader = new BufferedReader(
-                    new InputStreamReader(process.getInputStream(), StandardCharsets.UTF_8))) {
-                output = reader.lines().collect(Collectors.joining("\n"));
-            }
-
-            int code = process.waitFor();
-            if (code != 0) {
-                log.error("ogr2ogr 导入失败, exitCode={}, output={}", code, output);
-                throw new RuntimeException("ogr2ogr 导入失败(exitCode=" + code + "): " + output);
-            }
-            log.info("导入成功, table={}, output={}", tableName, output);
-        } catch (IOException e) {
-            throw new RuntimeException("执行 ogr2ogr 失败，请确认已安装 GDAL", e);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            throw new RuntimeException("ogr2ogr 导入过程被中断", e);
         }
     }
 
