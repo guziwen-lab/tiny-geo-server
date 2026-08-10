@@ -1,7 +1,7 @@
 package com.supermap.resolver;
 
 import com.supermap.LayerInfo;
-import com.supermap.enums.GeomType;
+import com.supermap.gis.enums.GeomType;
 
 import java.util.List;
 

@@ -1,6 +1,6 @@
 package com.supermap.service;
 
-import com.supermap.enums.GeomType;
+import com.supermap.gis.enums.GeomType;
 
 public final class GeometryExpression {
 

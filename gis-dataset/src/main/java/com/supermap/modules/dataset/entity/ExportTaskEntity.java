@@ -6,7 +6,7 @@ import com.baomidou.mybatisplus.annotation.TableName;
 
 import java.time.Instant;
 
-import com.supermap.enums.DatasetType;
+import com.supermap.gis.enums.DatasetType;
 import com.supermap.enums.UploadStatus;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;

@@ -5,11 +5,11 @@ import com.supermap.AnalysisParam;
 import com.supermap.AnalysisResult;
 import com.supermap.LayerInfo;
 import com.supermap.core.common.util.StringUtils;
-import com.supermap.enums.GeomType;
-import com.supermap.service.GeometryService;
-import com.supermap.type.Column;
-import com.supermap.type.TableProcessResult;
-import com.supermap.util.TableNameUtils;
+import com.supermap.gis.enums.GeomType;
+import com.supermap.gis.service.GeometryService;
+import com.supermap.gis.type.Column;
+import com.supermap.gis.type.TableProcessResult;
+import com.supermap.gis.util.TableNameUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 

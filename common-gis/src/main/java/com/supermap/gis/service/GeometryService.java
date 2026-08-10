@@ -1,12 +1,11 @@
-package com.supermap.service;
+package com.supermap.gis.service;
 
-import com.supermap.dao.GeometryDao;
-import com.supermap.enums.GeomType;
-import com.supermap.type.Column;
-import com.supermap.type.TableProcessResult;
-import com.supermap.util.TempTableNameGenerator;
+import com.supermap.gis.dao.GeometryDao;
+import com.supermap.gis.enums.GeomType;
+import com.supermap.gis.type.Column;
+import com.supermap.gis.type.TableProcessResult;
+import com.supermap.gis.util.TempTableNameGenerator;
 import lombok.AllArgsConstructor;
-import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Service;
 
 import java.util.List;

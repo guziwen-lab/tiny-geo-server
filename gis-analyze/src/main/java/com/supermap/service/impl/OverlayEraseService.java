@@ -1,10 +1,10 @@
 package com.supermap.service.impl;
 
-import com.supermap.enums.GeomType;
+import com.supermap.gis.enums.GeomType;
 import com.supermap.enums.OverlayAlgorithm;
 import com.supermap.service.AbstractOverlayExecuteService;
 import com.supermap.service.GeometryExpression;
-import com.supermap.type.Column;
+import com.supermap.gis.type.Column;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

@@ -1,4 +1,4 @@
-package com.supermap.enums;
+package com.supermap.gis.enums;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

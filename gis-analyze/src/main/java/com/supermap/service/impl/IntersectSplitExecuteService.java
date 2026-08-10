@@ -8,8 +8,8 @@ import com.supermap.service.AbstractExecuteService;
 import com.supermap.service.GeometryExpression;
 import com.supermap.task.param.IntersectSplitParam;
 import com.supermap.task.param.IntersectSplitParam.SplitField;
-import com.supermap.type.Column;
-import com.supermap.util.TableNameUtils;
+import com.supermap.gis.type.Column;
+import com.supermap.gis.util.TableNameUtils;
 import org.springframework.stereotype.Service;
 
 import java.util.*;

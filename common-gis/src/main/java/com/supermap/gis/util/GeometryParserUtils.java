@@ -1,4 +1,4 @@
-package com.supermap.util;
+package com.supermap.gis.util;
 
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.io.ParseException;

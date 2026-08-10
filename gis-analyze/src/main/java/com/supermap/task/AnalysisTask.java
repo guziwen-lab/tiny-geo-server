@@ -4,7 +4,7 @@ import com.supermap.AnalysisContext;
 import com.supermap.AnalysisParam;
 import com.supermap.AnalysisResult;
 import com.supermap.enums.AnalysisType;
-import com.supermap.enums.GeomType;
+import com.supermap.gis.enums.GeomType;
 
 public interface AnalysisTask<T extends AnalysisParam> {
 

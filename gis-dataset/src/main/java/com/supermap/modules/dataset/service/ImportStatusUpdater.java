@@ -1,6 +1,6 @@
 package com.supermap.modules.dataset.service;
 
-import com.supermap.enums.GeomType;
+import com.supermap.gis.enums.GeomType;
 import com.supermap.enums.UploadStatus;
 import com.supermap.modules.dataset.dao.DatasetDao;
 import com.supermap.modules.dataset.entity.DatasetEntity;

@@ -2,11 +2,11 @@ package com.supermap.service;
 
 import com.supermap.AnalysisContext;
 import com.supermap.LayerInfo;
-import com.supermap.enums.GeomType;
+import com.supermap.gis.enums.GeomType;
 import com.supermap.enums.OverlayAlgorithm;
 import com.supermap.task.param.OverlayParam;
-import com.supermap.type.Column;
-import com.supermap.util.TableNameUtils;
+import com.supermap.gis.type.Column;
+import com.supermap.gis.util.TableNameUtils;
 
 import java.util.*;
 

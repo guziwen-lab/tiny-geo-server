@@ -1,6 +1,6 @@
 package com.supermap;
 
-import com.supermap.enums.GeomType;
+import com.supermap.gis.enums.GeomType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

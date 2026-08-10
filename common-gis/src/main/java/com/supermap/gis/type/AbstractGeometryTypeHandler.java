@@ -1,4 +1,4 @@
-package com.supermap.type;
+package com.supermap.gis.type;
 
 import org.apache.ibatis.type.BaseTypeHandler;
 import org.apache.ibatis.type.JdbcType;

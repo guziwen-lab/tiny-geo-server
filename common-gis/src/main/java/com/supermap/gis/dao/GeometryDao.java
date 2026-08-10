@@ -1,6 +1,6 @@
-package com.supermap.dao;
+package com.supermap.gis.dao;
 
-import com.supermap.type.Column;
+import com.supermap.gis.type.Column;
 import org.apache.ibatis.annotations.*;
 
 import java.util.List;

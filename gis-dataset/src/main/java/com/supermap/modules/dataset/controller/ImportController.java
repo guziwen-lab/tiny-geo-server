@@ -7,7 +7,7 @@ import com.supermap.core.common.util.StringUtils;
 import com.supermap.modules.dataset.dto.UploadGeoJsonDTO;
 import com.supermap.modules.dataset.dto.UploadWktDTO;
 import com.supermap.modules.dataset.service.ImportService;
-import com.supermap.util.GeometryParserUtils;
+import com.supermap.gis.util.GeometryParserUtils;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.AllArgsConstructor;
 import org.springframework.validation.annotation.Validated;

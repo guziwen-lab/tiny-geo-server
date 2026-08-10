@@ -6,7 +6,7 @@ import com.supermap.resolver.GeomTypeResolver;
 import com.supermap.service.*;
 import com.supermap.enums.AnalysisType;
 import com.supermap.enums.OverlayAlgorithm;
-import com.supermap.enums.GeomType;
+import com.supermap.gis.enums.GeomType;
 import com.supermap.task.AbstractAnalysisTask;
 import com.supermap.task.param.OverlayParam;
 import jakarta.annotation.PostConstruct;

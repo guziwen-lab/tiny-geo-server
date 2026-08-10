@@ -1,12 +1,13 @@
 package com.supermap.service;
 
+import com.supermap.gis.service.GeometryService;
 import com.supermap.AnalysisContext;
 import com.supermap.AnalysisParam;
 import com.supermap.LayerInfo;
 import com.supermap.dao.ExecuteSqlMapper;
 import com.supermap.security.SqlInjectionCheck;
-import com.supermap.type.Column;
-import com.supermap.util.TempTableNameGenerator;
+import com.supermap.gis.type.Column;
+import com.supermap.gis.util.TempTableNameGenerator;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 

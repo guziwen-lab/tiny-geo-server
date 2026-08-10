@@ -1,8 +1,8 @@
 package com.supermap;
 
-import com.supermap.enums.GeomType;
+import com.supermap.gis.enums.GeomType;
 import com.supermap.task.AbstractAnalysisTask;
-import com.supermap.type.Column;
+import com.supermap.gis.type.Column;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 

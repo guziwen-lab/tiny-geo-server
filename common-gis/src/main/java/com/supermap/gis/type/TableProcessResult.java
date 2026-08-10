@@ -1,4 +1,4 @@
-package com.supermap.type;
+package com.supermap.gis.type;
 
 /**
  * @author gzw

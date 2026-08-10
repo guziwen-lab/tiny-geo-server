@@ -1,6 +1,6 @@
 package com.supermap;
 
-import com.supermap.enums.GeomType;
+import com.supermap.gis.enums.GeomType;
 import lombok.Data;
 
 import java.util.ArrayList;

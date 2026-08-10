@@ -2,8 +2,8 @@ package com.supermap.gdal.options;
 
 import com.supermap.command.CommandExecutor;
 import com.supermap.gdal.config.GdalProperties;
-import com.supermap.enums.DatasetType;
-import com.supermap.enums.GeomType;
+import com.supermap.gis.enums.DatasetType;
+import com.supermap.gis.enums.GeomType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 

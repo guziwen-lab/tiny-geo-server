@@ -5,7 +5,7 @@ import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.supermap.db.type.JsonbTypeHandler;
-import com.supermap.type.MultiPolygonTypeHandler;
+import com.supermap.gis.type.MultiPolygonTypeHandler;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import org.locationtech.jts.geom.MultiPolygon;
