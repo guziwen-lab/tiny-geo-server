@@ -34,25 +34,25 @@ springdoc:
   group-configs:
     - group: 'sys'
       packages-to-scan:
-        - com.supermap.modules.sys
+        - com.supermap.admin.modules.sys
     - group: 'log'
       packages-to-scan:
-        - com.supermap.modules.log
+        - com.supermap.admin.modules.log
     - group: 'security'
       packages-to-scan:
-        - com.supermap.modules.security
+        - com.supermap.admin.modules.security
     - group: 'analyzetask'
       packages-to-scan:
-        - com.supermap.modules.analyzetask
+        - com.supermap.task.modules.analyzetask
     - group: 'business'
       packages-to-scan:
-        - com.supermap.modules.business
+        - com.supermap.task.modules.business
     - group: 'compose'
       packages-to-scan:
-        - com.supermap.modules.compose
+        - com.supermap.task.modules.compose
     - group: 'gis-dataset'
       packages-to-scan:
-        - com.supermap.modules.dataset
+        - com.supermap.dataset.modules.dataset
   default-flat-param-object: true
 knife4j:
   enable: true
