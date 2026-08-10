@@ -26,17 +26,17 @@
 
     <modules>
         <module>common-core</module>
-        <module>admin</module>
-        <module>gis-platform</module>
-        <module>common-generator</module>
         <module>common-gis</module>
         <module>common-db</module>
         <module>common-office</module>
         <module>common-command</module>
         <module>common-gdal</module>
+        <module>common-generator</module>
+        <module>admin</module>
         <module>gis-dataset</module>
         <module>gis-analyze</module>
         <module>gis-analyze-task</module>
+        <module>gis-platform</module>
     </modules>
 
     <dependencies>
