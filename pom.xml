@@ -32,6 +32,8 @@
         <module>common-gis</module>
         <module>common-db</module>
         <module>common-office</module>
+        <module>common-command</module>
+        <module>common-gdal</module>
         <module>gis-dataset</module>
         <module>gis-analyze</module>
         <module>gis-analyze-task</module>

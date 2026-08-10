@@ -6,7 +6,6 @@ import com.supermap.common.util.CollectionUtils;
 import com.supermap.common.util.StringUtils;
 import com.supermap.modules.dataset.dto.UploadGeoJsonDTO;
 import com.supermap.modules.dataset.dto.UploadWktDTO;
-import com.supermap.modules.dataset.dto.BatchImportGdbDTO;
 import com.supermap.modules.dataset.service.ImportService;
 import com.supermap.util.GeometryParserUtils;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -56,21 +55,10 @@ public class ImportController {
         return R.ok(ids);
     }
 
-    /**
-     * 按实际 SRID（以及不能混存的图层、几何类型）将一批 GDB 归并为数据集。
-     * SRID 是坐标处理的最小颗粒度，不同高斯分带不会被写入同一张表。
-     */
-    @PostMapping("/gdb/batch/grouping")
-    public R<List<Long>> importGdbBatchByGrouping(@RequestBody @Validated List<BatchImportGdbDTO> dtoList) {
-        List<Long> ids = importService.importGdbBatchByGrouping(dtoList);
-        return R.ok(ids);
-    }
-
     @PostMapping("/shp/batch")
     public R<Long> importShpBatch(String path,
                                   String layerName,
                                   Integer srid,
-                                  String encoding,
                                   String tableName,
                                   String shpFilePattern) {
         File dir = new File(path);
@@ -95,7 +83,7 @@ public class ImportController {
         if (CollectionUtils.isEmpty(paths))
             throw new IllegalArgumentException("文件夹为空");
 
-        Long id = importService.importShpBatch(paths, layerName, srid, encoding, tableName);
+        Long id = importService.importShpBatch(paths, layerName, srid, tableName);
         return R.ok(id);
     }
 

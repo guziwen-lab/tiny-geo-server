@@ -1,13 +1,16 @@
 package com.supermap.modules.dataset.service;
 
+import com.supermap.GdalTool;
 import com.supermap.common.util.CollectionUtils;
+import com.supermap.common.util.FileNameUtils;
 import com.supermap.common.util.StringUtils;
 import com.supermap.config.DatasetProperties;
 import com.supermap.enums.GeomType;
 import com.supermap.modules.dataset.dto.GdbLayerSource;
-import com.supermap.modules.dataset.dto.LayerMeta;
+import com.supermap.info.LayerMeta;
 import com.supermap.modules.dataset.entity.DatasetEntity;
 import com.supermap.service.GeometryService;
+import com.supermap.util.ShapeEncodingDetector;
 import com.supermap.util.TableNameUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,8 +24,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -33,13 +34,14 @@ public class ImportAsyncService {
     private final GeometryService geometryService;
     private final ImportStatusUpdater importStatusUpdater;
     private final DatasetProperties datasetProperties;
+    private final GdalTool gdalTool;
 
     @Async("importTaskExecutor")
     public void importLayerAsync(DatasetEntity entity, String sourcePath, String exportLayerName, boolean isAppend) {
         String tableName = entity.getTableName();
         try {
             // 查询图层元数据
-            LayerMeta meta = queryLayerMeta(sourcePath, exportLayerName);
+            LayerMeta meta = gdalTool.queryLayerMeta(sourcePath, exportLayerName);
 
             // 如果是追加导入，先校验 srid 和几何类型，避免脏数据写入原表；featureCount累加
             long featureCount = meta.featureCount();
@@ -88,6 +90,43 @@ public class ImportAsyncService {
         }
     }
 
+    @Async("importTaskExecutor")
+    public void importShpLayersAsync(DatasetEntity entity,
+                                     List<String> paths,
+                                     Integer srid,
+                                     boolean isAppend) {
+        List<GdbLayerSource> sources = new ArrayList<>();
+        for (String path : paths) {
+            String ln = FileNameUtils.getFileNameWithoutExtension(path);
+            String confirmEncoding = ShapeEncodingDetector.detect(path, ln);
+
+            GdbLayerSource gdbLayerSource = new GdbLayerSource(path, ln, confirmEncoding);
+            sources.add(gdbLayerSource);
+        }
+
+        importLayersAsync(entity, sources, srid, isAppend);
+    }
+
+    @Async("importTaskExecutor")
+    public void importGdbLayersAsync(DatasetEntity entity,
+                                     List<String> paths,
+                                     Integer srid,
+                                     boolean isAppend) {
+        List<GdbLayerSource> sources = new ArrayList<>();
+        for (String gdbPath : paths) {
+            List<String> layerNames = gdalTool.listGdbLayers(gdbPath);
+            if (layerNames.isEmpty())
+                throw new IllegalArgumentException("GDB中未找到任何图层: " + gdbPath);
+            if (!layerNames.contains(entity.getLayerName()))
+                throw new IllegalArgumentException("图层不存在: " + entity.getLayerName() + ", GDB=" + gdbPath);
+
+            GdbLayerSource gdbLayerSource = new GdbLayerSource(gdbPath, entity.getLayerName());
+            sources.add(gdbLayerSource);
+        }
+
+        importLayersAsync(entity, sources, srid, isAppend);
+    }
+
     /**
      * 顺序导入同一投影组中的多个 GDB 图层。必须在同一个异步任务中顺序执行，
      * 否则“首个建表”与后续“追加”会产生竞争。
@@ -103,17 +142,17 @@ public class ImportAsyncService {
                 throw new IllegalArgumentException("导入图层不能为空");
             }
 
-            LayerMeta first = queryLayerMeta(sources.get(0).path(), sources.get(0).layerName());
+            LayerMeta first = gdalTool.queryLayerMeta(sources.get(0).getPath(), sources.get(0).getLayerName());
             long featureCount = 0;
             for (int i = 0; i < sources.size(); i++) {
                 GdbLayerSource source = sources.get(i);
-                LayerMeta meta = queryLayerMeta(source.path(), source.layerName());
+                LayerMeta meta = gdalTool.queryLayerMeta(source.getPath(), source.getLayerName());
                 if (srid == null && !Objects.equals(first.srid(), meta.srid())) {
                     throw new RuntimeException("批量导入分组内 SRID 不一致: " + first.srid() + " / " + meta.srid());
                 }
                 checkGeomTypeCompatible(GeomType.ofOgr2ogrCode(first.geomType()), meta.geomType());
-                execOgr2ogr(source.path(), tableName, source.layerName(), isAppend || i > 0,
-                        i == 0 ? null : GeomType.ofOgr2ogrCode(first.geomType()), srid, source.encoding());
+                execOgr2ogr(source.getPath(), tableName, source.getLayerName(), isAppend || i > 0,
+                        i == 0 ? null : GeomType.ofOgr2ogrCode(first.geomType()), srid, source.getEncoding());
                 featureCount += meta.featureCount();
             }
 
@@ -248,71 +287,6 @@ public class ImportAsyncService {
             Thread.currentThread().interrupt();
             throw new RuntimeException("ogr2ogr 导入过程被中断", e);
         }
-    }
-
-    /**
-     * 导入前查询 shp/gdb 的元数据（几何类型、SRID、要素数量）
-     */
-    public LayerMeta queryLayerMeta(String path, String layerName) {
-        String geomType = null;
-        Integer srid = null;
-        long featureCount = 0;
-
-        try {
-            List<String> cmd = new ArrayList<>();
-            cmd.add("ogrinfo");
-            cmd.add("-so");
-            cmd.add(path);
-            if (layerName != null) {
-                cmd.add(layerName);
-            }
-
-            log.info("执行查询元数据命令: {}", String.join(" ", cmd));
-
-            ProcessBuilder pb = new ProcessBuilder(cmd);
-            pb.redirectErrorStream(true);
-            Process process = pb.start();
-
-            Pattern geomPattern = Pattern.compile("^Geometry:\\s+(.+)$");
-            Pattern countPattern = Pattern.compile("^Feature Count:\\s+(\\d+)$");
-            Pattern epsgPattern = Pattern.compile("(?:ID\\[\"EPSG\",|AUTHORITY\\[\"EPSG\",\")(\\d+)\"?]");
-
-            try (BufferedReader reader = new BufferedReader(
-                    new InputStreamReader(process.getInputStream(), StandardCharsets.UTF_8))) {
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    Matcher geomMatcher = geomPattern.matcher(line);
-                    if (geomMatcher.find()) {
-                        geomType = geomMatcher.group(1).trim();
-                        continue;
-                    }
-
-                    Matcher countMatcher = countPattern.matcher(line);
-                    if (countMatcher.find()) {
-                        featureCount = Long.parseLong(countMatcher.group(1));
-                        continue;
-                    }
-
-                    Matcher epsgMatcher = epsgPattern.matcher(line);
-                    if (epsgMatcher.find()) {
-                        srid = Integer.parseInt(epsgMatcher.group(1));
-                    }
-                }
-            }
-
-            int code = process.waitFor();
-            if (code != 0) {
-                log.error("执行 ogrinfo 获取 LayerMeta 失败, exitCode={}", code);
-                throw new RuntimeException("执行 ogrinfo 获取 LayerMeta 失败 (exitCode=" + code + ")");
-            }
-        } catch (IOException e) {
-            throw new RuntimeException("执行 ogrinfo 失败，请确认已安装 GDAL", e);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            throw new RuntimeException("ogrinfo 过程被中断", e);
-        }
-
-        return new LayerMeta(geomType, srid, featureCount);
     }
 
 }

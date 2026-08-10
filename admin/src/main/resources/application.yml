@@ -18,3 +18,4 @@ spring:
       matching-strategy: ANT_PATH_MATCHER
   main:
     allow-circular-references: true
+    allow-bean-definition-overriding: true

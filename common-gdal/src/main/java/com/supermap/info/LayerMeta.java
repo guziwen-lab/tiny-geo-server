@@ -1,4 +1,4 @@
-package com.supermap.modules.dataset.dto;
+package com.supermap.info;
 
 /**
  * @author gzw
