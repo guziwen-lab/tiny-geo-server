@@ -1,9 +1,9 @@
 package com.supermap.modules.analyzetask.service;
 
-import com.supermap.AnalysisContext;
-import com.supermap.AnalysisParam;
-import com.supermap.AnalysisResult;
-import com.supermap.AnalysisStep;
+import com.supermap.analyze.AnalysisContext;
+import com.supermap.analyze.AnalysisParam;
+import com.supermap.analyze.AnalysisResult;
+import com.supermap.analyze.AnalysisStep;
 import com.supermap.core.common.util.CollectionUtils;
 import com.supermap.enums.TaskStatus;
 import com.supermap.enums.UploadStatus;

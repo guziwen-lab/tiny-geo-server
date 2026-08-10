@@ -1,6 +1,6 @@
 package com.supermap.modules.business.service.impl;
 
-import com.supermap.AnalysisContext;
+import com.supermap.analyze.AnalysisContext;
 import com.supermap.modules.analyzetask.dto.ComposeTaskDTO;
 import com.supermap.modules.analyzetask.entity.TaskEntity;
 import com.supermap.modules.analyzetask.service.TaskService;
@@ -13,10 +13,10 @@ import com.supermap.modules.compose.service.ComposeService;
 import com.supermap.modules.compose.vo.ComposeVO;
 import com.supermap.support.compose.AsyncComposeExecutor;
 import com.supermap.support.analysis.SyncAnalysisExecutor;
-import com.supermap.task.param.FilterParam;
-import com.supermap.task.param.IntersectSplitParam;
-import com.supermap.task.param.IntersectSplitParam.SplitField;
-import com.supermap.enums.AnalysisType;
+import com.supermap.analyze.task.param.FilterParam;
+import com.supermap.analyze.task.param.IntersectSplitParam;
+import com.supermap.analyze.task.param.IntersectSplitParam.SplitField;
+import com.supermap.analyze.enums.AnalysisType;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

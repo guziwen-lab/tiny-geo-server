@@ -1,8 +1,11 @@
 package com.supermap.modules.analyzetask.service.impl;
 
+import com.supermap.analyze.AnalysisContext;
+import com.supermap.analyze.AnalysisEngine;
+import com.supermap.analyze.AnalysisParam;
+import com.supermap.analyze.LayerInfo;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.supermap.*;
 import com.supermap.gdal.config.GdalProperties;
 import com.supermap.enums.TaskStatus;
 import com.supermap.modules.analyzetask.dto.*;
@@ -13,7 +16,7 @@ import com.supermap.modules.analyzetask.entity.TaskDatasetEntity;
 
 import com.supermap.modules.analyzetask.service.TaskDatasetService;
 import com.supermap.support.analysis.AsyncAnalysisExecutor;
-import com.supermap.task.AnalysisTask;
+import com.supermap.analyze.task.AnalysisTask;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.tika.utils.StringUtils;

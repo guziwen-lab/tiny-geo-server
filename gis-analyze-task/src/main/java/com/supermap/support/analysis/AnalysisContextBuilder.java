@@ -1,8 +1,8 @@
 package com.supermap.support.analysis;
 
-import com.supermap.AnalysisContext;
-import com.supermap.AnalysisParam;
-import com.supermap.LayerInfo;
+import com.supermap.analyze.AnalysisContext;
+import com.supermap.analyze.AnalysisParam;
+import com.supermap.analyze.LayerInfo;
 import com.supermap.gdal.config.GdalProperties;
 import com.supermap.config.TaskConfigurationProperties;
 import lombok.RequiredArgsConstructor;

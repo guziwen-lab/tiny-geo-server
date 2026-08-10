@@ -6,7 +6,7 @@ import com.baomidou.mybatisplus.annotation.TableName;
 
 import java.time.Instant;
 
-import com.supermap.enums.AnalysisType;
+import com.supermap.analyze.enums.AnalysisType;
 import com.supermap.gis.enums.GeomType;
 import com.supermap.enums.TaskStatus;
 import io.swagger.v3.oas.annotations.media.Schema;

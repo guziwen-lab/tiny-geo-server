@@ -1,7 +1,7 @@
 package com.supermap.modules.analyzetask.dto;
 
-import com.supermap.AnalysisParam;
-import com.supermap.enums.AnalysisType;
+import com.supermap.analyze.AnalysisParam;
+import com.supermap.analyze.enums.AnalysisType;
 import com.supermap.modules.compose.entity.ComposeEntity;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotEmpty;

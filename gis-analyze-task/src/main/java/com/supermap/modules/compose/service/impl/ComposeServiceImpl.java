@@ -2,9 +2,9 @@ package com.supermap.modules.compose.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.supermap.AnalysisContext;
-import com.supermap.AnalysisParam;
-import com.supermap.LayerInfo;
+import com.supermap.analyze.AnalysisContext;
+import com.supermap.analyze.AnalysisParam;
+import com.supermap.analyze.LayerInfo;
 import com.supermap.core.common.util.JSON;
 import com.supermap.enums.TaskStatus;
 import com.supermap.modules.analyzetask.dto.ComposeTaskDTO;

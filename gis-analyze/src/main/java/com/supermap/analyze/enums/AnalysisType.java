@@ -1,0 +1,28 @@
+package com.supermap.analyze.enums;
+
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+
+/**
+ * @author gzw
+ */
+@Getter
+@AllArgsConstructor
+public enum AnalysisType {
+
+    OVERLAY("图层叠加"),
+    BUFFER("缓冲区分析"),
+    DISSOLVE("消减"),
+    SPATIAL_JOIN("空间连接"),
+
+    INTERSECT_SPLIT("相交面积拆分"),
+    /**
+     * 还可以修改srid
+     */
+    REPAIR_GEOMETRY("修复几何类型"),
+    FILTER("属性过滤"),
+    ATTRIBUTE_CALCULATE("属性计算");
+
+    private final String desc;
+
+}

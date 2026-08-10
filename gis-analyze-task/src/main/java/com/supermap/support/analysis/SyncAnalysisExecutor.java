@@ -1,10 +1,10 @@
 package com.supermap.support.analysis;
 
-import com.supermap.AnalysisContext;
-import com.supermap.AnalysisEngine;
-import com.supermap.AnalysisParam;
-import com.supermap.AnalysisResult;
-import com.supermap.enums.AnalysisType;
+import com.supermap.analyze.AnalysisContext;
+import com.supermap.analyze.AnalysisEngine;
+import com.supermap.analyze.AnalysisParam;
+import com.supermap.analyze.AnalysisResult;
+import com.supermap.analyze.enums.AnalysisType;
 import com.supermap.modules.analyzetask.entity.TaskEntity;
 import com.supermap.modules.analyzetask.service.TaskStatusUpdateService;
 import lombok.RequiredArgsConstructor;

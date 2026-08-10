@@ -2,7 +2,7 @@ package com.supermap.modules.compose.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.supermap.AnalysisParam;
+import com.supermap.analyze.AnalysisParam;
 import com.supermap.modules.analyzetask.dto.ComposeTaskDTO;
 import com.supermap.modules.compose.entity.ComposeEntity;
 import com.supermap.modules.compose.dto.ComposeDTO;
