@@ -3,6 +3,7 @@ package com.supermap.gdal;
 import com.supermap.command.CommandExecutor;
 import com.supermap.command.CommandResult;
 import com.supermap.gdal.config.GdalProperties;
+import com.supermap.gdal.encoding.ShapeEncodingDetector;
 import com.supermap.gis.enums.DatasetType;
 import com.supermap.gis.enums.GeomType;
 import com.supermap.gdal.info.LayerMeta;
@@ -26,12 +27,10 @@ import java.util.List;
 public class GdalTool {
 
     private final CommandExecutor executor;
-
     private final GdalProperties gdalProperties;
-
     private final GdalImportOptions gdalImportOptions;
-
     private final GdalExportOptions gdalExportOptions;
+    private final ShapeEncodingDetector shapeEncodingDetector;
 
     public List<String> listGdbLayers(String gdbPath) {
         List<String> command = new ArrayList<>();
@@ -78,6 +77,10 @@ public class GdalTool {
                           GeomType geomType,
                           boolean append) {
         gdalExportOptions.execExport(tableName, targetPath, DatasetType.SHP, geomType, append);
+    }
+
+    public String detectEncoding(String sourcePath, String layerName) {
+        return shapeEncodingDetector.detect(sourcePath, layerName);
     }
 
 }

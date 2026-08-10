@@ -6,6 +6,13 @@ gdal:
   pk-column-name: id
 task:
   pk-column-name: serial_id
+command:
+  command-timeout: 30m
+  executor:
+    core-pool-size: 8
+    max-pool-size: 16
+    keep-alive: 60s
+    queue-capacity: 200
 server:
   port: 8081
 spring:

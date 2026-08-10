@@ -9,7 +9,7 @@ import com.supermap.dataset.modules.dataset.dto.GdbLayerSource;
 import com.supermap.gdal.info.LayerMeta;
 import com.supermap.dataset.modules.dataset.entity.DatasetEntity;
 import com.supermap.gis.service.GeometryService;
-import com.supermap.dataset.util.ShapeEncodingDetector;
+import com.supermap.gdal.encoding.ShapeEncodingDetector;
 import com.supermap.gis.util.TableNameUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -92,7 +92,7 @@ public class ImportAsyncService {
         List<GdbLayerSource> sources = new ArrayList<>();
         for (String path : paths) {
             String ln = FileNameUtils.getFileNameWithoutExtension(path);
-            String confirmEncoding = ShapeEncodingDetector.detect(path, ln);
+            String confirmEncoding = gdalTool.detectEncoding(path, ln);
 
             GdbLayerSource gdbLayerSource = new GdbLayerSource(path, ln, confirmEncoding);
             sources.add(gdbLayerSource);
