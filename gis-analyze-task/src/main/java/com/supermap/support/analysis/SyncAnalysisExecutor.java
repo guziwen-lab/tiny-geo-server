@@ -22,7 +22,7 @@ public class SyncAnalysisExecutor {
     private final AnalysisEngine analysisEngine;
     private final TaskStatusUpdateService taskStatusUpdateService;
 
-    public <T extends AnalysisParam> void executeAsync(TaskEntity task, AnalysisType analysisType, AnalysisContext<T> context) {
+    public <T extends AnalysisParam> void execute(TaskEntity task, AnalysisType analysisType, AnalysisContext<T> context) {
         try {
             AnalysisResult result = analysisEngine.execute(analysisType, context);
 

@@ -76,7 +76,7 @@ public class OtherAgriculturalLandServiceImpl implements OtherAgriculturalLandSe
         // 执行分析任务
         TaskEntity taskEntity = composeVO.getTaskEntity();
         AnalysisContext<FilterParam> context = composeVO.getAnalysisContext();
-        syncAnalysisExecutor.executeAsync(taskEntity, AnalysisType.FILTER, context);
+        syncAnalysisExecutor.execute(taskEntity, AnalysisType.FILTER, context);
 
         return taskService.getById(taskEntity.getId());
     }
@@ -103,7 +103,7 @@ public class OtherAgriculturalLandServiceImpl implements OtherAgriculturalLandSe
         // 执行分析任务
         TaskEntity taskEntity = composeVO.getTaskEntity();
         AnalysisContext<IntersectSplitParam> context = composeVO.getAnalysisContext();
-        syncAnalysisExecutor.executeAsync(taskEntity, AnalysisType.INTERSECT_SPLIT, context);
+        syncAnalysisExecutor.execute(taskEntity, AnalysisType.INTERSECT_SPLIT, context);
 
         return taskService.getById(taskEntity.getId());
     }
