@@ -1,4 +1,4 @@
-package com.supermap.util;
+package com.supermap.office.util;
 
 import cn.hutool.core.util.StrUtil;
 import lombok.extern.slf4j.Slf4j;
