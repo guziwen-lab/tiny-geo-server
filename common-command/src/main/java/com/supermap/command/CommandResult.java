@@ -1,4 +1,4 @@
-package com.supermap;
+package com.supermap.command;
 
 public record CommandResult(int exitCode, String stdout, String stderr) {
 

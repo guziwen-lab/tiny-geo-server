@@ -1,6 +1,6 @@
-package com.supermap.executor;
+package com.supermap.command.executor;
 
-import com.supermap.config.CommandProperties;
+import com.supermap.command.config.CommandProperties;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;

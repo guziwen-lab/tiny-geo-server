@@ -1,4 +1,4 @@
-package com.supermap.info.parser;
+package com.supermap.gdal.info.parser;
 
 import java.util.ArrayList;
 import java.util.List;

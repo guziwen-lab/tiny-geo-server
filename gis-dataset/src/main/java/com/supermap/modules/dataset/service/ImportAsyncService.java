@@ -1,12 +1,12 @@
 package com.supermap.modules.dataset.service;
 
-import com.supermap.GdalTool;
+import com.supermap.gdal.GdalTool;
 import com.supermap.common.util.CollectionUtils;
 import com.supermap.common.util.FileNameUtils;
-import com.supermap.config.DatasetProperties;
+import com.supermap.gdal.config.GdalProperties;
 import com.supermap.enums.GeomType;
 import com.supermap.modules.dataset.dto.GdbLayerSource;
-import com.supermap.info.LayerMeta;
+import com.supermap.gdal.info.LayerMeta;
 import com.supermap.modules.dataset.entity.DatasetEntity;
 import com.supermap.service.GeometryService;
 import com.supermap.util.ShapeEncodingDetector;
@@ -27,7 +27,7 @@ public class ImportAsyncService {
 
     private final GeometryService geometryService;
     private final ImportStatusUpdater importStatusUpdater;
-    private final DatasetProperties datasetProperties;
+    private final GdalProperties gdalProperties;
     private final GdalTool gdalTool;
 
     @Async("importTaskExecutor")
@@ -55,13 +55,13 @@ public class ImportAsyncService {
 
             // 检查几何类型（优先以 PostgreSQL 实际存储的几何类型为准）
             GeomType geomType = geometryService.resolveActualGeomType(
-                    datasetProperties.getSchema() + "." + tableName, meta.geomType());
+                    gdalProperties.getSchema() + "." + tableName, meta.geomType());
             if (geomType == null) {
                 throw new RuntimeException("几何类型不支持: " + meta.geomType());
             }
 
             // 创建空间索引
-            geometryService.createGistIndex(datasetProperties.getSchema(), tableName);
+            geometryService.createGistIndex(gdalProperties.getSchema(), tableName);
 
             // 更新状态为成功
             importStatusUpdater.markSuccess(
@@ -151,16 +151,16 @@ public class ImportAsyncService {
             }
 
             GeomType geomType = geometryService.resolveActualGeomType(
-                    TableNameUtils.getTableNameWithSchema(datasetProperties.getSchema(), tableName), first.geomType());
+                    TableNameUtils.getTableNameWithSchema(gdalProperties.getSchema(), tableName), first.geomType());
             if (geomType == null) {
                 throw new RuntimeException("几何类型不支持: " + first.geomType());
             }
-            geometryService.createGistIndex(datasetProperties.getSchema(), tableName);
+            geometryService.createGistIndex(gdalProperties.getSchema(), tableName);
             importStatusUpdater.markSuccess(entity.getId(), geomType, srid == null ? first.srid() : srid, featureCount);
         } catch (Exception e) {
             log.error("批量导入失败, datasetId={}, table={}", entity.getId(), tableName, e);
             try {
-                geometryService.dropTableIfExists(TableNameUtils.getTableNameWithSchema(datasetProperties.getSchema(), tableName));
+                geometryService.dropTableIfExists(TableNameUtils.getTableNameWithSchema(gdalProperties.getSchema(), tableName));
             } catch (Exception dropEx) {
                 log.error("清理失败表失败: {}", tableName, dropEx);
             }

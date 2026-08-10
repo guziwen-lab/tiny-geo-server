@@ -1,4 +1,4 @@
-package com.supermap;
+package com.supermap.command;
 
 public class CommandException extends RuntimeException {
 

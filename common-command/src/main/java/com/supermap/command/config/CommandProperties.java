@@ -1,4 +1,4 @@
-package com.supermap.config;
+package com.supermap.command.config;
 
 import lombok.Getter;
 import lombok.Setter;

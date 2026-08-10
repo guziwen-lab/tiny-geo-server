@@ -3,7 +3,7 @@ package com.supermap.modules.analyzetask.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.supermap.*;
-import com.supermap.config.DatasetProperties;
+import com.supermap.gdal.config.GdalProperties;
 import com.supermap.enums.TaskStatus;
 import com.supermap.modules.analyzetask.dto.*;
 import com.supermap.support.analysis.AnalysisContextBuilder;
@@ -40,7 +40,7 @@ public class TaskServiceImpl extends ServiceImpl<TaskDao, TaskEntity> implements
 
     private final AsyncAnalysisExecutor asyncAnalysisExecutor;
 
-    private final DatasetProperties datasetProperties;
+    private final GdalProperties gdalProperties;
 
     private final AnalysisContextBuilder analysisContextBuilder;
 
@@ -93,7 +93,7 @@ public class TaskServiceImpl extends ServiceImpl<TaskDao, TaskEntity> implements
         List<DatasetEntity> datasets = taskDatasetService.getDatasetEntityByTaskId(taskId);
 
         // 校验数据集是否存在
-        String schemaName = datasetProperties.getSchema();
+        String schemaName = gdalProperties.getSchema();
         for (DatasetEntity dataset : datasets) {
             if (!dataset.getSchemaName().equals(schemaName)) {
                 throw new IllegalArgumentException("Datasets must be in the config schema");

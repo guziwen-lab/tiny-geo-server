@@ -1,10 +1,10 @@
 package com.supermap.modules.dataset.service.impl;
 
-import com.supermap.GdalTool;
+import com.supermap.gdal.GdalTool;
 import com.supermap.common.util.FileNameUtils;
 import com.supermap.common.util.JSON;
 import com.supermap.common.util.StringUtils;
-import com.supermap.config.DatasetProperties;
+import com.supermap.gdal.config.GdalProperties;
 import com.supermap.enums.DatasetType;
 import com.supermap.enums.UploadStatus;
 import com.supermap.modules.dataset.dao.FeatureDao;
@@ -37,7 +37,7 @@ public class ImportServiceImpl implements ImportService {
     private final DatasetTableNameGenerator datasetTableNameGenerator;
     private final DatasetService datasetService;
     private final ImportAsyncService importAsyncService;
-    private final DatasetProperties datasetProperties;
+    private final GdalProperties gdalProperties;
     private final FeatureDao featureDao;
     private final GdalTool gdalTool;
 
@@ -53,7 +53,7 @@ public class ImportServiceImpl implements ImportService {
         datasetEntity.setDatasetType(DatasetType.SHP.name());
         datasetEntity.setSourceFile(shpPath);
         datasetEntity.setLayerName(layerName);
-        datasetEntity.setSchemaName(datasetProperties.getSchema());
+        datasetEntity.setSchemaName(gdalProperties.getSchema());
         datasetEntity.setTableName(tableName);
         datasetEntity.setStatus(UploadStatus.PROCESSING);
         datasetEntity.setCreatedAt(Instant.now());
@@ -112,7 +112,7 @@ public class ImportServiceImpl implements ImportService {
             entity.setDatasetType(DatasetType.GDB.name());
             entity.setSourceFile(gdbPath);
             entity.setLayerName(ln);
-            entity.setSchemaName(datasetProperties.getSchema());
+            entity.setSchemaName(gdalProperties.getSchema());
             entity.setTableName(tableName);
             entity.setStatus(UploadStatus.PROCESSING);
             entity.setCreatedAt(Instant.now());
@@ -172,7 +172,7 @@ public class ImportServiceImpl implements ImportService {
         datasetEntity.setDatasetType(DatasetType.GDB.name());
         datasetEntity.setSourceFile(StringUtils.limit(String.join(",", paths), 10000));
         datasetEntity.setLayerName(layerName);
-        datasetEntity.setSchemaName(datasetProperties.getSchema());
+        datasetEntity.setSchemaName(gdalProperties.getSchema());
         datasetEntity.setTableName(StringUtils.isEmpty(tableName) ? datasetTableNameGenerator.getTableName() : tableName);
         datasetEntity.setStatus(UploadStatus.PROCESSING);
         datasetEntity.setCreatedAt(Instant.now());
@@ -197,7 +197,7 @@ public class ImportServiceImpl implements ImportService {
         datasetEntity.setDatasetType(DatasetType.SHP.name());
         datasetEntity.setSourceFile(StringUtils.limit(String.join(",", paths), 10000));
         datasetEntity.setLayerName(layerName);
-        datasetEntity.setSchemaName(datasetProperties.getSchema());
+        datasetEntity.setSchemaName(gdalProperties.getSchema());
         datasetEntity.setTableName(StringUtils.isEmpty(tableName) ? datasetTableNameGenerator.getTableName() : tableName);
         datasetEntity.setStatus(UploadStatus.PROCESSING);
         datasetEntity.setCreatedAt(Instant.now());

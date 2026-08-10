@@ -1,6 +1,6 @@
-import com.supermap.GdalTool;
+import com.supermap.gdal.GdalTool;
 import com.supermap.GisDatasetApplication;
-import com.supermap.info.LayerMeta;
+import com.supermap.gdal.info.LayerMeta;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;

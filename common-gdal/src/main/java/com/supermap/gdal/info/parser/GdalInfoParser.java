@@ -1,6 +1,6 @@
-package com.supermap.info.parser;
+package com.supermap.gdal.info.parser;
 
-import com.supermap.info.LayerMeta;
+import com.supermap.gdal.info.LayerMeta;
 
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;

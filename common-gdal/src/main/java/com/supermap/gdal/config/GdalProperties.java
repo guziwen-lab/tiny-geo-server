@@ -1,4 +1,4 @@
-package com.supermap;
+package com.supermap.gdal.config;
 
 import lombok.Getter;
 import lombok.Setter;

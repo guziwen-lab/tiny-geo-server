@@ -1,7 +1,7 @@
-package com.supermap.options;
+package com.supermap.gdal.options;
 
-import com.supermap.CommandExecutor;
-import com.supermap.GdalProperties;
+import com.supermap.command.CommandExecutor;
+import com.supermap.gdal.config.GdalProperties;
 import com.supermap.enums.DatasetType;
 import com.supermap.enums.GeomType;
 import lombok.RequiredArgsConstructor;

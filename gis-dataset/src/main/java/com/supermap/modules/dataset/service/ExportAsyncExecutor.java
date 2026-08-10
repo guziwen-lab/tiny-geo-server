@@ -1,7 +1,6 @@
 package com.supermap.modules.dataset.service;
 
-import com.supermap.GdalTool;
-import com.supermap.config.DatasetProperties;
+import com.supermap.gdal.GdalTool;
 import com.supermap.enums.GeomType;
 import com.supermap.modules.dataset.entity.ExportTaskEntity;
 import com.supermap.modules.sys.entity.FileEntity;
@@ -20,7 +19,6 @@ import java.util.List;
 public class ExportAsyncExecutor {
 
     private final ExportStatusUpdater exportStatusUpdater;
-    private final DatasetProperties datasetProperties;
     private final GeometryService geometryService;
     private final GdalTool gdalTool;
 

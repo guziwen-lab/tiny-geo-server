@@ -1,4 +1,4 @@
-package com.supermap.info;
+package com.supermap.gdal.info;
 
 /**
  * @author gzw

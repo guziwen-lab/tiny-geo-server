@@ -1,12 +1,15 @@
-package com.supermap;
+package com.supermap.gdal;
 
+import com.supermap.command.CommandExecutor;
+import com.supermap.command.CommandResult;
+import com.supermap.gdal.config.GdalProperties;
 import com.supermap.enums.DatasetType;
 import com.supermap.enums.GeomType;
-import com.supermap.info.LayerMeta;
-import com.supermap.info.parser.GdalInfoParser;
-import com.supermap.info.parser.GdalLayerInfoParser;
-import com.supermap.options.GdalExportOptions;
-import com.supermap.options.GdalImportOptions;
+import com.supermap.gdal.info.LayerMeta;
+import com.supermap.gdal.info.parser.GdalInfoParser;
+import com.supermap.gdal.info.parser.GdalLayerInfoParser;
+import com.supermap.gdal.options.GdalExportOptions;
+import com.supermap.gdal.options.GdalImportOptions;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.stereotype.Component;

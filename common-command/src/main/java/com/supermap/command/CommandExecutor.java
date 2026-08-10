@@ -1,6 +1,6 @@
-package com.supermap;
+package com.supermap.command;
 
-import com.supermap.config.CommandProperties;
+import com.supermap.command.config.CommandProperties;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
