@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
-<mapper namespace="com.supermap.modules.sys.dao.DictDao">
+<mapper namespace="com.supermap.admin.modules.sys.dao.DictDao">
 
 	<!-- 可根据自己的需求，是否要使用 -->
-    <resultMap type="com.supermap.modules.sys.entity.DictEntity" id="dictMap">
+    <resultMap type="com.supermap.admin.modules.sys.entity.DictEntity" id="dictMap">
         <result property="dictId" column="dict_id"/>
         <result property="name" column="name"/>
         <result property="description" column="description"/>

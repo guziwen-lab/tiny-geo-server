@@ -3,7 +3,7 @@ package com.supermap.dataset.modules.dataset.service;
 import com.supermap.gdal.GdalTool;
 import com.supermap.gis.enums.GeomType;
 import com.supermap.dataset.modules.dataset.entity.ExportTaskEntity;
-import com.supermap.modules.sys.entity.FileEntity;
+import com.supermap.admin.modules.sys.entity.FileEntity;
 import com.supermap.gis.service.GeometryService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

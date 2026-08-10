@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
-<mapper namespace="com.supermap.modules.sys.dao.PermissionDao">
+<mapper namespace="com.supermap.admin.modules.sys.dao.PermissionDao">
 
-    <resultMap type="com.supermap.modules.sys.entity.PermissionEntity" id="permissionMap">
+    <resultMap type="com.supermap.admin.modules.sys.entity.PermissionEntity" id="permissionMap">
         <result property="permissionId" column="permission_id"/>
         <result property="parentId" column="parent_id"/>
         <result property="name" column="name"/>
