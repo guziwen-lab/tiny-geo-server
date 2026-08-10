@@ -5,7 +5,6 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.supermap.AnalysisContext;
 import com.supermap.AnalysisParam;
 import com.supermap.LayerInfo;
-import com.supermap.common.util.BeanUtils;
 import com.supermap.common.util.JSON;
 import com.supermap.enums.TaskStatus;
 import com.supermap.modules.analyzetask.dto.ComposeTaskDTO;
@@ -50,21 +49,6 @@ public class ComposeServiceImpl extends ServiceImpl<ComposeDao, ComposeEntity> i
     public Page<ComposeEntity> queryPage(ComposeDTO dto) {
         LambdaQueryWrapper<ComposeEntity> wrapper = new LambdaQueryWrapper<>();
         return page(dto.page(), wrapper);
-    }
-
-    @Override
-    public Long saveDTO(ComposeSaveDTO dto) {
-        ComposeEntity composeEntity = new ComposeEntity();
-        BeanUtils.copyProperties(dto, composeEntity);
-        save(composeEntity);
-        return composeEntity.getId();
-    }
-
-    @Override
-    public void updateDTOById(ComposeSaveDTO dto) {
-        ComposeEntity composeEntity = new ComposeEntity();
-        BeanUtils.copyProperties(dto, composeEntity);
-        updateById(composeEntity);
     }
 
     @Transactional(rollbackFor = Exception.class)
