@@ -8,8 +8,6 @@
 
 package com.supermap.generator.config;
 
-import com.generator.dao.*;
-import com.supermap.dao.*;
 import com.supermap.generator.dao.*;
 import com.supermap.generator.utils.RenException;
 import jakarta.annotation.Resource;
