@@ -16,7 +16,7 @@ import java.util.Map;
  * @author gzw
  */
 @Slf4j
-@RestControllerAdvice(basePackages = {"com.supermap.modules"})
+@RestControllerAdvice(basePackages = {"com.supermap"})
 public class GlobalExceptionControllerAdvice {
 
     /**

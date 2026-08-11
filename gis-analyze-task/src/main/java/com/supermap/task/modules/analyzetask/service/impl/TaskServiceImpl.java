@@ -69,7 +69,7 @@ public class TaskServiceImpl extends ServiceImpl<TaskDao, TaskEntity> implements
         try {
             save(taskEntity);
         } catch (DuplicateKeyException e) {
-            throw new IllegalArgumentException("Task name already exists");
+            throw new IllegalArgumentException("Task name already exists", e);
         }
 
         List<TaskDatasetEntity> taskDatasetEntities = getTaskDatasetEntities(dto.getDatasetIds(), taskEntity);

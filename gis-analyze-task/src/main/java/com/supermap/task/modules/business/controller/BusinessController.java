@@ -34,11 +34,7 @@ public class BusinessController {
     @Operation(summary = "其他农用地分析（非同口径/同口径）")
     @PostMapping("/qtnydbh/analyze")
     public R<Long> qtnydbhAnalyze(@RequestBody @Validated QtnydbhAnalyzeDTO dto) {
-        ComposeEntity composeEntity = otherAgriculturalLandService.analyze(
-                dto.getZtDatasetId(),
-                dto.getDltbDatasetId(),
-                dto.getCaliber()
-        );
+        ComposeEntity composeEntity = otherAgriculturalLandService.analyze(dto);
         return R.ok(composeEntity.getId());
     }
 

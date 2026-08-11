@@ -5,6 +5,7 @@ import com.supermap.task.modules.analyzetask.dto.ComposeTaskDTO;
 import com.supermap.task.modules.analyzetask.entity.TaskEntity;
 import com.supermap.task.modules.analyzetask.service.TaskService;
 import com.supermap.task.modules.business.constant.BusinessConstants;
+import com.supermap.task.modules.business.dto.QtnydbhAnalyzeDTO;
 import com.supermap.task.modules.business.enums.Caliber;
 import com.supermap.task.modules.business.service.OtherAgriculturalLandService;
 import com.supermap.task.modules.compose.dto.ComposeSaveDTO;
@@ -48,14 +49,14 @@ public class OtherAgriculturalLandServiceImpl implements OtherAgriculturalLandSe
     private final AsyncComposeExecutor asyncComposeExecutor;
 
     @Override
-    public ComposeEntity analyze(Long ztDatasetId, Long dltbDatasetId, Caliber caliber) {
-        ComposeSaveDTO dto = new ComposeSaveDTO();
-        dto.setName("其他农用地分析");
-        ComposeEntity composeEntity = composeService.createCompose(dto);
+    public ComposeEntity analyze(QtnydbhAnalyzeDTO dto) {
+        ComposeSaveDTO composeSaveDTO = new ComposeSaveDTO();
+        composeSaveDTO.setName(dto.getComposeName());
+        ComposeEntity composeEntity = composeService.createCompose(composeSaveDTO);
 
         asyncComposeExecutor.executeAsync(composeEntity, () -> {
-            TaskEntity taskEntity = step1IntersectSplit(ztDatasetId, dltbDatasetId, composeEntity);
-            return step2AttrFilter(taskEntity.getResultDatasetId(), caliber, composeEntity);
+            TaskEntity taskEntity = step1IntersectSplit(dto.getZtDatasetId(), dto.getDltbDatasetId(), composeEntity);
+            return step2AttrFilter(taskEntity.getResultDatasetId(), dto.getCaliber(), composeEntity);
         });
 
         return composeEntity;

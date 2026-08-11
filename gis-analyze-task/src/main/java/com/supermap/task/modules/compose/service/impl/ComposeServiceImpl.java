@@ -6,6 +6,7 @@ import com.supermap.analyze.AnalysisContext;
 import com.supermap.analyze.AnalysisParam;
 import com.supermap.analyze.LayerInfo;
 import com.supermap.core.common.util.JSON;
+import com.supermap.idgenerator.TaskNameGenerator;
 import com.supermap.task.enums.TaskStatus;
 import com.supermap.task.modules.analyzetask.dto.ComposeTaskDTO;
 import com.supermap.task.modules.analyzetask.dto.TaskDatasetSaveDTO;
@@ -22,6 +23,7 @@ import com.supermap.dataset.modules.dataset.service.DatasetService;
 import com.supermap.task.support.analysis.AnalysisContextBuilder;
 import com.supermap.task.support.analysis.LayerInfoBuilder;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 
@@ -44,6 +46,7 @@ public class ComposeServiceImpl extends ServiceImpl<ComposeDao, ComposeEntity> i
     private final TaskDatasetService taskDatasetService;
     private final AnalysisContextBuilder analysisExecutor;
     private final ComposeStepService composeStepService;
+    private final TaskNameGenerator taskNameGenerator;
 
     @Override
     public Page<ComposeEntity> queryPage(ComposeDTO dto) {
@@ -65,7 +68,7 @@ public class ComposeServiceImpl extends ServiceImpl<ComposeDao, ComposeEntity> i
 
         // 保存任务
         TaskEntity taskEntity = new TaskEntity();
-        taskEntity.setTaskName(dto.getTaskDescription());
+        taskEntity.setTaskName(taskNameGenerator.getTaskName());
         taskEntity.setAnalysisType(dto.getAnalysisType());
         taskEntity.setTaskParam(JSON.toJSONString(dto.getTaskParam()));
         taskEntity.setStatus(TaskStatus.PROCESSING);
@@ -114,7 +117,11 @@ public class ComposeServiceImpl extends ServiceImpl<ComposeDao, ComposeEntity> i
         composeEntity.setName(dto.getName());
         composeEntity.setStatus(TaskStatus.NOT_PROCESSED);
         composeEntity.setCreatedAt(Instant.now());
-        save(composeEntity);
+        try {
+            save(composeEntity);
+        } catch (DuplicateKeyException e) {
+            throw new IllegalArgumentException("Compose name already exists", e);
+        }
 
         return composeEntity;
     }

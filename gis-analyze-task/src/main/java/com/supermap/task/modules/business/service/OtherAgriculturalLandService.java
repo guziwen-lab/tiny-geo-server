@@ -1,6 +1,6 @@
 package com.supermap.task.modules.business.service;
 
-import com.supermap.task.modules.business.enums.Caliber;
+import com.supermap.task.modules.business.dto.QtnydbhAnalyzeDTO;
 import com.supermap.task.modules.compose.entity.ComposeEntity;
 
 /**
@@ -17,11 +17,8 @@ public interface OtherAgriculturalLandService {
     /**
      * 执行其他农用地分析
      *
-     * @param ztDatasetId  ZT监测图层数据集ID
-     * @param dltbDatasetId DLTB地类图斑数据集ID
-     * @param caliber       口径（非同口径/同口径）
      * @return ComposeEntity id
      */
-    ComposeEntity analyze(Long ztDatasetId, Long dltbDatasetId, Caliber caliber);
+    ComposeEntity analyze(QtnydbhAnalyzeDTO dto);
 
 }
