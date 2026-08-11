@@ -131,6 +131,7 @@ gis-analyze-task
 * JDK17+
 * Maven3.6+
 * PostgreSQL 12+ (postgis)
+* redis
 
 ## 本地部署
 
