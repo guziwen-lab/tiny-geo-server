@@ -70,9 +70,9 @@ public abstract class AbstractExecuteService<T extends AnalysisParam> implements
                              AnalysisContext<T> context) {
         if (current != null && current.getTableName() != null)
             SqlInjectionCheckHelper.checkTableName(current.getTableName());
-
         if (next != null && next.getTableName() != null)
             SqlInjectionCheckHelper.checkTableName(next.getTableName());
+        SqlInjectionCheckHelper.checkTableName(resultTableName);
 
         String sql = buildExecuteSql(current, next, resultTableName, context);
         log.debug("[taskName: {}] execute sql: {}", context.getTaskName(), sql);

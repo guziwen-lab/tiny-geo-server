@@ -2,7 +2,6 @@ package com.supermap.analyze.service.impl;
 
 import com.supermap.analyze.AnalysisContext;
 import com.supermap.analyze.LayerInfo;
-import com.supermap.analyze.helper.SqlInjectionCheckHelper;
 import com.supermap.analyze.service.AbstractExecuteService;
 import com.supermap.analyze.task.param.FilterParam;
 import com.supermap.gis.util.TableNameUtils;
@@ -23,13 +22,10 @@ public class FilterExecuteService extends AbstractExecuteService<FilterParam> {
                                      AnalysisContext<FilterParam> context) {
         List<String> selectItems = createSingleTableSelectItems(current, context);
 
-        String tableName = current.getTableName();
-        String newTableName = context.getResultTableName();
-        SqlInjectionCheckHelper.checkTableName(tableName, newTableName);
-
         String schema = context.getSchema();
+        String tableName = current.getTableName();
         String inputTable = TableNameUtils.getTableNameWithSchema(schema, tableName);
-        String newTable = TableNameUtils.getTableNameWithSchema(schema, newTableName);
+        String newTable = TableNameUtils.getTableNameWithSchema(schema, resultTableName);
 
         String whereClause = context.getParam().getWhereClause();
 

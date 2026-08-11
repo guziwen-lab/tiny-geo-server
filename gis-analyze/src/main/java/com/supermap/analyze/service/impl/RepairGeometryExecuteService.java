@@ -21,9 +21,6 @@ public class RepairGeometryExecuteService extends AbstractExecuteService<RepairG
                                      LayerInfo next,
                                      String resultTableName,
                                      AnalysisContext<RepairGeometryParam> context) {
-        String tableName = current.getTableName();
-        String newTableName = context.getResultTableName();
-
         List<String> selectItems = createSingleTableSelectItems(current, context);
 
         RepairGeometryParam param = context.getParam();
@@ -37,8 +34,9 @@ public class RepairGeometryExecuteService extends AbstractExecuteService<RepairG
         }
 
         String schema = context.getSchema();
+        String tableName = current.getTableName();
         String inputTable = TableNameUtils.getTableNameWithSchema(schema, tableName);
-        String newTable = TableNameUtils.getTableNameWithSchema(schema, newTableName);
+        String newTable = TableNameUtils.getTableNameWithSchema(schema, resultTableName);
 
         return """
                 CREATE TABLE %s AS

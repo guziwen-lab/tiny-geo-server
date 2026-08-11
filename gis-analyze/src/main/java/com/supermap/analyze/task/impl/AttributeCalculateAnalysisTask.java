@@ -102,6 +102,7 @@ public class AttributeCalculateAnalysisTask extends AbstractAnalysisTask<Attribu
             if (StringUtils.isEmpty(field.expression())) {
                 throw new IllegalArgumentException("计算字段表达式不能为空: " + field.name());
             }
+            SqlInjectionCheckHelper.checkColumnName(field.name());
         }
     }
 
