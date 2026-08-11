@@ -6,6 +6,7 @@ import com.supermap.analyze.service.AbstractExecuteService;
 import com.supermap.analyze.task.param.AttributeCalculateParam;
 import com.supermap.gis.type.Column;
 import com.supermap.gis.util.TableNameUtils;
+import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,6 +14,7 @@ import java.util.List;
 /**
  * @author gzw
  */
+@Service
 public class AttributeCalculateExecuteService extends AbstractExecuteService<AttributeCalculateParam> {
 
     @Override

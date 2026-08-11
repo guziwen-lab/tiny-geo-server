@@ -4,24 +4,20 @@ import com.supermap.analyze.AnalysisContext;
 import com.supermap.analyze.AnalysisResult;
 import com.supermap.analyze.AnalysisStep;
 import com.supermap.analyze.LayerInfo;
+import com.supermap.analyze.service.impl.AttributeCalculateExecuteService;
 import com.supermap.core.common.util.CollectionUtils;
 import com.supermap.core.common.util.JSON;
 import com.supermap.core.common.util.StringUtils;
-import com.supermap.analyze.dao.ExecuteSqlMapper;
 import com.supermap.analyze.enums.AnalysisType;
 import com.supermap.gis.enums.GeomType;
 import com.supermap.analyze.helper.SqlInjectionCheckHelper;
-import com.supermap.gis.service.GeometryService;
 import com.supermap.analyze.task.AbstractAnalysisTask;
 import com.supermap.analyze.task.param.AttributeCalculateParam;
 import com.supermap.analyze.task.param.AttributeCalculateParam.CalculatedField;
-import com.supermap.gis.type.Column;
-import com.supermap.gis.util.TableNameUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -40,8 +36,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class AttributeCalculateAnalysisTask extends AbstractAnalysisTask<AttributeCalculateParam> {
 
-    private final ExecuteSqlMapper executeSqlMapper;
-    private final GeometryService geometryService;
+    private final AttributeCalculateExecuteService attributeCalculateExecuteService;
 
     @Override
     public AnalysisType getType() {
@@ -109,43 +104,9 @@ public class AttributeCalculateAnalysisTask extends AbstractAnalysisTask<Attribu
     @Override
     protected AnalysisResult doExecute(AnalysisContext<AttributeCalculateParam> context) {
         LayerInfo input = context.getInputLayers().get(0);
-        String tableName = input.getTableName();
-        String schema = context.getSchema();
         String resultTableName = context.getResultTableName();
 
-        SqlInjectionCheckHelper.checkTableName(tableName, resultTableName);
-
-        List<CalculatedField> fields = context.getParam().getFields();
-        List<String> fieldNames = fields.stream().map(CalculatedField::name).toList();
-        SqlInjectionCheckHelper.checkColumnName(fieldNames.toArray(new String[0]));
-
-        String inputTable = TableNameUtils.getTableNameWithSchema(schema, tableName);
-        String resultTable = TableNameUtils.getTableNameWithSchema(schema, resultTableName);
-
-        List<String> selectItems = new ArrayList<>();
-        String pkCol = context.getPkCol();
-        selectItems.add("row_number() OVER () AS " + pkCol);
-
-        for (Column column : input.getColumns()) {
-            selectItems.add("\"%s\"".formatted(column.name()));
-        }
-        for (CalculatedField field : fields) {
-            selectItems.add("(%s) AS \"%s\"".formatted(field.expression(), field.name()));
-        }
-        selectItems.add("geom");
-
-        String sql = """
-                CREATE TABLE %s AS
-                SELECT
-                %s
-                FROM %s
-                """.formatted(resultTable, String.join(",\n", selectItems), inputTable);
-
-        log.debug("[taskName: {}] execute sql: {}", context.getTaskName(), sql);
-        executeSqlMapper.executeSql(sql);
-
-        geometryService.addPrimaryKey(schema, resultTableName, "serial_id");
-        geometryService.createGistIndex(schema, resultTableName);
+        attributeCalculateExecuteService.execute(input, null, resultTableName, context);
 
         context.addStep(new AnalysisStep(1,
                 input.getOriginalTableName(),
