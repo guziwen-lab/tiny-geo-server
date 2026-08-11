@@ -13,7 +13,7 @@
     <artifactId>tiny-geo-server</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>tiny-geo-server</name>
-    <description>通用后端</description>
+    <description>tiny-geo-server</description>
     <packaging>pom</packaging>
 
     <properties>
