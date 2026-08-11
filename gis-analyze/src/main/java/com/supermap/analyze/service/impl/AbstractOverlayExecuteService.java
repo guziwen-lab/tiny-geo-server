@@ -1,7 +1,8 @@
-package com.supermap.analyze.service;
+package com.supermap.analyze.service.impl;
 
 import com.supermap.analyze.AnalysisContext;
 import com.supermap.analyze.LayerInfo;
+import com.supermap.analyze.service.AbstractExecuteService;
 import com.supermap.gis.enums.GeomType;
 import com.supermap.analyze.enums.OverlayAlgorithm;
 import com.supermap.analyze.task.param.OverlayParam;
@@ -19,7 +20,9 @@ public abstract class AbstractOverlayExecuteService extends AbstractExecuteServi
     protected String buildExecuteSql(LayerInfo current, LayerInfo next, String result, AnalysisContext<OverlayParam> context) {
         List<Column> currentColumns = current.getColumns();
         List<Column> nextColumns = next.getColumns();
-        String selectClause = buildSelectClause(currentColumns,
+        String selectClause = buildSelectClause(
+                context.getPkCol(),
+                currentColumns,
                 nextColumns,
                 geometryExpression(context.getGeomType(), context.getSrid()));
 
@@ -35,14 +38,16 @@ public abstract class AbstractOverlayExecuteService extends AbstractExecuteServi
 
     protected abstract String buildSql(String current, String next, String result, String selectClause);
 
-    protected String buildSelectClause(List<Column> currentColumns,
+    protected String buildSelectClause(String pkCol,
+                                       List<Column> currentColumns,
                                        List<Column> nextColumns,
                                        String geometryExpression) {
         Set<String> usedNames = new HashSet<>();
         List<String> selectItems = new ArrayList<>();
 
         // 结果表主键
-        selectItems.add("row_number() OVER () AS id");
+        selectItems.add("row_number() OVER () AS " + pkCol);
+        usedNames.add(pkCol);
 
         // 当前图层字段
         for (Column column : currentColumns) {

@@ -126,7 +126,7 @@ public class TaskServiceImpl extends ServiceImpl<TaskDao, TaskEntity> implements
                 .map(LayerInfoBuilder::fromDatasetEntity).toList();
 
         // 构建分析任务参数
-        AnalysisTask<?> analysisTask = analysisEngine.getTask(taskEntity.getAnalysisType());
+        AnalysisTask<? extends AnalysisParam> analysisTask = analysisEngine.getTask(taskEntity.getAnalysisType());
 
         // 构建分析上下文
         return analysisContextBuilder.buildAnalysisContext(layerInfos,

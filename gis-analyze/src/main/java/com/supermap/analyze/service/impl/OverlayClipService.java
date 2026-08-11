@@ -2,7 +2,6 @@ package com.supermap.analyze.service.impl;
 
 import com.supermap.gis.enums.GeomType;
 import com.supermap.analyze.enums.OverlayAlgorithm;
-import com.supermap.analyze.service.AbstractOverlayExecuteService;
 import com.supermap.analyze.service.GeometryExpression;
 import com.supermap.gis.type.Column;
 import lombok.RequiredArgsConstructor;
@@ -47,8 +46,8 @@ public class OverlayClipService extends AbstractOverlayExecuteService {
     }
 
     @Override
-    protected String buildSelectClause(List<Column> currentColumns, List<Column> nextColumns, String geometryExpression) {
-        return super.buildSelectClause(currentColumns, Collections.emptyList(), geometryExpression);
+    protected String buildSelectClause(String pkCol, List<Column> currentColumns, List<Column> nextColumns, String geometryExpression) {
+        return super.buildSelectClause(pkCol, currentColumns, Collections.emptyList(), geometryExpression);
     }
 
 }

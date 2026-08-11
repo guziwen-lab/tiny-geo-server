@@ -82,14 +82,19 @@ public class AttributeCalculateAnalysisTask extends AbstractAnalysisTask<Attribu
 
     @Override
     protected void validate(AnalysisContext<AttributeCalculateParam> context) {
+        if (context.getParam() == null)
+            throw new IllegalArgumentException("分析参数不能为空");
+
         List<LayerInfo> layers = context.getInputLayers();
         if (layers == null || layers.size() != 1) {
             throw new IllegalArgumentException("属性计算分析需要且仅需要1个图层");
         }
+
         List<CalculatedField> fields = context.getParam().getFields();
         if (CollectionUtils.isEmpty(fields)) {
             throw new IllegalArgumentException("计算字段列表不能为空");
         }
+
         for (CalculatedField field : fields) {
             if (StringUtils.isEmpty(field.name())) {
                 throw new IllegalArgumentException("计算字段名不能为空");
@@ -117,7 +122,8 @@ public class AttributeCalculateAnalysisTask extends AbstractAnalysisTask<Attribu
         String resultTable = TableNameUtils.getTableNameWithSchema(schema, resultTableName);
 
         List<String> selectItems = new ArrayList<>();
-        selectItems.add("row_number() OVER () AS id");
+        String pkCol = context.getPkCol();
+        selectItems.add("row_number() OVER () AS " + pkCol);
 
         for (Column column : input.getColumns()) {
             selectItems.add("\"%s\"".formatted(column.name()));
@@ -145,7 +151,7 @@ public class AttributeCalculateAnalysisTask extends AbstractAnalysisTask<Attribu
                 null,
                 resultTableName));
 
-        return finalizeResult(context, resultTableName, "Attribute calculate completed");
+        return finalizeResult(context, "Attribute calculate completed");
     }
 
 }

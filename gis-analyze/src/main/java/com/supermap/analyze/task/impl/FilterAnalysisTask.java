@@ -4,15 +4,13 @@ import com.supermap.analyze.AnalysisContext;
 import com.supermap.analyze.AnalysisResult;
 import com.supermap.analyze.AnalysisStep;
 import com.supermap.analyze.LayerInfo;
+import com.supermap.analyze.service.impl.FilterExecuteService;
 import com.supermap.core.common.util.StringUtils;
-import com.supermap.analyze.dao.ExecuteSqlMapper;
 import com.supermap.analyze.enums.AnalysisType;
 import com.supermap.gis.enums.GeomType;
 import com.supermap.analyze.security.SqlInjectionCheck;
-import com.supermap.gis.service.GeometryService;
 import com.supermap.analyze.task.AbstractAnalysisTask;
 import com.supermap.analyze.task.param.FilterParam;
-import com.supermap.gis.util.TableNameUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -35,8 +33,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class FilterAnalysisTask extends AbstractAnalysisTask<FilterParam> {
 
-    private final ExecuteSqlMapper executeSqlMapper;
-    private final GeometryService geometryService;
+    private final FilterExecuteService filterExecuteService;
 
     @Override
     public AnalysisType getType() {
@@ -62,6 +59,9 @@ public class FilterAnalysisTask extends AbstractAnalysisTask<FilterParam> {
 
     @Override
     protected void validate(AnalysisContext<FilterParam> context) {
+        if (context.getParam() == null)
+            throw new IllegalArgumentException("分析参数不能为空");
+
         List<LayerInfo> layers = context.getInputLayers();
         if (layers == null || layers.size() != 1) {
             throw new IllegalArgumentException("属性过滤分析需要且仅需要1个图层");
@@ -74,35 +74,17 @@ public class FilterAnalysisTask extends AbstractAnalysisTask<FilterParam> {
     @Override
     protected AnalysisResult doExecute(AnalysisContext<FilterParam> context) {
         LayerInfo input = context.getInputLayers().get(0);
-        String tableName = input.getTableName();
-        String schema = context.getSchema();
         String newTableName = context.getResultTableName();
+        SqlInjectionCheck.checkTableName(newTableName);
 
-        SqlInjectionCheck.checkTableName(tableName, newTableName);
-
-        String inputTable = TableNameUtils.getTableNameWithSchema(schema, tableName);
-        String newTable = TableNameUtils.getTableNameWithSchema(schema, newTableName);
-        String whereClause = context.getParam().getWhereClause();
-        String sql = """
-                CREATE TABLE %s AS
-                SELECT row_number() OVER () AS serial_id,
-                 *
-                FROM %s
-                WHERE %s
-                """.formatted(newTable, inputTable, whereClause);
-
-        log.debug("[taskName: {}] execute sql: {}", context.getTaskName(), sql);
-        executeSqlMapper.executeSql(sql);
-
-        geometryService.addPrimaryKey(schema, newTableName, "serial_id");
-        geometryService.createGistIndex(schema, newTableName);
+        filterExecuteService.execute(input, null, newTableName, context);
 
         context.addStep(new AnalysisStep(1,
                 input.getOriginalTableName(),
                 null,
                 newTableName));
 
-        return finalizeResult(context, newTableName, "Filter completed");
+        return finalizeResult(context, "Filter completed");
     }
 
 }

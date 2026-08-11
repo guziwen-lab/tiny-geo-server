@@ -29,7 +29,9 @@ import java.util.function.Function;
 public class IntersectSplitExecuteService extends AbstractExecuteService<IntersectSplitParam> {
 
     @Override
-    protected String buildExecuteSql(LayerInfo current, LayerInfo next, String resultTableName,
+    protected String buildExecuteSql(LayerInfo current,
+                                     LayerInfo next,
+                                     String resultTableName,
                                      AnalysisContext<IntersectSplitParam> context) {
         IntersectSplitParam param = context.getParam();
         List<SplitField> splitFieldsA = param.getSplitFieldsA();
@@ -40,6 +42,9 @@ public class IntersectSplitExecuteService extends AbstractExecuteService<Interse
                 .toMap(splitFieldsB, SplitField::getSourceField, Function.identity());
 
         Set<String> usedNames = new HashSet<>();
+        String pkCol = context.getPkCol();
+        usedNames.add(pkCol);
+
         List<String> t1SelectItems = new ArrayList<>();
         List<String> t2SelectItems = new ArrayList<>();
         List<String> outerSelectItems = new ArrayList<>();
@@ -107,7 +112,7 @@ public class IntersectSplitExecuteService extends AbstractExecuteService<Interse
         t2SelectItems.add(intersectionArea);
 
         /*--------------------- 最外层查询字段 ---------------------*/
-        String id = "row_number() OVER () AS %s".formatted(context.getPkCol());
+        String id = "row_number() OVER () AS %s".formatted(pkCol);
         outerSelectItems.add(id);
 
         // 需要保留的原表属性字段

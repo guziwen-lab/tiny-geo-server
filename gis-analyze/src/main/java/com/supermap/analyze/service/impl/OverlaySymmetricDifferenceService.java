@@ -2,7 +2,6 @@ package com.supermap.analyze.service.impl;
 
 import com.supermap.gis.enums.GeomType;
 import com.supermap.analyze.enums.OverlayAlgorithm;
-import com.supermap.analyze.service.AbstractOverlayExecuteService;
 import com.supermap.analyze.service.GeometryExpression;
 import com.supermap.gis.type.Column;
 import lombok.RequiredArgsConstructor;
@@ -54,9 +53,9 @@ public class OverlaySymmetricDifferenceService extends AbstractOverlayExecuteSer
     }
 
     @Override
-    protected String buildSelectClause(List<Column> currentColumns, List<Column> nextColumns, String geometryExpression) {
+    protected String buildSelectClause(String pkCol, List<Column> currentColumns, List<Column> nextColumns, String geometryExpression) {
         // 对称差只保留输入图层属性
-        return super.buildSelectClause(currentColumns, Collections.emptyList(), geometryExpression);
+        return super.buildSelectClause(pkCol, currentColumns, Collections.emptyList(), geometryExpression);
     }
 
 }

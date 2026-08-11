@@ -86,13 +86,11 @@ public interface GeometryDao {
             FROM information_schema.columns c
             WHERE c.table_name = #{table}
               AND c.column_name <> 'geom'
-              AND c.column_name <> #{pkCol}
               AND c.table_schema = #{schema}
             ORDER BY c.ordinal_position
             """)
     List<Column> listAttrColumns(@Param("schema") String schema,
-                                 @Param("table") String table,
-                                 @Param("pkCol") String pkCol);
+                                 @Param("table") String table);
 
     @Select("""
             SELECT COUNT(*)
@@ -105,13 +103,5 @@ public interface GeometryDao {
     int countNeedNormalize(@Param("schema") String schema,
                            @Param("tableName") String tableName,
                            @Param("geoType") String geoType);
-
-    void copyTable(@Param("tableName") String tableName,
-                   @Param("newTableName") String newTableName,
-                   @Param("schema") String schema,
-                   @Param("columns") List<String> columns,
-                   @Param("originSrid") Integer originSrid,
-                   @Param("postgisGeometryType") String postgisGeometryType,
-                   @Param("targetSrid") Integer targetSrid);
 
 }

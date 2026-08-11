@@ -89,8 +89,8 @@ public class GeometryService {
         geometryDao.addPrimaryKey(schema, table, pkCol);
     }
 
-    public List<Column> listAttrColumns(String schema, String tableName, String pkCol) {
-        return geometryDao.listAttrColumns(schema, tableName, pkCol);
+    public List<Column> listAttrColumns(String schema, String tableName) {
+        return geometryDao.listAttrColumns(schema, tableName);
     }
 
     /**
@@ -103,19 +103,6 @@ public class GeometryService {
             return geomType;
         }
         return GeomType.ofOgr2ogrCode(fallbackGeomType);
-    }
-
-    public void copyTable(String tableName,
-                          String newTableName,
-                          String schema,
-                          List<Column> columns,
-                          Integer originSrid,
-                          GeomType geomType,
-                          Integer srid) {
-        String postgisGeometryType = geomType.getPostgisGeometryTypeWithoutSt();
-
-        List<String> columnNames = columns.stream().map(Column::name).toList();
-        geometryDao.copyTable(tableName, newTableName, schema, columnNames, originSrid, postgisGeometryType, srid);
     }
 
 }

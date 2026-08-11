@@ -24,7 +24,7 @@ public class AnalysisEngine {
         return task.execute(context);
     }
 
-    public AnalysisTask<?> getTask(AnalysisType type) {
+    public AnalysisTask<? extends AnalysisParam> getTask(AnalysisType type) {
         AnalysisTask<?> task = taskMap.get(type);
         if (task == null) {
             throw new IllegalArgumentException("Unsupported analysis type: " + type);

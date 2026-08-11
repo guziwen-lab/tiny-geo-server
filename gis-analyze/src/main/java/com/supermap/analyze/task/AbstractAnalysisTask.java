@@ -4,7 +4,6 @@ import com.supermap.analyze.AnalysisContext;
 import com.supermap.analyze.AnalysisParam;
 import com.supermap.analyze.AnalysisResult;
 import com.supermap.analyze.LayerInfo;
-import com.supermap.core.common.util.StringUtils;
 import com.supermap.gis.enums.GeomType;
 import com.supermap.gis.service.GeometryService;
 import com.supermap.gis.type.Column;
@@ -135,6 +134,18 @@ public abstract class AbstractAnalysisTask<T extends AnalysisParam> implements A
      * 完成态处理：将最后一个临时表改名为结果表，构建分析结果
      *
      * @param context           分析上下文
+     * @param message           结果附加信息
+     * @return 分析结果
+     */
+    protected AnalysisResult finalizeResult(AnalysisContext<T> context,
+                                            String message) {
+        return finalizeResult(context, null, message);
+    }
+
+    /**
+     * 完成态处理：将最后一个临时表改名为结果表，构建分析结果
+     *
+     * @param context           分析上下文
      * @param lastTempTableName 最后一个临时表名（将被改名为结果表）
      * @param message           结果附加信息
      * @return 分析结果
@@ -142,17 +153,12 @@ public abstract class AbstractAnalysisTask<T extends AnalysisParam> implements A
     protected AnalysisResult finalizeResult(AnalysisContext<T> context,
                                             String lastTempTableName,
                                             String message) {
+
         String resultTableName = context.getResultTableName();
         String schema = context.getSchema();
 
-        if (!StringUtils.equals(lastTempTableName, resultTableName)) {
-            // 把最后一个临时表改名为结果表
-            geometryService.renameTable(
-                    TableNameUtils.getTableNameWithSchema(schema, lastTempTableName),
-                    resultTableName);
-
-            // 从临时表列表中移除已改名为结果表的表，避免清理时误操作（实际上临时表已经被改名，不会误操作）
-            context.getTempTableList().remove(lastTempTableName);
+        if (lastTempTableName != null) {
+            renameTempTableName(schema, lastTempTableName, resultTableName, context.getTempTableList());
         }
 
         long featureCount = geometryService.getFeatureCount(
@@ -166,6 +172,19 @@ public abstract class AbstractAnalysisTask<T extends AnalysisParam> implements A
                 .geomType(context.getGeomType())
                 .message(message)
                 .build();
+    }
+
+    private void renameTempTableName(String schema,
+                                     String lastTempTableName,
+                                     String resultTableName,
+                                     List<String> tempTableList) {
+        // 把最后一个临时表改名为结果表
+        geometryService.renameTable(
+                TableNameUtils.getTableNameWithSchema(schema, lastTempTableName),
+                resultTableName);
+
+        // 从临时表列表中移除已改名为结果表的表，避免清理时误操作（实际上临时表已经被改名，不会误操作）
+        tempTableList.remove(lastTempTableName);
     }
 
     /**
@@ -192,7 +211,7 @@ public abstract class AbstractAnalysisTask<T extends AnalysisParam> implements A
 
         for (LayerInfo inputLayer : inputLayers) {
             String tableName = inputLayer.getTableName();
-            List<Column> columns = geometryService.listAttrColumns(schema, tableName, context.getPkCol());
+            List<Column> columns = geometryService.listAttrColumns(schema, tableName);
             inputLayer.setColumns(columns);
         }
     }

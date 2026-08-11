@@ -4,9 +4,9 @@ import com.supermap.analyze.AnalysisContext;
 import com.supermap.analyze.AnalysisResult;
 import com.supermap.analyze.AnalysisStep;
 import com.supermap.analyze.LayerInfo;
+import com.supermap.analyze.service.impl.AbstractOverlayExecuteService;
 import com.supermap.core.common.util.CollectionUtils;
 import com.supermap.analyze.resolver.GeomTypeResolver;
-import com.supermap.analyze.service.*;
 import com.supermap.analyze.enums.AnalysisType;
 import com.supermap.analyze.enums.OverlayAlgorithm;
 import com.supermap.gis.enums.GeomType;
@@ -89,6 +89,9 @@ public class OverlayAnalysisTask extends AbstractAnalysisTask<OverlayParam> {
 
     @Override
     protected void validate(AnalysisContext<OverlayParam> context) {
+        if (context.getParam() == null)
+            throw new IllegalArgumentException("分析参数不能为空");
+
         OverlayAlgorithm overlayAlgorithm = context.getParam().getOverlayAlgorithm();
         if (overlayAlgorithm == null)
             throw new IllegalArgumentException("叠加分析类型不能为空");

@@ -2,7 +2,6 @@ package com.supermap.analyze.service.impl;
 
 import com.supermap.gis.enums.GeomType;
 import com.supermap.analyze.enums.OverlayAlgorithm;
-import com.supermap.analyze.service.AbstractOverlayExecuteService;
 import com.supermap.analyze.service.GeometryExpression;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

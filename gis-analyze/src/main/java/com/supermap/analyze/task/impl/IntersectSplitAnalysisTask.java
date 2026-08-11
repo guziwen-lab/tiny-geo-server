@@ -68,19 +68,24 @@ public class IntersectSplitAnalysisTask extends AbstractAnalysisTask<IntersectSp
         LayerInfo current = layers.get(0);
         LayerInfo next = layers.get(1);
 
-        LayerInfo output = intersectSplitExecuteService.execute(current, next, context);
+        String resultTableName = context.getResultTableName();
+        LayerInfo output = intersectSplitExecuteService.execute(current, next, resultTableName, context);
 
-        // 添加分析步骤：输出表名直接用结果表名
+        // 添加分析步骤
         context.addStep(new AnalysisStep(1,
                 current.getOriginalTableName(),
                 next.getOriginalTableName(),
-                context.getResultTableName()));
+                resultTableName));
 
-        return finalizeResult(context, output.getTableName(), "Intersect with area split completed");
+        return finalizeResult(context, "Intersect with area split completed");
     }
 
     @Override
     protected void validate(AnalysisContext<IntersectSplitParam> context) {
+        IntersectSplitParam param = context.getParam();
+        if (param == null)
+            throw new IllegalArgumentException("分析参数不能为空");
+
         List<LayerInfo> layers = context.getInputLayers();
 
         // 图层数量校验：相交面积拆分仅支持2个图层
@@ -99,7 +104,6 @@ public class IntersectSplitAnalysisTask extends AbstractAnalysisTask<IntersectSp
         }
 
         // 阈值校验
-        IntersectSplitParam param = context.getParam();
         String intersectAreaThreshold = param.getIntersectAreaThreshold();
         if (intersectAreaThreshold != null) {
             try {

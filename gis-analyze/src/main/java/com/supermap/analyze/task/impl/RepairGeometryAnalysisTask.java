@@ -4,11 +4,11 @@ import com.supermap.analyze.AnalysisContext;
 import com.supermap.analyze.AnalysisResult;
 import com.supermap.analyze.AnalysisStep;
 import com.supermap.analyze.LayerInfo;
+import com.supermap.analyze.service.impl.RepairGeometryExecuteService;
 import com.supermap.core.common.util.StringUtils;
 import com.supermap.analyze.enums.AnalysisType;
 import com.supermap.gis.enums.GeomType;
 import com.supermap.analyze.security.SqlInjectionCheck;
-import com.supermap.gis.service.GeometryService;
 import com.supermap.analyze.task.AbstractAnalysisTask;
 import com.supermap.analyze.task.param.RepairGeometryParam;
 import lombok.RequiredArgsConstructor;
@@ -25,39 +25,29 @@ import java.util.List;
 @RequiredArgsConstructor
 public class RepairGeometryAnalysisTask extends AbstractAnalysisTask<RepairGeometryParam> {
 
-    private final GeometryService geometryService;
+    private final RepairGeometryExecuteService repairGeometryExecuteService;
 
     @Override
     protected AnalysisResult doExecute(AnalysisContext<RepairGeometryParam> context) {
         LayerInfo layer = context.getInputLayers().get(0);
-        String schema = context.getSchema();
-        String tableName = layer.getTableName();
         String newTableName = context.getResultTableName();
+        SqlInjectionCheck.checkTableName(newTableName);
 
-        SqlInjectionCheck.checkTableName(tableName, newTableName);
-
-        // 用新表名复制表
-        RepairGeometryParam param = context.getParam();
-        GeomType geomType = context.getGeomType();
-        geometryService.copyTable(tableName,
-                newTableName,
-                schema,
-                layer.getColumns(),
-                layer.getSrid(),
-                geomType,
-                param.getSrid());
-        geometryService.createGistIndex(schema, newTableName);
+        repairGeometryExecuteService.execute(layer, null, newTableName, context);
 
         context.addStep(new AnalysisStep(1,
                 layer.getOriginalTableName(),
                 null,
                 newTableName));
 
-        return finalizeResult(context, newTableName, "Filter completed");
+        return finalizeResult(context, "Filter completed");
     }
 
     @Override
     protected void validate(AnalysisContext<RepairGeometryParam> context) {
+        if (context.getParam() == null)
+            throw new IllegalArgumentException("分析参数不能为空");
+
         List<LayerInfo> layers = context.getInputLayers();
         if (layers == null || layers.size() != 1) {
             throw new IllegalArgumentException("修复几何类型需要且仅需要1个图层");
