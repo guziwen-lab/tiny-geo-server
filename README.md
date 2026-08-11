@@ -138,5 +138,5 @@ gis-analyze-task
 2. 创建数据库
 3. 执行db/postgis.sql文件，初始化数据
 4. 修改application-dev.yml文件，修改数据库账号和密码
-5. swagger文档路径：http://localhost:8080/renren-admin/doc.html
+5. swagger文档路径：http://localhost:8081/doc.html
 6. 账号密码：admin/123456
