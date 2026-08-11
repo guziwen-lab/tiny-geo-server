@@ -125,14 +125,14 @@ gis-platform
 * 持久层框架：MyBatis 3.5
 * 日志管理：Logback
 * 页面交互：Vue3.x
-* 图层叠加分析: postgis
+* 图层叠加分析: PostGIS
 * 导入导出GDB/Shp: GDAL 3.x
 
 ## 软件需求
 
 * JDK17+
 * Maven3.6+
-* PostgreSQL 12+ (postgis)
+* PostgreSQL 12+ (PostGIS)
 * redis
 * GDAL 3.x
 
