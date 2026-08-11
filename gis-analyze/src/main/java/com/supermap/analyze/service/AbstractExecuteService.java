@@ -122,10 +122,13 @@ public abstract class AbstractExecuteService<T extends AnalysisParam> implements
         for (Column column : columns) {
             String alias = uniqueFieldNameHelper.uniqueFieldName(column.name());
             selectItems.add(
-                    "a.\"%s\" AS \"%s\""
+                    "\"%s\" AS \"%s\""
                             .formatted(column.name(), alias)
             );
         }
+
+        String geomExpr = GeometryExpression.wrap("geom", context.getGeomType(), context.getSrid());
+        selectItems.add(geomExpr + " AS geom");
         return selectItems;
     }
 
