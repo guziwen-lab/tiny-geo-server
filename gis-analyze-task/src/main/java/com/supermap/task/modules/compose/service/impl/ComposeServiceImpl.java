@@ -9,7 +9,6 @@ import com.supermap.core.common.util.JSON;
 import com.supermap.idgenerator.TaskNameGenerator;
 import com.supermap.task.enums.TaskStatus;
 import com.supermap.task.modules.task.dto.ComposeTaskDTO;
-import com.supermap.task.modules.task.dto.TaskDatasetSaveDTO;
 import com.supermap.task.modules.task.entity.TaskDatasetEntity;
 import com.supermap.task.modules.task.entity.TaskEntity;
 import com.supermap.task.modules.task.service.TaskDatasetService;
@@ -19,7 +18,6 @@ import com.supermap.task.modules.compose.entity.ComposeStepEntity;
 import com.supermap.task.modules.compose.service.ComposeStepService;
 import com.supermap.task.modules.compose.vo.ComposeVO;
 import com.supermap.dataset.modules.dataset.entity.DatasetEntity;
-import com.supermap.dataset.modules.dataset.service.DatasetService;
 import com.supermap.task.support.analysis.AnalysisContextBuilder;
 import com.supermap.task.support.analysis.LayerInfoBuilder;
 import lombok.RequiredArgsConstructor;
@@ -42,7 +40,6 @@ import java.util.List;
 public class ComposeServiceImpl extends ServiceImpl<ComposeDao, ComposeEntity> implements ComposeService {
 
     private final TaskService taskService;
-    private final DatasetService datasetService;
     private final TaskDatasetService taskDatasetService;
     private final AnalysisContextBuilder analysisExecutor;
     private final ComposeStepService composeStepService;
@@ -60,12 +57,6 @@ public class ComposeServiceImpl extends ServiceImpl<ComposeDao, ComposeEntity> i
         if (sort < 1)
             throw new IllegalArgumentException("Sort must be greater than 0");
 
-        // 验证数据集
-        List<DatasetEntity> datasetEntities = datasetService.listByIds(dto.getDatasetIds().stream()
-                .map(TaskDatasetSaveDTO::getDatasetId).toList());
-        if (datasetEntities.size() != dto.getDatasetIds().size())
-            throw new IllegalArgumentException("Dataset not found");
-
         // 保存任务
         TaskEntity taskEntity = new TaskEntity();
         taskEntity.setTaskName(taskNameGenerator.getTaskName());
@@ -79,6 +70,11 @@ public class ComposeServiceImpl extends ServiceImpl<ComposeDao, ComposeEntity> i
         // 保存任务数据集关系
         List<TaskDatasetEntity> taskDatasetEntities = TaskServiceImpl.getTaskDatasetEntities(dto.getDatasetIds(), taskEntity);
         taskDatasetService.saveBatch(taskDatasetEntities);
+
+        List<DatasetEntity> datasetEntities = taskDatasetService.getDatasetEntityByTaskId(taskEntity.getId());
+        // 验证数据集
+        if (datasetEntities.size() != dto.getDatasetIds().size())
+            throw new IllegalArgumentException("Dataset not found");
 
         // 保存组合任务
         ComposeEntity composeEntity = dto.getComposeEntity();
