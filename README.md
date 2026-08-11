@@ -108,13 +108,13 @@ tiny-geo-server/
 ## 模块依赖关系
 
 ```plain text
-gis-platform
+gis-analyze-task
+  ├── gis-analyze ── common-gis
   └── gis-dataset ── common-gdal ── common-command
        ├── admin ── common-db ── common-core
        └── common-gis ── common-db
 
-gis-analyze-task
-  ├── gis-analyze ── common-gis
+gis-platform
   └── gis-dataset
 ```
 
