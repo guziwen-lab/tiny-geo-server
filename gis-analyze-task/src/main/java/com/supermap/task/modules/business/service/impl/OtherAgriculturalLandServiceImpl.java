@@ -1,9 +1,9 @@
 package com.supermap.task.modules.business.service.impl;
 
 import com.supermap.analyze.AnalysisContext;
-import com.supermap.task.modules.analyzetask.dto.ComposeTaskDTO;
-import com.supermap.task.modules.analyzetask.entity.TaskEntity;
-import com.supermap.task.modules.analyzetask.service.TaskService;
+import com.supermap.task.modules.task.dto.ComposeTaskDTO;
+import com.supermap.task.modules.task.entity.TaskEntity;
+import com.supermap.task.modules.task.service.TaskService;
 import com.supermap.task.modules.business.constant.BusinessConstants;
 import com.supermap.task.modules.business.dto.QtnydbhAnalyzeDTO;
 import com.supermap.task.modules.business.enums.Caliber;
@@ -85,9 +85,10 @@ public class OtherAgriculturalLandServiceImpl implements OtherAgriculturalLandSe
     private TaskEntity step1IntersectSplit(Long ztDatasetId, Long dltbDatasetId, ComposeEntity composeEntity) {
         // 构建分析任务参数
         IntersectSplitParam splitParam = new IntersectSplitParam(
-                List.of(SplitField.withDefaultResult("jcmj")),
-                List.of(SplitField.withDefaultResult("tbmj"), SplitField.withDefaultResult("kcmj"),
-                        SplitField.withDefaultResult("tbdlmj")),
+                List.of(new SplitField("jcmj", "jcmj_split")),
+                List.of(new SplitField("tbmj", "tbmj_split"),
+                        new SplitField("kcmj", "kcmj_split"),
+                        new SplitField("tbdlmj", "tbdlmj_split")),
                 "ZT_RATIO",
                 "DLTB_RATIO"
         );

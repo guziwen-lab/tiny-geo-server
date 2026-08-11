@@ -2,7 +2,7 @@ package com.supermap.task.modules.compose.vo;
 
 import com.supermap.analyze.AnalysisContext;
 import com.supermap.analyze.AnalysisParam;
-import com.supermap.task.modules.analyzetask.entity.TaskEntity;
+import com.supermap.task.modules.task.entity.TaskEntity;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 

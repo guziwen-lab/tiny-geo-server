@@ -1,6 +1,6 @@
 package com.supermap.task.support.compose;
 
-import com.supermap.task.modules.analyzetask.entity.TaskEntity;
+import com.supermap.task.modules.task.entity.TaskEntity;
 
 /**
  * @author gzw

@@ -1,7 +1,7 @@
 package com.supermap.task.modules.compose.service.impl;
 
 import com.supermap.task.enums.TaskStatus;
-import com.supermap.task.modules.analyzetask.entity.TaskEntity;
+import com.supermap.task.modules.task.entity.TaskEntity;
 import com.supermap.task.modules.compose.entity.ComposeEntity;
 import com.supermap.task.modules.compose.service.ComposeService;
 import com.supermap.task.modules.compose.service.ComposeStatusUpdateService;
