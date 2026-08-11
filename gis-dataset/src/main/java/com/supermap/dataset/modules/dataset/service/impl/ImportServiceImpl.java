@@ -61,26 +61,9 @@ public class ImportServiceImpl implements ImportService {
         datasetService.save(datasetEntity);
 
         // 异步执行导入
-        importAsyncService.importLayerAsync(datasetEntity, shpPath, layerName, false);
+        importAsyncService.importShpLayerAsync(datasetEntity, shpPath, layerName, false);
 
         return datasetEntity.getId();
-    }
-
-    @Override
-    public Long importShp(String shpPath, Long datasetId) {
-        DatasetEntity datasetEntity = checkAndGetDatasetEntity(datasetId);
-
-        importAsyncService.importLayerAsync(datasetEntity, shpPath, null, true);
-
-        return datasetId;
-    }
-
-    private DatasetEntity checkAndGetDatasetEntity(Long datasetId) {
-        if (!datasetService.updateStatusBySuccess(datasetId, UploadStatus.PROCESSING)) {
-            throw new IllegalArgumentException("只能追加导入成功的数据集或数据集不存在");
-        }
-
-        return datasetService.getById(datasetId);
     }
 
     @Transactional(rollbackFor = Exception.class)
@@ -123,14 +106,22 @@ public class ImportServiceImpl implements ImportService {
 
         // 异步执行导入
         for (DatasetEntity entity : entities) {
-            importAsyncService.importLayerAsync(entity, gdbPath, entity.getLayerName(), false);
+            importAsyncService.importGdbLayerAsync(entity, gdbPath, entity.getLayerName(), false);
         }
 
         return entities.stream().map(DatasetEntity::getId).collect(Collectors.toList());
     }
 
     @Override
-    public Long importGdb(String gdbPath, String layerName, Long datasetId) {
+    public Long importShpAppend(String shpPath, Long datasetId) {
+        DatasetEntity datasetEntity = checkAndGetDatasetEntity(datasetId);
+        importAsyncService.importShpLayerAsync(datasetEntity, shpPath, null, true);
+
+        return datasetId;
+    }
+
+    @Override
+    public Long importGdbAppend(String gdbPath, String layerName, Long datasetId) {
         List<String> layerNames = gdalTool.listGdbLayers(gdbPath);
         if (layerNames.isEmpty()) {
             throw new RuntimeException("GDB中未找到任何图层: " + gdbPath);
@@ -141,29 +132,9 @@ public class ImportServiceImpl implements ImportService {
 
         DatasetEntity datasetEntity = checkAndGetDatasetEntity(datasetId);
 
-        importAsyncService.importLayerAsync(datasetEntity, gdbPath, layerName, true);
+        importAsyncService.importGdbLayerAsync(datasetEntity, gdbPath, layerName, true);
 
         return datasetId;
-    }
-
-    @Override
-    public void uploadGeoJson(UploadGeoJsonDTO dto) {
-        FeatureEntity featureEntity = new FeatureEntity();
-        featureEntity.setId(IdentifierGeneratorUtils.nextId());
-        featureEntity.setName(dto.getName());
-        featureDao.saveWithGeoJson(featureEntity, dto.getGeoJson().toString());
-    }
-
-    @Override
-    public void uploadWkt(UploadWktDTO dto) {
-        String wkt = dto.getWkt();
-        Integer srid = dto.getSrid();
-
-        FeatureEntity featureEntity = new FeatureEntity();
-        featureEntity.setId(IdentifierGeneratorUtils.nextId());
-        featureEntity.setName(dto.getName());
-        featureEntity.setProperties(JSON.toJSONString(dto.getProperties()));
-        featureDao.saveWithWkt(featureEntity, wkt, srid);
     }
 
     @Override
@@ -208,6 +179,34 @@ public class ImportServiceImpl implements ImportService {
         importAsyncService.importShpLayersAsync(datasetEntity, paths, srid, StringUtils.isNotBlank(tableName));
 
         return datasetEntity.getId();
+    }
+
+    @Override
+    public void uploadGeoJson(UploadGeoJsonDTO dto) {
+        FeatureEntity featureEntity = new FeatureEntity();
+        featureEntity.setId(IdentifierGeneratorUtils.nextId());
+        featureEntity.setName(dto.getName());
+        featureDao.saveWithGeoJson(featureEntity, dto.getGeoJson().toString());
+    }
+
+    @Override
+    public void uploadWkt(UploadWktDTO dto) {
+        String wkt = dto.getWkt();
+        Integer srid = dto.getSrid();
+
+        FeatureEntity featureEntity = new FeatureEntity();
+        featureEntity.setId(IdentifierGeneratorUtils.nextId());
+        featureEntity.setName(dto.getName());
+        featureEntity.setProperties(JSON.toJSONString(dto.getProperties()));
+        featureDao.saveWithWkt(featureEntity, wkt, srid);
+    }
+
+    private DatasetEntity checkAndGetDatasetEntity(Long datasetId) {
+        if (!datasetService.updateStatusBySuccess(datasetId, UploadStatus.PROCESSING)) {
+            throw new IllegalArgumentException("只能追加导入成功的数据集或数据集不存在");
+        }
+
+        return datasetService.getById(datasetId);
     }
 
 }

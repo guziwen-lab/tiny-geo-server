@@ -9,7 +9,6 @@ import com.supermap.dataset.modules.dataset.dto.GdbLayerSource;
 import com.supermap.gdal.info.LayerMeta;
 import com.supermap.dataset.modules.dataset.entity.DatasetEntity;
 import com.supermap.gis.service.GeometryService;
-import com.supermap.gdal.encoding.ShapeEncodingDetector;
 import com.supermap.gis.util.TableNameUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -31,57 +30,22 @@ public class ImportAsyncService {
     private final GdalTool gdalTool;
 
     @Async("importTaskExecutor")
-    public void importLayerAsync(DatasetEntity entity, String sourcePath, String exportLayerName, boolean isAppend) {
-        String tableName = entity.getTableName();
-        try {
-            // 查询图层元数据
-            LayerMeta meta = gdalTool.queryLayerMeta(sourcePath, exportLayerName);
+    public void importShpLayerAsync(DatasetEntity entity,
+                                    String path,
+                                    String exportLayerName,
+                                    boolean isAppend) {
+        String ln = FileNameUtils.getFileNameWithoutExtension(path);
+        String encoding = gdalTool.detectEncoding(path, ln);
 
-            // 如果是追加导入，先校验 srid 和几何类型，避免脏数据写入原表；featureCount累加
-            long featureCount = meta.featureCount();
-            if (isAppend) {
-                Integer srid = entity.getSrid();
-                if (!Objects.equals(srid, meta.srid())) {
-                    throw new RuntimeException("SRID 不匹配: 原SRID=" + srid + ", 新SRID=" + meta.srid());
-                }
+        importLayerAsync(entity, path, exportLayerName, isAppend, encoding);
+    }
 
-                checkGeomTypeCompatible(entity.getGeomType(), meta.geomType());
-
-                featureCount += entity.getFeatureCount();
-            }
-
-            // 执行 ogr2ogr 导入
-            gdalTool.importLayer(sourcePath, tableName, exportLayerName, isAppend, entity.getGeomType(), null, null);
-
-            // 检查几何类型（优先以 PostgreSQL 实际存储的几何类型为准）
-            GeomType geomType = geometryService.resolveActualGeomType(
-                    gdalProperties.getSchema() + "." + tableName, meta.geomType());
-            if (geomType == null) {
-                throw new RuntimeException("几何类型不支持: " + meta.geomType());
-            }
-
-            // 创建空间索引
-            geometryService.createGistIndex(gdalProperties.getSchema(), tableName);
-
-            // 更新状态为成功
-            importStatusUpdater.markSuccess(
-                    entity.getId(),
-                    geomType,
-                    meta.srid(),
-                    featureCount
-            );
-        } catch (Exception e) {
-            log.error("数据集导入失败, datasetId={}, table={}", entity.getId(), tableName, e);
-            // 清理已创建的表
-            if (!isAppend) {
-                try {
-                    geometryService.dropTableIfExists(tableName);
-                } catch (Exception dropEx) {
-                    log.error("清理失败表失败: {}", tableName, dropEx);
-                }
-            }
-            importStatusUpdater.markFailed(entity.getId(), e.getMessage());
-        }
+    @Async("importTaskExecutor")
+    public void importGdbLayerAsync(DatasetEntity entity,
+                                    String path,
+                                    String exportLayerName,
+                                    boolean isAppend) {
+        importLayerAsync(entity, path, exportLayerName, isAppend, null);
     }
 
     @Async("importTaskExecutor")
@@ -121,12 +85,68 @@ public class ImportAsyncService {
         importLayersAsync(entity, sources, srid, isAppend);
     }
 
+    private void importLayerAsync(DatasetEntity entity,
+                                  String sourcePath,
+                                  String exportLayerName,
+                                  boolean isAppend,
+                                  String encoding) {
+        String tableName = entity.getTableName();
+        try {
+            // 查询图层元数据
+            LayerMeta meta = gdalTool.queryLayerMeta(sourcePath, exportLayerName);
+
+            // 如果是追加导入，先校验 srid 和几何类型，避免脏数据写入原表；featureCount累加
+            long featureCount = meta.featureCount();
+            if (isAppend) {
+                Integer srid = entity.getSrid();
+                if (!Objects.equals(srid, meta.srid())) {
+                    throw new RuntimeException("SRID 不匹配: 原SRID=" + srid + ", 新SRID=" + meta.srid());
+                }
+
+                checkGeomTypeCompatible(entity.getGeomType(), meta.geomType());
+
+                featureCount += entity.getFeatureCount();
+            }
+
+            // 执行 ogr2ogr 导入
+            gdalTool.importLayer(sourcePath, tableName, exportLayerName, isAppend, entity.getGeomType(), null, encoding);
+
+            // 检查几何类型（优先以 PostgreSQL 实际存储的几何类型为准）
+            GeomType geomType = geometryService.resolveActualGeomType(
+                    gdalProperties.getSchema() + "." + tableName, meta.geomType());
+            if (geomType == null) {
+                throw new RuntimeException("几何类型不支持: " + meta.geomType());
+            }
+
+            // 创建空间索引
+            geometryService.createGistIndex(gdalProperties.getSchema(), tableName);
+
+            // 更新状态为成功
+            importStatusUpdater.markSuccess(
+                    entity.getId(),
+                    geomType,
+                    meta.srid(),
+                    featureCount
+            );
+        } catch (Exception e) {
+            log.error("数据集导入失败, datasetId={}, table={}", entity.getId(), tableName, e);
+            // 清理已创建的表
+            if (!isAppend) {
+                try {
+                    geometryService.dropTableIfExists(tableName);
+                } catch (Exception dropEx) {
+                    log.error("清理失败表失败: {}", tableName, dropEx);
+                }
+            }
+            importStatusUpdater.markFailed(entity.getId(), e.getMessage());
+        }
+    }
+
     /**
      * 顺序导入同一投影组中的多个 GDB 图层。必须在同一个异步任务中顺序执行，
      * 否则“首个建表”与后续“追加”会产生竞争。
      */
-    @Async("importTaskExecutor")
-    public void importLayersAsync(DatasetEntity entity,
+    private void importLayersAsync(DatasetEntity entity,
                                   List<GdbLayerSource> sources,
                                   Integer srid,
                                   boolean isAppend) {

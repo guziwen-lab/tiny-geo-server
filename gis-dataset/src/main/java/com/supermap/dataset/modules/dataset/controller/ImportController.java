@@ -106,7 +106,7 @@ public class ImportController {
 
     @PostMapping("/append/shp")
     public R<Long> importShpAppend(String path, Long datasetId) {
-        Long id = importService.importShp(path, datasetId);
+        Long id = importService.importShpAppend(path, datasetId);
         return R.ok(id);
     }
 
@@ -115,7 +115,7 @@ public class ImportController {
         if (StringUtils.isEmpty(layerName))
             throw new IllegalArgumentException("图层名称不能为空");
 
-        Long id = importService.importGdb(path, layerName, datasetId);
+        Long id = importService.importGdbAppend(path, layerName, datasetId);
         return R.ok(id);
     }
 
