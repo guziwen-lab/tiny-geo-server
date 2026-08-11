@@ -1,4 +1,4 @@
-package com.supermap.gis.util;
+package com.supermap.idgenerator;
 
 import org.springframework.stereotype.Component;
 

@@ -66,7 +66,7 @@ public class OtherAgriculturalLandServiceImpl implements OtherAgriculturalLandSe
         FilterParam filterParam = new FilterParam(whereClause);
 
         ComposeTaskDTO<FilterParam> composeTaskDTO = new ComposeTaskDTO<>();
-        composeTaskDTO.setTaskName("其他农用地变化图斑第二步");
+        composeTaskDTO.setTaskDescription("其他农用地变化图斑第二步");
         composeTaskDTO.setAnalysisType(AnalysisType.FILTER);
         composeTaskDTO.setTaskParam(filterParam);
         composeTaskDTO.addDataset(List.of(datasetId));
@@ -93,7 +93,7 @@ public class OtherAgriculturalLandServiceImpl implements OtherAgriculturalLandSe
 
         // 创建任务
         ComposeTaskDTO<IntersectSplitParam> composeTaskDTO = new ComposeTaskDTO<>();
-        composeTaskDTO.setTaskName("其他农用地变化图斑第一步");
+        composeTaskDTO.setTaskDescription("其他农用地变化图斑第一步");
         composeTaskDTO.setAnalysisType(AnalysisType.INTERSECT_SPLIT);
         composeTaskDTO.setTaskParam(splitParam);
         composeTaskDTO.addDataset(List.of(ztDatasetId, dltbDatasetId));

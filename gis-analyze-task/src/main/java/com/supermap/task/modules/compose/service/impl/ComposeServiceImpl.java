@@ -65,10 +65,11 @@ public class ComposeServiceImpl extends ServiceImpl<ComposeDao, ComposeEntity> i
 
         // 保存任务
         TaskEntity taskEntity = new TaskEntity();
-        taskEntity.setTaskName(dto.getTaskName());
+        taskEntity.setTaskName(dto.getTaskDescription());
         taskEntity.setAnalysisType(dto.getAnalysisType());
         taskEntity.setTaskParam(JSON.toJSONString(dto.getTaskParam()));
         taskEntity.setStatus(TaskStatus.PROCESSING);
+        taskEntity.setStartedAt(Instant.now());
         taskEntity.setCreatedAt(Instant.now());
         taskService.save(taskEntity);
 
@@ -84,7 +85,7 @@ public class ComposeServiceImpl extends ServiceImpl<ComposeDao, ComposeEntity> i
             updateById(composeEntity);
         }
         ComposeStepEntity composeStepEntity = new ComposeStepEntity();
-        composeStepEntity.setDescription(dto.getTaskName());
+        composeStepEntity.setDescription(dto.getTaskDescription());
         composeStepEntity.setTaskId(taskEntity.getId());
         composeStepEntity.setComposeId(composeEntity.getId());
         composeStepEntity.setSort(sort);

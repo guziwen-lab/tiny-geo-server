@@ -1,4 +1,4 @@
-package com.supermap.gis.util;
+package com.supermap.idgenerator;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;

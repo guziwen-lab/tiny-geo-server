@@ -18,7 +18,7 @@ public class ComposeTaskDTO<T extends AnalysisParam> {
 
     private ComposeEntity composeEntity;
 
-    private String taskName;
+    private String taskDescription;
 
     private AnalysisType analysisType;
 

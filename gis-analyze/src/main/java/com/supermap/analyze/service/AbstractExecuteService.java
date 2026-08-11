@@ -7,7 +7,7 @@ import com.supermap.analyze.LayerInfo;
 import com.supermap.analyze.dao.ExecuteSqlMapper;
 import com.supermap.analyze.security.SqlInjectionCheck;
 import com.supermap.gis.type.Column;
-import com.supermap.gis.util.TempTableNameGenerator;
+import com.supermap.idgenerator.TempTableNameGenerator;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 

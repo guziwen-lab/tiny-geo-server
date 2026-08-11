@@ -4,7 +4,7 @@ import com.supermap.gis.dao.GeometryDao;
 import com.supermap.gis.enums.GeomType;
 import com.supermap.gis.type.Column;
 import com.supermap.gis.type.TableProcessResult;
-import com.supermap.gis.util.TempTableNameGenerator;
+import com.supermap.idgenerator.TempTableNameGenerator;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 

@@ -24,6 +24,11 @@
             <artifactId>common-db</artifactId>
             <version>0.0.1-SNAPSHOT</version>
         </dependency>
+        <dependency>
+            <groupId>com.supermap</groupId>
+            <artifactId>common-id-generator</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+        </dependency>
 
         <!--geotools-->
         <dependency>
