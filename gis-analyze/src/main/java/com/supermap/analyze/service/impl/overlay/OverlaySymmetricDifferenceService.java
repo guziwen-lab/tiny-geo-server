@@ -1,5 +1,6 @@
-package com.supermap.analyze.service.impl;
+package com.supermap.analyze.service.impl.overlay;
 
+import com.supermap.analyze.service.impl.AbstractOverlayExecuteService;
 import com.supermap.gis.enums.GeomType;
 import com.supermap.analyze.enums.OverlayAlgorithm;
 import com.supermap.analyze.service.GeometryExpression;
