@@ -2,6 +2,7 @@ package com.supermap.analyze.service.impl;
 
 import com.supermap.analyze.AnalysisContext;
 import com.supermap.analyze.LayerInfo;
+import com.supermap.analyze.helper.UniqueFieldNameHelper;
 import com.supermap.core.common.util.CollectionUtils;
 import com.supermap.core.common.util.StringUtils;
 import com.supermap.analyze.service.AbstractExecuteService;
@@ -41,9 +42,9 @@ public class IntersectSplitExecuteService extends AbstractExecuteService<Interse
         Map<String, SplitField> splitFieldsBMap = CollectionUtils
                 .toMap(splitFieldsB, SplitField::getSourceField, Function.identity());
 
-        Set<String> usedNames = new HashSet<>();
+        UniqueFieldNameHelper uniqueFieldNameHelper = new UniqueFieldNameHelper();
         String pkCol = context.getPkCol();
-        usedNames.add(pkCol);
+        uniqueFieldNameHelper.addUsedName(pkCol);
 
         List<String> t1SelectItems = new ArrayList<>();
         List<String> t2SelectItems = new ArrayList<>();
@@ -55,16 +56,16 @@ public class IntersectSplitExecuteService extends AbstractExecuteService<Interse
 
         /*--------------------- t1层查询字段 ---------------------*/
         // 源要素主键用于面积守恒校验及定位异常图斑。用不到。。。
-        /*String sourceAId = getUniqueFieldName("source_a_id", usedNames);
+        /*String sourceAId = uniqueFieldNameHelper.uniqueFieldName("source_a_id");
         originalAttrs.add(sourceAId);
         t1SelectItems.add("a.\"id\" AS %s".formatted(sourceAId));
-        String sourceBId = getUniqueFieldName("source_b_id", usedNames);
+        String sourceBId = uniqueFieldNameHelper.uniqueFieldName("source_b_id");
         originalAttrs.add(sourceBId);
         t1SelectItems.add("b.\"id\" AS %s".formatted(sourceBId));*/
 
         // A表（当前图层）全部属性字段
         for (Column column : current.getColumns()) {
-            String alias = getUniqueFieldName(column.name(), usedNames);
+            String alias = uniqueFieldNameHelper.uniqueFieldName(column.name());
             originalAttrs.add(alias);
             t1SelectItems.add("a.\"%s\" AS \"%s\"".formatted(column.name(), alias));
 
@@ -77,7 +78,7 @@ public class IntersectSplitExecuteService extends AbstractExecuteService<Interse
 
         // B表（叠加图层）全部属性字段
         for (Column column : next.getColumns()) {
-            String alias = getUniqueFieldName(column.name(), usedNames);
+            String alias = uniqueFieldNameHelper.uniqueFieldName(column.name());
             originalAttrs.add(alias);
             t1SelectItems.add("b.\"%s\" AS \"%s\"".formatted(column.name(), alias));
 
@@ -89,15 +90,15 @@ public class IntersectSplitExecuteService extends AbstractExecuteService<Interse
         }
 
         // A表图形面积
-        String areaA = getUniqueFieldName("a_area", usedNames);
+        String areaA = uniqueFieldNameHelper.uniqueFieldName("a_area");
         t1SelectItems.add("ST_Area(a.geom) AS %s".formatted(areaA));
 
         // B表图形面积
-        String areaB = getUniqueFieldName("b_area", usedNames);
+        String areaB = uniqueFieldNameHelper.uniqueFieldName("b_area");
         t1SelectItems.add("ST_Area(b.geom) AS %s".formatted(areaB));
 
         // 相交图形
-        String interGeom = getUniqueFieldName("inter_geom", usedNames);
+        String interGeom = uniqueFieldNameHelper.uniqueFieldName("inter_geom");
         String intersectionGeom = "ST_Intersection(a.geom, b.geom) AS %s"
                 .formatted(interGeom);
         t1SelectItems.add(intersectionGeom);
@@ -107,7 +108,7 @@ public class IntersectSplitExecuteService extends AbstractExecuteService<Interse
         String t1All = "t1.*";
         t2SelectItems.add(t1All);
         // 相交面积
-        String interArea = getUniqueFieldName("inter_area", usedNames);
+        String interArea = uniqueFieldNameHelper.uniqueFieldName("inter_area");
         String intersectionArea = "ST_Area(%s) AS %s".formatted(interGeom, interArea);
         t2SelectItems.add(intersectionArea);
 
@@ -132,27 +133,27 @@ public class IntersectSplitExecuteService extends AbstractExecuteService<Interse
             COALESCE(t2."kcmj", 0) * (t2.inter_area / NULLIF(t2.b_area, 0)) AS "kcmj_split",
          */
         for (SplitField field : splitFieldsA) {
-            String splitAlias = getUniqueFieldName(field.getResultField(), usedNames);
+            String splitAlias = uniqueFieldNameHelper.uniqueFieldName(field.getResultField());
             outerSelectItems.add("COALESCE(t2.\"%s\", 0) * (%s) AS \"%s\""
                     .formatted(field.getSourceField(), ratioA, splitAlias));
         }
 
         // B表拆分字段：按B表原图斑面积比例拆分
         for (SplitField field : splitFieldsB) {
-            String splitAlias = getUniqueFieldName(field.getResultField(), usedNames);
+            String splitAlias = uniqueFieldNameHelper.uniqueFieldName(field.getResultField());
             outerSelectItems.add("COALESCE(t2.\"%s\", 0) * (%s) AS \"%s\""
                     .formatted(field.getSourceField(), ratioB, splitAlias));
         }
 
         // A表比例字段
         if (param.getRatioFieldA() != null && !param.getRatioFieldA().isBlank()) {
-            String ratioAlias = getUniqueFieldName(param.getRatioFieldA(), usedNames);
+            String ratioAlias = uniqueFieldNameHelper.uniqueFieldName(param.getRatioFieldA());
             outerSelectItems.add("(%s) AS \"%s\"".formatted(ratioA, ratioAlias));
         }
 
         // B表比例字段
         if (param.getRatioFieldB() != null && !param.getRatioFieldB().isBlank()) {
-            String ratioAlias = getUniqueFieldName(param.getRatioFieldB(), usedNames);
+            String ratioAlias = uniqueFieldNameHelper.uniqueFieldName(param.getRatioFieldB());
             outerSelectItems.add("(%s) AS \"%s\"".formatted(ratioB, ratioAlias));
         }
 

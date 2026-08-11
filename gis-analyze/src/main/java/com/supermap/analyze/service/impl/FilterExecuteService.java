@@ -2,7 +2,7 @@ package com.supermap.analyze.service.impl;
 
 import com.supermap.analyze.AnalysisContext;
 import com.supermap.analyze.LayerInfo;
-import com.supermap.analyze.security.SqlInjectionCheck;
+import com.supermap.analyze.helper.SqlInjectionCheckHelper;
 import com.supermap.analyze.service.AbstractExecuteService;
 import com.supermap.analyze.task.param.FilterParam;
 import com.supermap.gis.util.TableNameUtils;
@@ -25,7 +25,7 @@ public class FilterExecuteService extends AbstractExecuteService<FilterParam> {
 
         String tableName = current.getTableName();
         String newTableName = context.getResultTableName();
-        SqlInjectionCheck.checkTableName(tableName, newTableName);
+        SqlInjectionCheckHelper.checkTableName(tableName, newTableName);
 
         String schema = context.getSchema();
         String inputTable = TableNameUtils.getTableNameWithSchema(schema, tableName);

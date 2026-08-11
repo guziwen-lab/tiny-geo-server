@@ -2,6 +2,7 @@ package com.supermap.analyze.service.impl;
 
 import com.supermap.analyze.AnalysisContext;
 import com.supermap.analyze.LayerInfo;
+import com.supermap.analyze.helper.UniqueFieldNameHelper;
 import com.supermap.analyze.service.AbstractExecuteService;
 import com.supermap.gis.enums.GeomType;
 import com.supermap.analyze.enums.OverlayAlgorithm;
@@ -42,16 +43,16 @@ public abstract class AbstractOverlayExecuteService extends AbstractExecuteServi
                                        List<Column> currentColumns,
                                        List<Column> nextColumns,
                                        String geometryExpression) {
-        Set<String> usedNames = new HashSet<>();
+        UniqueFieldNameHelper uniqueFieldNameHelper = new UniqueFieldNameHelper();
         List<String> selectItems = new ArrayList<>();
 
         // 结果表主键
         selectItems.add("row_number() OVER () AS " + pkCol);
-        usedNames.add(pkCol);
+        uniqueFieldNameHelper.addUsedName(pkCol);
 
         // 当前图层字段
         for (Column column : currentColumns) {
-            String alias = getUniqueFieldName(column.name(), usedNames);
+            String alias = uniqueFieldNameHelper.uniqueFieldName(column.name());
             selectItems.add(
                     "a.\"%s\" AS \"%s\""
                             .formatted(column.name(), alias)
@@ -60,7 +61,7 @@ public abstract class AbstractOverlayExecuteService extends AbstractExecuteServi
 
         // 叠加图层字段
         for (Column column : nextColumns) {
-            String alias = getUniqueFieldName(column.name(), usedNames);
+            String alias = uniqueFieldNameHelper.uniqueFieldName(column.name());
             selectItems.add(
                     "b.\"%s\" AS \"%s\""
                             .formatted(column.name(), alias)

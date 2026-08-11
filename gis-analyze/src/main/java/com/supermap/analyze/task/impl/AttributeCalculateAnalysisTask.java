@@ -10,7 +10,7 @@ import com.supermap.core.common.util.StringUtils;
 import com.supermap.analyze.dao.ExecuteSqlMapper;
 import com.supermap.analyze.enums.AnalysisType;
 import com.supermap.gis.enums.GeomType;
-import com.supermap.analyze.security.SqlInjectionCheck;
+import com.supermap.analyze.helper.SqlInjectionCheckHelper;
 import com.supermap.gis.service.GeometryService;
 import com.supermap.analyze.task.AbstractAnalysisTask;
 import com.supermap.analyze.task.param.AttributeCalculateParam;
@@ -112,11 +112,11 @@ public class AttributeCalculateAnalysisTask extends AbstractAnalysisTask<Attribu
         String schema = context.getSchema();
         String resultTableName = context.getResultTableName();
 
-        SqlInjectionCheck.checkTableName(tableName, resultTableName);
+        SqlInjectionCheckHelper.checkTableName(tableName, resultTableName);
 
         List<CalculatedField> fields = context.getParam().getFields();
         List<String> fieldNames = fields.stream().map(CalculatedField::name).toList();
-        SqlInjectionCheck.checkColumnName(fieldNames.toArray(new String[0]));
+        SqlInjectionCheckHelper.checkColumnName(fieldNames.toArray(new String[0]));
 
         String inputTable = TableNameUtils.getTableNameWithSchema(schema, tableName);
         String resultTable = TableNameUtils.getTableNameWithSchema(schema, resultTableName);

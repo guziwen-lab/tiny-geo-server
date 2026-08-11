@@ -8,7 +8,7 @@ import com.supermap.analyze.service.impl.FilterExecuteService;
 import com.supermap.core.common.util.StringUtils;
 import com.supermap.analyze.enums.AnalysisType;
 import com.supermap.gis.enums.GeomType;
-import com.supermap.analyze.security.SqlInjectionCheck;
+import com.supermap.analyze.helper.SqlInjectionCheckHelper;
 import com.supermap.analyze.task.AbstractAnalysisTask;
 import com.supermap.analyze.task.param.FilterParam;
 import lombok.RequiredArgsConstructor;
@@ -75,7 +75,7 @@ public class FilterAnalysisTask extends AbstractAnalysisTask<FilterParam> {
     protected AnalysisResult doExecute(AnalysisContext<FilterParam> context) {
         LayerInfo input = context.getInputLayers().get(0);
         String newTableName = context.getResultTableName();
-        SqlInjectionCheck.checkTableName(newTableName);
+        SqlInjectionCheckHelper.checkTableName(newTableName);
 
         filterExecuteService.execute(input, null, newTableName, context);
 

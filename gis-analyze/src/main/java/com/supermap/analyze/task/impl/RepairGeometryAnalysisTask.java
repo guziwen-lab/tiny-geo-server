@@ -8,7 +8,7 @@ import com.supermap.analyze.service.impl.RepairGeometryExecuteService;
 import com.supermap.core.common.util.StringUtils;
 import com.supermap.analyze.enums.AnalysisType;
 import com.supermap.gis.enums.GeomType;
-import com.supermap.analyze.security.SqlInjectionCheck;
+import com.supermap.analyze.helper.SqlInjectionCheckHelper;
 import com.supermap.analyze.task.AbstractAnalysisTask;
 import com.supermap.analyze.task.param.RepairGeometryParam;
 import lombok.RequiredArgsConstructor;
@@ -31,7 +31,7 @@ public class RepairGeometryAnalysisTask extends AbstractAnalysisTask<RepairGeome
     protected AnalysisResult doExecute(AnalysisContext<RepairGeometryParam> context) {
         LayerInfo layer = context.getInputLayers().get(0);
         String newTableName = context.getResultTableName();
-        SqlInjectionCheck.checkTableName(newTableName);
+        SqlInjectionCheckHelper.checkTableName(newTableName);
 
         repairGeometryExecuteService.execute(layer, null, newTableName, context);
 

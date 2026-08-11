@@ -1,11 +1,11 @@
-package com.supermap.analyze.security;
+package com.supermap.analyze.helper;
 
 import org.springframework.util.Assert;
 
 /**
  * @author gzw
  */
-public class SqlInjectionCheck {
+public class SqlInjectionCheckHelper {
 
     private static final String TABLE_NAME_REGEX = "^[A-Za-z_][A-Za-z0-9_]+$";
     private static final String COLUMN_NAME_REGEX = "^[A-Za-z_][A-Za-z0-9_]*$";

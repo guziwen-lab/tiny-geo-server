@@ -10,7 +10,7 @@ import com.supermap.core.common.util.StringUtils;
 import com.supermap.analyze.enums.AnalysisType;
 import com.supermap.gis.enums.GeomType;
 import com.supermap.analyze.resolver.GeomTypeResolver;
-import com.supermap.analyze.security.SqlInjectionCheck;
+import com.supermap.analyze.helper.SqlInjectionCheckHelper;
 import com.supermap.analyze.service.impl.IntersectSplitExecuteService;
 import com.supermap.analyze.task.AbstractAnalysisTask;
 import com.supermap.analyze.task.param.IntersectSplitParam;
@@ -69,7 +69,7 @@ public class IntersectSplitAnalysisTask extends AbstractAnalysisTask<IntersectSp
         LayerInfo next = layers.get(1);
 
         String resultTableName = context.getResultTableName();
-        LayerInfo output = intersectSplitExecuteService.execute(current, next, resultTableName, context);
+        intersectSplitExecuteService.execute(current, next, resultTableName, context);
 
         // 添加分析步骤
         context.addStep(new AnalysisStep(1,
@@ -159,8 +159,8 @@ public class IntersectSplitAnalysisTask extends AbstractAnalysisTask<IntersectSp
             availableNames.add(column.name().toLowerCase());
         }
 
-        SqlInjectionCheck.checkColumnName(splitFields.stream().map(SplitField::getSourceField).toArray(String[]::new));
-        SqlInjectionCheck.checkColumnName(splitFields.stream().map(SplitField::getResultField).toArray(String[]::new));
+        SqlInjectionCheckHelper.checkColumnName(splitFields.stream().map(SplitField::getSourceField).toArray(String[]::new));
+        SqlInjectionCheckHelper.checkColumnName(splitFields.stream().map(SplitField::getResultField).toArray(String[]::new));
 
         for (SplitField field : splitFields) {
             if (!availableNames.contains(field.getSourceField().toLowerCase())) {
@@ -172,7 +172,7 @@ public class IntersectSplitAnalysisTask extends AbstractAnalysisTask<IntersectSp
 
     private void validateResultField(String field, String label) {
         if (!StringUtils.isEmpty(field)) {
-            SqlInjectionCheck.checkColumnName(field);
+            SqlInjectionCheckHelper.checkColumnName(field);
         }
     }
 

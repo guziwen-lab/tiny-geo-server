@@ -6,7 +6,7 @@ import com.supermap.analyze.AnalysisContext;
 import com.supermap.analyze.AnalysisParam;
 import com.supermap.analyze.LayerInfo;
 import com.supermap.analyze.dao.ExecuteSqlMapper;
-import com.supermap.analyze.security.SqlInjectionCheck;
+import com.supermap.analyze.helper.SqlInjectionCheckHelper;
 import com.supermap.gis.type.Column;
 import com.supermap.idgenerator.TempTableNameGenerator;
 import lombok.extern.slf4j.Slf4j;
@@ -14,7 +14,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 /**
  * @author gzw
@@ -70,10 +69,10 @@ public abstract class AbstractExecuteService<T extends AnalysisParam> implements
                              String resultTableName,
                              AnalysisContext<T> context) {
         if (current != null && current.getTableName() != null)
-            SqlInjectionCheck.checkTableName(current.getTableName());
+            SqlInjectionCheckHelper.checkTableName(current.getTableName());
 
         if (next != null && next.getTableName() != null)
-            SqlInjectionCheck.checkTableName(next.getTableName());
+            SqlInjectionCheckHelper.checkTableName(next.getTableName());
 
         String sql = buildExecuteSql(current, next, resultTableName, context);
         log.debug("[taskName: {}] execute sql: {}", context.getTaskName(), sql);
@@ -108,18 +107,6 @@ public abstract class AbstractExecuteService<T extends AnalysisParam> implements
                                               LayerInfo next,
                                               String resultTableName,
                                               AnalysisContext<T> context);
-
-    protected String getUniqueFieldName(String name, Set<String> usedNames) {
-        String result = name;
-        int i = 1;
-
-        while (usedNames.contains(result)) {
-            result = name + "_" + i++;
-        }
-
-        usedNames.add(result);
-        return result;
-    }
 
     protected static List<String> createSingleTableSelectItems(LayerInfo layerInfo,
                                                                AnalysisContext<? extends AnalysisParam> context) {
