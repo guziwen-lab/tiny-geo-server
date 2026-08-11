@@ -4,6 +4,7 @@ import com.supermap.gdal.GdalTool;
 import com.supermap.gdal.info.LayerMeta;
 import com.supermap.task.GisAnalyzeTaskApplication;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
@@ -13,6 +14,7 @@ import java.util.List;
  * @author gzw
  */
 @SpringBootTest(classes = GisAnalyzeTaskApplication.class)
+@Tag("manual")
 public class GdalTest {
 
     @Autowired

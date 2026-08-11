@@ -22,6 +22,7 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <lombok.version>1.18.24</lombok.version>
         <jsoup.version>1.15.3</jsoup.version>
+        <test.excludedGroups>manual</test.excludedGroups>
     </properties>
 
     <modules>
@@ -104,7 +105,12 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <configuration>
-                    <skipTests>true</skipTests>
+                    <!--
+                        默认执行可重复的自动化测试；依赖本机数据、GDAL 或人工检查的测试
+                        以 JUnit @Tag("manual") 标记；执行时使用
+                        -Dtest.excludedGroups= -Dgroups=manual 单独运行。
+                     -->
+                    <excludedGroups>${test.excludedGroups}</excludedGroups>
                 </configuration>
             </plugin>
         </plugins>
