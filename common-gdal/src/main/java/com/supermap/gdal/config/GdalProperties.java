@@ -24,8 +24,14 @@ public class GdalProperties {
 
     private String pgConnect;
 
+    private String pgPassword;
+
     private String schema = "public";
 
     private String pkColumnName = "id";
+
+    public String getPgConnect() {
+        return pgConnect + " " + pgPassword;
+    }
 
 }
