@@ -121,10 +121,12 @@ gis-platform
 ## 技术选型：
 
 * 核心框架：Spring Boot 3.x
-* 安全框架：Apache Shiro 2.1
+* 安全框架：Apache Shiro 2.0
 * 持久层框架：MyBatis 3.5
 * 日志管理：Logback
 * 页面交互：Vue3.x
+* 图层叠加分析: postgis
+* 导入导出GDB/Shp: GDAL 3.x
 
 ## 软件需求
 
@@ -132,6 +134,7 @@ gis-platform
 * Maven3.6+
 * PostgreSQL 12+ (postgis)
 * redis
+* GDAL 3.x
 
 ## 本地部署
 
