@@ -49,9 +49,9 @@ springdoc:
     - group: 'security'
       packages-to-scan:
         - com.supermap.admin.modules.security
-    - group: 'analyzetask'
+    - group: 'task'
       packages-to-scan:
-        - com.supermap.task.modules.analyzetask
+        - com.supermap.task.modules.task
     - group: 'business'
       packages-to-scan:
         - com.supermap.task.modules.business
