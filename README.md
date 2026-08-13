@@ -140,7 +140,7 @@ gis-platform
 
 1. 通过git下载源码
 2. 创建数据库
-3. 执行db/postgis.sql文件，初始化数据
+3. psql导入db/tiny_geo_server.sql文件，初始化数据
 4. 修改application-dev.yml文件，修改数据库和redis以及gdal的数据库的账号和密码
 5. swagger文档路径：http://localhost:8081/doc.html
 6. 账号密码：admin/123456
