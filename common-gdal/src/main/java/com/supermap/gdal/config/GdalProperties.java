@@ -31,7 +31,7 @@ public class GdalProperties {
     private String pkColumnName = "id";
 
     public String getPgConnect() {
-        return pgConnect + " " + pgPassword;
+        return pgConnect + " password=" + pgPassword;
     }
 
 }
