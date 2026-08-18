@@ -1,4 +1,4 @@
-package com.supermap.admin.modules.sys.dto;
+package com.supermap.file.dto;
 
 import com.supermap.core.common.valid.group.Update;
 import io.swagger.v3.oas.annotations.media.Schema;

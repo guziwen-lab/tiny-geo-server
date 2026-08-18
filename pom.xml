@@ -34,6 +34,7 @@
         <module>common-gdal</module>
         <module>common-generator</module>
         <module>common-id-generator</module>
+        <module>common-file</module>
         <module>admin</module>
         <module>gis-dataset</module>
         <module>gis-analyze</module>

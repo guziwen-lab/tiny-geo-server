@@ -1,11 +1,11 @@
-package com.supermap.admin.modules.sys.controller;
+package com.supermap.file.controller;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.supermap.core.common.pojo.R;
-import com.supermap.admin.modules.sys.dto.FileDTO;
-import com.supermap.admin.modules.sys.entity.FileEntity;
-import com.supermap.admin.modules.sys.service.FileService;
-import com.supermap.admin.modules.sys.vo.FileUrlVO;
+import com.supermap.file.dto.FileDTO;
+import com.supermap.file.entity.FileEntity;
+import com.supermap.file.service.FileService;
+import com.supermap.file.vo.FileUrlVO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletResponse;

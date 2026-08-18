@@ -1,11 +1,11 @@
-package com.supermap.admin.modules.sys.service;
+package com.supermap.file.service;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.supermap.admin.modules.sys.dto.FileDTO;
-import com.supermap.admin.modules.sys.dto.FileDownloadDTO;
-import com.supermap.admin.modules.sys.entity.FileEntity;
-import com.supermap.admin.modules.sys.vo.FileUrlVO;
+import com.supermap.file.dto.FileDTO;
+import com.supermap.file.dto.FileDownloadDTO;
+import com.supermap.file.entity.FileEntity;
+import com.supermap.file.vo.FileUrlVO;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.web.multipart.MultipartFile;
 

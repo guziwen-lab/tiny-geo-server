@@ -1,15 +1,15 @@
-package com.supermap.admin.modules.sys.service.impl;
+package com.supermap.file.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.supermap.core.common.util.*;
-import com.supermap.admin.modules.sys.dao.FileDao;
-import com.supermap.admin.modules.sys.dto.FileDTO;
-import com.supermap.admin.modules.sys.dto.FileDownloadDTO;
-import com.supermap.admin.modules.sys.entity.FileEntity;
-import com.supermap.admin.modules.sys.service.FileService;
-import com.supermap.admin.modules.sys.vo.FileUrlVO;
+import com.supermap.file.dao.FileDao;
+import com.supermap.file.dto.FileDTO;
+import com.supermap.file.dto.FileDownloadDTO;
+import com.supermap.file.entity.FileEntity;
+import com.supermap.file.service.FileService;
+import com.supermap.file.vo.FileUrlVO;
 import jakarta.servlet.http.HttpServletResponse;
 import org.apache.tika.Tika;
 import org.springframework.beans.factory.annotation.Value;

@@ -1,7 +1,7 @@
-package com.supermap.admin.modules.sys.dao;
+package com.supermap.file.dao;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.supermap.admin.modules.sys.entity.FileEntity;
+import com.supermap.file.entity.FileEntity;
 import org.apache.ibatis.annotations.Mapper;
 
 /**

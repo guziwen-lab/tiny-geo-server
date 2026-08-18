@@ -16,6 +16,7 @@ import com.supermap.admin.modules.sys.dto.UserSaveDTO;
 import com.supermap.admin.modules.sys.vo.UserVO;
 import com.supermap.admin.shiro.LoginUser;
 import com.supermap.admin.shiro.encoder.PasswordEncoder;
+import com.supermap.file.service.FileService;
 import lombok.AllArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.redis.core.RedisTemplate;

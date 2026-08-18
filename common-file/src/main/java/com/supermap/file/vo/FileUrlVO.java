@@ -1,6 +1,6 @@
-package com.supermap.admin.modules.sys.vo;
+package com.supermap.file.vo;
 
-import com.supermap.admin.modules.sys.entity.FileEntity;
+import com.supermap.file.entity.FileEntity;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 

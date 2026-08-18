@@ -1,4 +1,4 @@
-package com.supermap.admin.modules.sys.entity;
+package com.supermap.file.entity;
 
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
