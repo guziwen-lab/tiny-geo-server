@@ -35,21 +35,28 @@ public class R<T> implements Serializable {
     @Schema(title = "响应数据")
     private T data;
 
+    @Schema(title = "时间戳")
+    private Long timestamp;
+
     public R() {
-        code = SUCCESS_CODE;
-        msg = SUCCESS_MSG;
+        this.timestamp = System.currentTimeMillis();
+        this.code = SUCCESS_CODE;
+        this.msg = SUCCESS_MSG;
     }
 
     public R(Integer code) {
+        this.timestamp = System.currentTimeMillis();
         this.code = code;
     }
 
     public R(Integer code, String msg) {
+        this.timestamp = System.currentTimeMillis();
         this.code = code;
         this.msg = msg;
     }
 
     public R(Integer code, String msg, T data) {
+        this.timestamp = System.currentTimeMillis();
         this.code = code;
         this.data = data;
         this.msg = msg;
