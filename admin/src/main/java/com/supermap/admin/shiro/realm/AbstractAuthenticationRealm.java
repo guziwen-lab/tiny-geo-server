@@ -1,6 +1,6 @@
 package com.supermap.admin.shiro.realm;
 
-import com.supermap.core.common.util.BeanUtils;
+import com.supermap.core.util.BeanUtils;
 import com.supermap.admin.modules.sys.entity.UserEntity;
 import com.supermap.admin.modules.sys.service.UserService;
 import com.supermap.admin.shiro.LoginUser;

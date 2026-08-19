@@ -1,6 +1,6 @@
 package com.supermap.admin.shiro.realm;
 
-import com.supermap.core.common.util.StringUtils;
+import com.supermap.core.util.StringUtils;
 import com.supermap.admin.modules.sys.entity.UserEntity;
 import com.supermap.admin.shiro.credential.RetryLimitCredentialsMatcher;
 import lombok.extern.slf4j.Slf4j;

@@ -1,12 +1,8 @@
 package com.supermap.admin.config;
 
-import com.supermap.core.common.filter.TraceIdFilter;
-import com.supermap.db.xss.XssFilter;
-import jakarta.servlet.DispatcherType;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.Ordered;
 import org.springframework.web.filter.DelegatingFilterProxy;
 
 /**
@@ -18,14 +14,6 @@ import org.springframework.web.filter.DelegatingFilterProxy;
 public class FilterConfig {
 
     @Bean
-    public FilterRegistrationBean<TraceIdFilter> traceIdFilter() {
-        FilterRegistrationBean<TraceIdFilter> bean = new FilterRegistrationBean<>();
-        bean.setFilter(new TraceIdFilter());
-        bean.setOrder(Ordered.HIGHEST_PRECEDENCE);
-        return bean;
-    }
-
-    @Bean
     public FilterRegistrationBean<DelegatingFilterProxy> shiroFilterRegistration() {
         FilterRegistrationBean<DelegatingFilterProxy> registration = new FilterRegistrationBean<>();
         registration.setFilter(new DelegatingFilterProxy("shiroFilter"));
@@ -34,17 +22,6 @@ public class FilterConfig {
         registration.setEnabled(true);
         registration.setOrder(Integer.MAX_VALUE - 1);
         registration.addUrlPatterns("/*");
-        return registration;
-    }
-
-    @Bean
-    public FilterRegistrationBean<XssFilter> xssFilterRegistration() {
-        FilterRegistrationBean<XssFilter> registration = new FilterRegistrationBean<>();
-        registration.setDispatcherTypes(DispatcherType.REQUEST);
-        registration.setFilter(new XssFilter());
-        registration.addUrlPatterns("/*");
-        registration.setName("xssFilter");
-        registration.setOrder(Integer.MAX_VALUE);
         return registration;
     }
 

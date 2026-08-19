@@ -9,9 +9,9 @@ import lombok.AllArgsConstructor;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import com.supermap.core.common.valid.group.Add;
-import com.supermap.core.common.valid.group.Update;
-import com.supermap.core.common.pojo.R;
+import com.supermap.core.valid.group.Add;
+import com.supermap.core.valid.group.Update;
+import com.supermap.core.pojo.R;
 import com.supermap.task.modules.task.dto.TaskStepDTO;
 import com.supermap.task.modules.task.dto.TaskStepSaveDTO;
 import com.supermap.task.modules.task.entity.TaskStepEntity;

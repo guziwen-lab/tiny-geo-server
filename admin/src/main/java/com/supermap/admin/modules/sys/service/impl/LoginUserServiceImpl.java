@@ -1,6 +1,6 @@
 package com.supermap.admin.modules.sys.service.impl;
 
-import com.supermap.core.common.util.BeanUtils;
+import com.supermap.core.util.BeanUtils;
 import com.supermap.admin.modules.sys.entity.LoginLogEntity;
 import com.supermap.admin.modules.sys.entity.UserEntity;
 import com.supermap.admin.modules.sys.service.LoginLogService;

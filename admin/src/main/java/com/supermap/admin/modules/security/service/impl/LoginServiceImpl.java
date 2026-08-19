@@ -1,7 +1,7 @@
 package com.supermap.admin.modules.security.service.impl;
 
-import com.supermap.core.common.util.BeanUtils;
-import com.supermap.core.common.util.IpUtils;
+import com.supermap.core.util.BeanUtils;
+import com.supermap.core.util.IpUtils;
 import com.supermap.admin.modules.security.service.LoginService;
 import com.supermap.admin.modules.security.vo.RouteVO;
 import com.supermap.admin.modules.sys.dto.UserLoginDTO;

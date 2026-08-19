@@ -1,6 +1,6 @@
 package com.supermap.file.dto;
 
-import com.supermap.core.common.valid.group.Update;
+import com.supermap.core.valid.group.Update;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;

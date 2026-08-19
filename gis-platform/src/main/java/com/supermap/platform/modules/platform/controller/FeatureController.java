@@ -9,7 +9,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import com.supermap.core.common.pojo.R;
+import com.supermap.core.pojo.R;
 import com.supermap.platform.modules.platform.dto.FeatureDTO;
 import com.supermap.platform.modules.platform.service.FeatureService;
 

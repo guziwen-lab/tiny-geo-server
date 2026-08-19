@@ -2,8 +2,8 @@ package com.supermap.admin.modules.sys.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.supermap.core.common.util.BeanUtils;
-import com.supermap.core.common.util.StringUtils;
+import com.supermap.core.util.BeanUtils;
+import com.supermap.core.util.StringUtils;
 import com.supermap.admin.modules.sys.entity.DictItemEntity;
 import com.supermap.admin.modules.sys.service.DictItemService;
 import jakarta.annotation.Resource;

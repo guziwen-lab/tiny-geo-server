@@ -3,7 +3,7 @@ package com.supermap.admin.modules.sys.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.supermap.core.common.util.StringUtils;
+import com.supermap.core.util.StringUtils;
 import com.supermap.admin.modules.sys.dao.AdministrativeDivisionCodeDao;
 import com.supermap.admin.modules.sys.dto.AdministrativeDivisionCodeDTO;
 import com.supermap.admin.modules.sys.entity.AdministrativeDivisionCodeEntity;

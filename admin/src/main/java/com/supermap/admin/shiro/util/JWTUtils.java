@@ -3,7 +3,7 @@ package com.supermap.admin.shiro.util;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.interfaces.DecodedJWT;
-import com.supermap.core.common.util.JSON;
+import com.supermap.core.util.JSON;
 import com.supermap.admin.shiro.LoginUser;
 import com.supermap.admin.shiro.config.JWTProperties;
 import lombok.AllArgsConstructor;

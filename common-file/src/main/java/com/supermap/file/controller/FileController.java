@@ -1,7 +1,7 @@
 package com.supermap.file.controller;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.supermap.core.common.pojo.R;
+import com.supermap.core.pojo.R;
 import com.supermap.file.dto.FileDTO;
 import com.supermap.file.entity.FileEntity;
 import com.supermap.file.service.FileService;

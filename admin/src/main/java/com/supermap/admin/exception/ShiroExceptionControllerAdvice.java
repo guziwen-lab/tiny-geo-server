@@ -1,7 +1,7 @@
 package com.supermap.admin.exception;
 
-import com.supermap.core.common.enumeration.BizCodeEnum;
-import com.supermap.core.common.pojo.R;
+import com.supermap.core.enumeration.BizCodeEnum;
+import com.supermap.core.pojo.R;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.shiro.authc.ExcessiveAttemptsException;
 import org.apache.shiro.authc.IncorrectCredentialsException;

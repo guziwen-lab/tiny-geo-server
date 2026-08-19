@@ -5,7 +5,7 @@ import com.supermap.analyze.AnalysisResult;
 import com.supermap.analyze.AnalysisStep;
 import com.supermap.analyze.LayerInfo;
 import com.supermap.analyze.service.impl.AbstractOverlayExecuteService;
-import com.supermap.core.common.util.CollectionUtils;
+import com.supermap.core.util.CollectionUtils;
 import com.supermap.analyze.resolver.GeomTypeResolver;
 import com.supermap.analyze.enums.AnalysisType;
 import com.supermap.analyze.enums.OverlayAlgorithm;

@@ -5,7 +5,7 @@ import com.supermap.analyze.AnalysisResult;
 import com.supermap.analyze.AnalysisStep;
 import com.supermap.analyze.LayerInfo;
 import com.supermap.analyze.service.impl.RepairGeometryExecuteService;
-import com.supermap.core.common.util.StringUtils;
+import com.supermap.core.util.StringUtils;
 import com.supermap.analyze.enums.AnalysisType;
 import com.supermap.gis.enums.GeomType;
 import com.supermap.analyze.task.AbstractAnalysisTask;

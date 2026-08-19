@@ -1,7 +1,7 @@
 package com.supermap.admin.modules.sys.controller;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.supermap.core.common.pojo.R;
+import com.supermap.core.pojo.R;
 import com.supermap.admin.modules.sys.dto.AdministrativeDivisionCodeDTO;
 import com.supermap.admin.modules.sys.entity.AdministrativeDivisionCodeEntity;
 import com.supermap.admin.modules.sys.service.AdministrativeDivisionCodeService;

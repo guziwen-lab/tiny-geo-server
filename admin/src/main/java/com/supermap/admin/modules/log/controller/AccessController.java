@@ -1,7 +1,7 @@
 package com.supermap.admin.modules.log.controller;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.supermap.core.common.pojo.R;
+import com.supermap.core.pojo.R;
 import com.supermap.admin.modules.log.dto.AccessDTO;
 import com.supermap.admin.modules.log.entity.AccessEntity;
 import com.supermap.admin.modules.log.service.AccessService;

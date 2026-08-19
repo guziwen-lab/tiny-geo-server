@@ -8,7 +8,7 @@
 
 package com.supermap.core.exception;
 
-import com.supermap.core.common.util.MessageUtils;
+import com.supermap.core.util.MessageUtils;
 import lombok.Getter;
 import lombok.Setter;
 

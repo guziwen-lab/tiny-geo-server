@@ -1,6 +1,6 @@
 package com.supermap.admin.shiro;
 
-import com.supermap.core.common.util.SpringContextUtils;
+import com.supermap.core.util.SpringContextUtils;
 import com.supermap.admin.shiro.util.RedisTokenUtils;
 import org.apache.shiro.SecurityUtils;
 

@@ -1,9 +1,9 @@
 package com.supermap.admin.shiro.util;
 
-import com.supermap.core.common.util.JSON;
+import com.supermap.core.util.JSON;
 import com.supermap.admin.constant.AuthenticationConstant;
-import com.supermap.core.common.util.StringUtils;
-import com.supermap.core.common.util.UUIDUtils;
+import com.supermap.core.util.StringUtils;
+import com.supermap.core.util.UUIDUtils;
 import com.supermap.admin.shiro.LoginUser;
 import lombok.AllArgsConstructor;
 import org.springframework.data.redis.core.BoundValueOperations;
