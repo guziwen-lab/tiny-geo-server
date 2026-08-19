@@ -58,7 +58,10 @@ public class FileServiceImpl extends ServiceImpl<FileDao, FileEntity> implements
         String month = String.format("%02d", today.getMonthValue());  // 格式化为两位数字
         String day = String.format("%02d", today.getDayOfMonth());    // 格式化为两位数字
 
-        return basePath + File.separator + year + File.separator + month + File.separator + day + File.separator;
+        String s = basePath + File.separator + year + File.separator + month + File.separator + day + File.separator;
+        if (!FileUtils.exist(s))
+            FileUtils.mkdir(s);
+        return s;
     }
 
     @Override
