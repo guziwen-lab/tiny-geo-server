@@ -9,9 +9,9 @@ import lombok.AllArgsConstructor;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import com.supermap.common.valid.group.Add;
-import com.supermap.common.valid.group.Update;
-import com.supermap.common.pojo.R;
+import com.supermap.core.common.valid.group.Add;
+import com.supermap.core.common.valid.group.Update;
+import com.supermap.core.common.pojo.R;
 import ${package}.${moduleName}.dto.${className}DTO;
 import ${package}.${moduleName}.dto.${className}SaveDTO;
 import ${package}.${moduleName}.entity.${className}Entity;
