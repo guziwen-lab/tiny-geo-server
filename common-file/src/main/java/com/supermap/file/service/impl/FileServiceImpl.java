@@ -299,7 +299,13 @@ public class FileServiceImpl extends ServiceImpl<FileDao, FileEntity> implements
         if (directory)
             throw new RuntimeException("改文件为目录");
 
-        return filePath.replaceFirst(basePath, externalUrlPrefix);
+        return filePath.replace(basePath, externalUrlPrefix).replace('\\', '/');
+    }
+
+    public static void main(String[] args) {
+        String filePath = "D:\\gzw\\file\\2026\\08\\21\\a9c1e278bf2f41a3a29595c0bd1a6e8d.png";
+        String s = filePath.replace("D:\\gzw\\file", "http://localhost/file").replace('\\', '/');
+        System.out.println(s);
     }
 
 }

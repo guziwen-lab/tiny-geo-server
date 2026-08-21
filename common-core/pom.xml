@@ -11,10 +11,6 @@
     <packaging>jar</packaging>
     <description>common</description>
 
-    <build>
-        <finalName>${project.artifactId}</finalName>
-    </build>
-
     <dependencies>
         <!--zip-->
         <dependency>
