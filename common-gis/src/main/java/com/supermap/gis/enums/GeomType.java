@@ -45,6 +45,38 @@ public enum GeomType {
         return null;
     }
 
+    /**
+     * 将 ogrinfo 报告的图层几何类型归一化为支持的几何类型：
+     * GDB 曲面图层常报告为 Multi Surface / Curve Polygon，无法直接落入基础类型，
+     * 统一映射为同族 Multi 类型，由导入时的显式 -nlt 类型完成线性化转换
+     */
+    public static GeomType ofOgr2ogrCodeNormalize(String code) {
+        if (code == null) {
+            return null;
+        }
+        GeomType exact = ofOgr2ogrCode(code);
+        if (exact != null) {
+            return exact;
+        }
+        return switch (code) {
+            case "Multi Surface", "Curve Polygon" -> MULTI_POLYGON;
+            case "Multi Curve", "Compound Curve" -> MULTI_LINE_STRING;
+            default -> null;
+        };
+    }
+
+    /**
+     * 提升为同族 Multi 类型，与 -nlt PROMOTE_TO_MULTI 的建列策略一致
+     */
+    public GeomType promoteToMulti() {
+        return switch (this) {
+            case POINT -> MULTI_POINT;
+            case LINE_STRING -> MULTI_LINE_STRING;
+            case POLYGON -> MULTI_POLYGON;
+            default -> this;
+        };
+    }
+
     public static GeomType ofPostgisCode(String code) {
         for (GeomType geomType : GeomType.values()) {
             if (geomType.getPostgisGeometryType().equals(code)) {

@@ -86,19 +86,19 @@ public class GdalImportOptions {
             command.add(encoding);
         }
 
-        if (isAppend) {
-            // 追加时以目标表的几何类型为准：目标为 Multi 类型则提升源数据，
-            // 目标为非 Multi 类型则不提升（预校验已保证源数据不含 Multi 类型）
-            if (targetGeomType != null && targetGeomType.isMulti()) {
-                command.add("-nlt");
-                command.add("PROMOTE_TO_MULTI");
-            }
-        } else if (sourcePath.toLowerCase().endsWith(".shp")) {
-            // Shapefile 的 Polygon 图层可能实际包含 MultiPolygon，
+        if (targetGeomType != null && targetGeomType.isMulti()) {
+            // 以目标 Multi 类型显式转换，forceTo 同时覆盖两类不匹配场景：
+            // shp 头声明 Polygon 实际含 MultiPolygon 的提升，以及
+            // GDB MultiSurface 曲面向 MultiPolygon 的线性化降维（PROMOTE_TO_MULTI 无法处理后者）
+            command.add("-nlt");
+            command.add(targetGeomType.getOgr2ogrNltValue());
+        } else if (!isAppend && sourcePath.toLowerCase().endsWith(".shp")) {
+            // 未取得目标类型时兜底：Shapefile 头声明的 Polygon 图层可能实际包含 MultiPolygon，
             // 强制提升为 Multi 类型避免 PostgreSQL COPY 阶段几何类型不匹配
             command.add("-nlt");
             command.add("PROMOTE_TO_MULTI");
         }
+        // 追加且目标为非 Multi 类型时：预校验已保证源数据不含 Multi 类型，无需转换
 
         return command;
     }
